@@ -79,9 +79,11 @@ func (s *Server) Start(ctx context.Context, ready chan struct{}) error {
 	r := mux.NewRouter()
 	r.HandleFunc("/upload", s.handle(s.handlePost)).Methods(http.MethodPost)
 	r.HandleFunc("/upload", s.handle(s.handleOptions)).Methods(http.MethodOptions)
+	r.PathPrefix("/shas").Methods(http.MethodGet).HandlerFunc(s.handle(s.handleShasGet))
 	// GET handler can handle HEAD request. The difference is that the response body should be empty on HEAD request.
 	r.PathPrefix("/files").Methods(http.MethodGet, http.MethodHead).HandlerFunc(s.handle(s.handleGet))
 	r.PathPrefix("/files").Methods(http.MethodPut).HandlerFunc(s.handle(s.handlePut))
+	r.PathPrefix("/files").Methods(http.MethodDelete).HandlerFunc(s.handle(s.handleDelete))
 	r.PathPrefix("/files").Methods(http.MethodOptions).HandlerFunc(s.handle(s.handleOptions))
 	r.NotFoundHandler = http.HandlerFunc(handleNotFound)
 	r.MethodNotAllowedHandler = http.HandlerFunc(handleMethodNotAllowed)
@@ -225,11 +227,38 @@ func (s *Server) handlePut(w http.ResponseWriter, r *http.Request) (int, any) {
 	if err != nil {
 		return status, err
 	}
+	// log.Printf("UpdatedPdf: %s %s", s.DocumentRoot + "/" + path, destPath)
+	UpdatedPdf( s.DocumentRoot, "/jpgroot", path)
 
 	if s.EnableCORS {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 	}
 	return http.StatusCreated, SuccessfullyUploadedResult{true, destPath}
+}
+
+func (s *Server) handleDelete(w http.ResponseWriter, r *http.Request) (int, any) {
+	path := getPathFromURL(r.URL)
+	if path == "" {
+		log.Printf("URL not matched: (url=%s)", r.URL.String())
+		return http.StatusMethodNotAllowed, fmt.Errorf("DELETE is accepted on /files/:name")
+	}
+
+	destPath := path
+	if !strings.HasPrefix(destPath, "/") {
+		destPath = "/" + destPath
+	}
+	destPath = "/files" + destPath
+
+	log.Printf("DeletedPdf: %s %s", s.DocumentRoot + "/" + path)
+	err := DeletedPdf( s.DocumentRoot, "/jpgroot", path)
+	if err != nil {
+		return http.StatusNotFound, err
+	}
+
+	if s.EnableCORS {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+	}
+	return http.StatusAccepted, SuccessfullyUploadedResult{true, destPath}
 }
 
 func (s *Server) processUpload(w http.ResponseWriter, r *http.Request, path string) (int, string, error) {
@@ -304,6 +333,48 @@ func (s *Server) processUpload(w http.ResponseWriter, r *http.Request, path stri
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 	}
 	return http.StatusCreated, destPath, nil
+}
+
+func (s *Server) handleShasGet(w http.ResponseWriter, r *http.Request) (int, any) {
+	requestPath := strings.TrimPrefix(r.URL.Path, "/shas")
+	if requestPath == "" {
+		requestPath = "/"
+	}
+	log.Printf("GET %s -> %s", r.URL.Path, requestPath)
+	f, err := s.fs.Open(requestPath)
+	if s.EnableCORS {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+	}
+	if err != nil {
+		// ErrNotExist is a common case so don't log it
+		if errors.Is(err, os.ErrNotExist) {
+			return http.StatusNotFound, fmt.Errorf("file not found")
+		}
+		log.Printf("Error: %+v", err)
+		return http.StatusInternalServerError, fmt.Errorf("failed to open file")
+	}
+	defer f.Close()
+	GetShaList(requestPath)
+	fi, err := f.Stat()
+	if err != nil {
+		log.Printf("failed to stat: %v", err)
+		return http.StatusInternalServerError, fmt.Errorf("stat failed")
+	}
+	if fi.IsDir() {
+		// TODO
+		log.Printf("%s is a directory", requestPath)
+		return http.StatusNotFound, fmt.Errorf("%s is a directory", requestPath)
+	}
+	name := fi.Name()
+	modtime := fi.ModTime()
+
+/*
+content := "Hello, this is dynamically generated content."
+		contentReader := bytes.NewReader([]byte(content))
+*/
+
+	http.ServeContent(w, r, name, modtime, f)
+	return justOK()
 }
 
 func (s *Server) handleGet(w http.ResponseWriter, r *http.Request) (int, any) {

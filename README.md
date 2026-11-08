@@ -12,6 +12,7 @@ Simple HTTP server to save artifacts
   - [`POST /upload`](#post-upload)
   - [`PUT /files/:path`](#put-filespath)
   - [`GET /files/:path`](#get-filespath)
+  - [`DELETE /files/:path`](#delete-filespath)
   - [`HEAD /files/:path`](#head-filespath)
   - [`OPTIONS /files/:path`](#options-filespath)
   - [`OPTIONS /upload`](#options-upload)
@@ -269,6 +270,45 @@ Content-Type
 $ curl http://localhost:25478/files/sample.txt
 Hello, world!
 ```
+
+### `DELTE /files/:path`
+
+Deletes a file. The name is taken from the path in the request URL.
+
+#### Parameters
+
+|    Name     | Required? |   Type    |                    Description                     | Default |
+| ----------- | :-------: | --------- | -------------------------------------------------- | ------- |
+| `:path`     |     x     | `string`  | Path to the file.                                  |         |
+
+#### Response
+
+##### On Successful
+
+Status Code
+: `202 Accepted`
+
+Content-Type
+: `application/json`
+
+Body:
+
+|  Name  |   Type    |               Description               |
+| ------ | --------- | --------------------------------------- |
+| `ok`   | `boolean` | `true` if successful.                   |
+| `path` | `string`  | A path to access this file in this API. |
+
+##### On Failure
+
+|   StatusCode   |                                              When                                              |
+| -------------- | ---------------------------------------------------------------------------------------------- |
+| `404 Not Found` | No such file on the server. |
+
+#### Example
+
+```
+$ curl -XDELETE "http://localhost:25478/files/foobar.txt"
+{"ok":true,"path":"/files/foobar.txt"}
 
 ### `HEAD /files/:path`
 

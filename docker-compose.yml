@@ -1,0 +1,14 @@
+services:
+  app:
+    image: mayth/simple-upload-server:v2
+    build:
+      context: .
+      tags:
+        - "mayth/simple-upload-server:testing"
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./_container_data/docroot:/docroot
+      - ./_container_data/jpgroot:/jpgroot
+      - ./_container_data/sqlroot:/sqlroot
+    command: -document_root=/docroot -addr=:8080 -max_upload_size 10485760
