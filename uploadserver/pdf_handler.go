@@ -66,12 +66,12 @@ type ShaDatabase struct {
 func initDb (sqlPath string) error {
 	// log.Printf("initDb: %s", sqlPath)
 	// os.Remove("/sqlroot/shafiles.db")
-	err = os.MkdirAll(filepath.Dir(sqlPath), os.ModePerm)
+	err := os.MkdirAll(filepath.Dir(sqlPath), os.ModePerm)
 	if err != nil {
 		log.Printf("making sqlPath dir: %v\n", err)
 		return fmt.Errorf("making sqlPath dir: %v", err)
 	}
-	db, err := sql.Open("sqlite3", "/sqlroot/shafiles.db")
+	db, err = sql.Open("sqlite3", "/sqlroot/shafiles.db")
 	if err != nil {
 		log.Fatal(err)
 		return err
