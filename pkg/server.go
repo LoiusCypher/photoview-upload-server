@@ -128,7 +128,7 @@ func (s *Server) Start(ctx context.Context, ready chan struct{}) error {
 
 func logAccess(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		
+		vs := []string{
 			r.RemoteAddr,
 			"-",
 			"-",
