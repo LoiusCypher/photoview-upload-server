@@ -78,7 +78,7 @@ func TestServer(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to parse base url: %v", err)
 	}
-
+/*
 	withPreservingOriginal := func(t *testing.T, path string, f func()) {
 		original, err := afero.ReadFile(fs, path)
 		if err != nil {
@@ -89,7 +89,7 @@ func TestServer(t *testing.T) {
 			t.Fatalf("failed to restore original content: %v", err)
 		}
 	}
-/*
+
 	t.Run("POST /upload", func(t *testing.T) {
 		u := base.JoinPath("/upload")
 		req, err := makeFormRequest(u, http.MethodPost, "hello.txt", bytes.NewBufferString("hello, world"))
