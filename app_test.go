@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	photoviewuploadserver "github.com/loiuscypher/photoview-upload-server"
+	"github.com/loiuscypher/photoview-upload-server/uploadserver "
 )
 
 func Test_parseConfig(t *testing.T) {
