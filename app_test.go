@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	simpleuploadserver "github.com/mayth/go-simple-upload-server/v2/pkg"
+	simpleuploadserver "github.com/loiuscypher/go-simple-upload-server/v2/pkg"
 )
 
 func Test_parseConfig(t *testing.T) {

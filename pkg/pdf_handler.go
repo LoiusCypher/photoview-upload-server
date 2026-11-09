@@ -159,66 +159,9 @@ func (shaDb *ShaDatabase) getPathSha(w http.ResponseWriter, reqPath string) (boo
 	return true, nil
 }
 
-func (shaDb *ShaDatabase) registerPdfWithSha (pdfPath string, pdfSha string) error {
-	log.Printf("registerPdfWithSha: %s %s", pdfPath, pdfSha)
-
-	tx, err := shaDb.db.Begin()
-	if err != nil {
-		log.Fatal(err)
-		return err
-	}
-	stmt, err := tx.Prepare("INSERT OR REPLACE INTO shafiles(sha, path) VALUES(?, ?)")
-	if err != nil {
-		log.Fatal(err)
-		return err
-	}
-	defer stmt.Close()
-	_, err = stmt.Exec(pdfSha, pdfPath)
-	if err != nil {
-		log.Fatal(err)
-		return err
-	}
-	err = tx.Commit()
-	if err != nil {
-		log.Fatal(err)
-	}
-	return nil
-}
-
-func (shaDb *ShaDatabase) unRegisterPdf (pdfPath string) error {
-	log.Printf("unRegisterPdf: %s", pdfPath)
-
-	tx, err := shaDb.db.Begin()
-	if err != nil {
-		log.Fatal(err)
-		return err
-	}
-	stmt, err := tx.Prepare("DELETE FROM shafiles WHERE path = ?")
-	if err != nil {
-		log.Fatal(err)
-		return err
-	}
-	defer stmt.Close()
-	_, err = stmt.Exec(pdfPath)
-	if err != nil {
-		log.Fatal(err)
-		return err
-	}
-	err = tx.Commit()
-	if err != nil {
-		log.Fatal(err)
-	}
-	return nil
-}
-
-func DeletedPdf(docroot string, jpgroot string, uploadPath string) error {
-	pdfPath := docroot + "/" + uploadPath
+func deleteJpgs(jpgroot string, uploadPath string) error {
 	jpgPath := strings.TrimSuffix(jpgroot + "/" + uploadPath, filepath.Ext(uploadPath)) + "-*.jpg"
-	log.Printf("DeletedPdf: %s %s %s", uploadPath, pdfPath, jpgPath)
-	if err := os.Remove(pdfPath); err != nil {
-		log.Println("Error removing", pdfPath, ": ", err)
-		return fmt.Errorf("Error removing %s: %v", pdfPath, err)
-	}
+	log.Printf("deleteJpgs: %s %s", uploadPath, jpgPath)
 	jpgFiles, err := filepath.Glob(jpgPath)
 	if err != nil {
 		log.Println("Error resolving file pattern", jpgPath, ": ", err)
@@ -229,17 +172,6 @@ func DeletedPdf(docroot string, jpgroot string, uploadPath string) error {
 			log.Println("Error removing", jpgFile, ": ", err)
 			return fmt.Errorf("Error removing %s: %v", jpgFile, err)
 		}
-	}
-	shaDb := openDb("/sqlroot/shafiles.db")
-	if shaDb == nil {
-		return fmt.Errorf("openDb failed")
-	}
-	defer shaDb.Close()
-	if err := shaDb.countRows(); err != nil {
-		return err
-	}
-	if err := shaDb.unRegisterPdf(uploadPath); err != nil {
-		return err
 	}
 	return nil
 }
@@ -268,8 +200,7 @@ func convertPdfToJpg(pdfPath string, jpgRoot string, uploadPath string) error {
 	return nil
 }
 
-func recordSha(pdfPath string, uploadPath string) error {
-	// log.Printf("'%s' executable magick in '%s'\n", targExe, pathExe)
+func recordSha(pdfPath string, registerPath string) error {
 	pdfSha, err := calcSha(pdfPath)
 	if err != nil {
 		log.Printf("making calcSha: %v\n", err)
@@ -281,16 +212,44 @@ func recordSha(pdfPath string, uploadPath string) error {
 		return fmt.Errorf("openDb failed")
 	}
 	defer shaDb.Close()
-	if err := shaDb.countRows(); err != nil {
+	tx, err := shaDb.db.Begin()
+	if err != nil {
+		log.Fatal(err)
 		return err
 	}
-	if err := shaDb.registerPdfWithSha(uploadPath, pdfSha); err != nil {
+	_, err = tx.Exec("INSERT OR REPLACE INTO shafiles(sha, path) VALUES(?, ?)", pdfSha, registerPath)
+	if err != nil {
+		log.Fatal(err)
 		return err
 	}
-	if err := shaDb.countRows(); err != nil {
-		return err
+	err = tx.Commit()
+	if err != nil {
+		log.Fatal(err)
 	}
 	return nil
 }
 
+func deleteSha(registerPath string) error {
+	log.Printf("deleteSha: %s", registerPath)
+	shaDb := openDb("/sqlroot/shafiles.db")
+	if shaDb == nil {
+		return fmt.Errorf("openDb failed")
+	}
+	defer shaDb.Close()
+	tx, err := shaDb.db.Begin()
+	if err != nil {
+		log.Fatal(err)
+		return err
+	}
+	_, err = tx.Exec("DELETE FROM shafiles WHERE path = ?", registerPath)
+	if err != nil {
+		log.Fatal(err)
+		return err
+	}
+	err = tx.Commit()
+	if err != nil {
+		log.Fatal(err)
+	}
+	return nil
+}
 

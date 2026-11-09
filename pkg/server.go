@@ -9,10 +9,8 @@ import (
 	"log"
 	"net"
 	"net/http"
-	"net/url"
 	"os"
 	"path/filepath"
-	"regexp"
 	"slices"
 	"strings"
 	"time"
@@ -130,7 +128,7 @@ func (s *Server) Start(ctx context.Context, ready chan struct{}) error {
 
 func logAccess(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		vs := []string{
+		
 			r.RemoteAddr,
 			"-",
 			"-",
@@ -144,16 +142,6 @@ func logAccess(next http.Handler) http.Handler {
 		log.Println(strings.Join(vs, " "))
 		next.ServeHTTP(w, r)
 	})
-}
-
-var fileRe = regexp.MustCompile(`^/files/(.+)$`)
-
-func getPathFromURL(u *url.URL) string {
-	matches := fileRe.FindStringSubmatch(u.Path)
-	if matches == nil {
-		return ""
-	}
-	return matches[1]
 }
 
 type ErrorResult struct {
@@ -206,12 +194,11 @@ func (s *Server) handle(f func(w http.ResponseWriter, r *http.Request) (int, any
 func (s *Server) handlePut(w http.ResponseWriter, r *http.Request) (int, any) {
 	path := strings.TrimPrefix(r.URL.Path, "/files/")
 
-	status, destPath, err := s.processUpload(w, r, path)
+	status, pdfPath, err := s.processUpload(w, r, path)
 	if err != nil {
 		return status, err
 	}
-	pdfPath := s.DocumentRoot + "/" + path
-	err = convertPdfToJpg( pdfPath, "/jpgroot", path)
+	err = convertPdfToJpg( pdfPath, s.DocumentRoot, path)
 	if err != nil {
 		return http.StatusInternalServerError, err
 	}
@@ -226,14 +213,17 @@ func (s *Server) handlePut(w http.ResponseWriter, r *http.Request) (int, any) {
 	if s.EnableCORS {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 	}
-	return http.StatusCreated, SuccessfullyUploadedResult{true, destPath}
+	return http.StatusCreated, SuccessfullyUploadedResult{true, r.URL.Path}
 }
 
 func (s *Server) handleDelete(w http.ResponseWriter, r *http.Request) (int, any) {
 	path := strings.TrimPrefix(r.URL.Path, "/files/")
 
-	log.Printf("DeletedPdf: %s %s", s.DocumentRoot + "/" + path)
-	err := DeletedPdf( s.DocumentRoot, "/jpgroot", path)
+	err := deleteJpgs( s.DocumentRoot, path)
+	if err != nil {
+		return http.StatusNotFound, err
+	}
+	err = deleteSha( path)
 	if err != nil {
 		return http.StatusNotFound, err
 	}
@@ -241,7 +231,6 @@ func (s *Server) handleDelete(w http.ResponseWriter, r *http.Request) (int, any)
 	if s.EnableCORS {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 	}
-	//return http.StatusAccepted, SuccessfullyUploadedResult{true, destPath}
 	return justOK()
 }
 
@@ -260,21 +249,7 @@ func (s *Server) processUpload(w http.ResponseWriter, r *http.Request, path stri
 	// MaxBytesReader closes the underlying io.Reader on its Close() is called
 	defer src.Close()
 
-	if exists, err := afero.Exists(s.fs, path); err != nil {
-		log.Printf("failed to check the existence of the file (path=%s): %v", path, err)
-		return http.StatusInternalServerError, "", fmt.Errorf("cannot check the existence of the file")
-	} else if exists && !allowOverwrite {
-		return http.StatusConflict, "", fmt.Errorf("the file already exists")
-	}
-
-	// ensure the directories exist
-	dirsPath := filepath.Dir(path)
-	if err := s.fs.MkdirAll(dirsPath, 0755); err != nil {
-		log.Printf("failed to create directories (path=%s): %v", dirsPath, err)
-		return http.StatusInternalServerError, "", fmt.Errorf("cannot create directories")
-	}
-
-	dstFile, err := s.fs.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0666)
+	dstFile, err := os.CreateTemp("", filepath.Base(path))
 	if err != nil {
 		log.Printf("failed to open the destination file (path=%s): %v", path, err)
 		return http.StatusInternalServerError, "", fmt.Errorf("cannot open file")
@@ -289,19 +264,11 @@ func (s *Server) processUpload(w http.ResponseWriter, r *http.Request, path stri
 		log.Printf("failed to write the uploaded content: %v", err)
 		return http.StatusInternalServerError, "", fmt.Errorf("failed to write the content")
 	}
-	log.Printf("uploaded to %s (%d bytes)", path, written)
-
-	destPath := path
-	if !strings.HasPrefix(destPath, "/") {
-		destPath = "/" + destPath
-	}
-	destPath = "/files" + destPath
-
-	log.Printf("uploaded by PUT to %s (%d bytes)", path, written)
+	log.Printf("uploaded by PUT to %s (%d bytes)", dstFile.Name(), written)
 	if s.EnableCORS {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 	}
-	return http.StatusCreated, destPath, nil
+	return http.StatusCreated, dstFile.Name(), nil
 }
 
 func (s *Server) handleListGet(w http.ResponseWriter, r *http.Request) (int, any) {
@@ -347,20 +314,6 @@ func (s *Server) handleGet(w http.ResponseWriter, r *http.Request) (int, any) {
 		return http.StatusNotFound, "file not Found"
 	}
 	return justOK()
-}
-
-func (s *Server) handleOptions(w http.ResponseWriter, r *http.Request) (int, any) {
-	var allowedMethods []string
-	if r.URL.Path == "/filelist" {
-		allowedMethods = []string{http.MethodGet}
-	} else if strings.HasPrefix(r.URL.Path, "/files") {
-		allowedMethods = []string{http.MethodGet, http.MethodPut, http.MethodDelete}
-	}
-	if s.EnableCORS {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-	}
-	w.Header().Set("Access-Control-Allow-Methods", strings.Join(allowedMethods, ", "))
-	return http.StatusNoContent, nil
 }
 
 func (s *Server) authenticationMiddleware(next http.Handler) http.Handler {
@@ -437,16 +390,33 @@ func handleNotFound(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+var allowedMethodsFilelist = []string{http.MethodGet}
+var allowedMethodsFiles = []string{http.MethodGet, http.MethodPut, http.MethodDelete}
+
+func (s *Server) handleOptions(w http.ResponseWriter, r *http.Request) (int, any) {
+	var allowedMethods []string
+	if r.URL.Path == "/filelist" {
+		allowedMethods = allowedMethodsFilelist
+	} else if strings.HasPrefix(r.URL.Path, "/files") {
+		allowedMethods = allowedMethodsFiles
+	}
+	if s.EnableCORS {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+	}
+	w.Header().Set("Access-Control-Allow-Methods", strings.Join(allowedMethods, ", "))
+	return http.StatusNoContent, nil
+}
+
 func handleMethodNotAllowed(w http.ResponseWriter, r *http.Request) {
 	var endpoint string
 	var allowedMethods []string
 	if r.URL.Path == "/filelist" {
 		endpoint = "/filelist"
-		allowedMethods = []string{http.MethodGet}
+		allowedMethods = allowedMethodsFilelist
 	}
 	if strings.HasPrefix(r.URL.Path, "/files") {
 		endpoint = "/files"
-		allowedMethods = []string{http.MethodGet, http.MethodPut, http.MethodDelete}
+		allowedMethods = allowedMethodsFiles
 	}
 	w.Header().Set("Allow", strings.Join(allowedMethods, ", "))
 	resp := ErrorResult{false, fmt.Sprintf("%s is not allowed on %s", r.Method, endpoint)}

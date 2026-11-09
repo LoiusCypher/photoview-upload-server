@@ -1,4 +1,4 @@
-module github.com/mayth/go-simple-upload-server/v2
+module github.com/loiuscypher/go-simple-upload-server/v2
 
 go 1.25.0
 
