@@ -24,7 +24,7 @@ jobs:
       uses: docker/metadata-action@v6
       with:
         images: |
-          loiuscypher/photoview-upload-server
+          loiusc/photoview-upload-server
         tags: |
           type=ref,event=branch
           type=ref,event=pr
