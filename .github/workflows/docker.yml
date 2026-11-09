@@ -13,7 +13,7 @@ env:
   DOCKER_REGISTRY: ${{ '' }}
   DOCKER_USERNAME: loiusc
   DOCKER_PASSWORD: ${{ secrets.DOCKERHUB_TOKEN }}
-  DOCKER_IMAGE: ${{ 'loiusc/photoview' }}
+  DOCKER_IMAGE: ${{ 'loiusc/photoview-upload-server' }}
 
 jobs:
   build:

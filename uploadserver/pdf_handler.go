@@ -20,13 +20,13 @@ func calcSha(filePath string) (string, error) {
 	f, err := os.Open(filePath)
 	if err != nil {
 		log.Println("Error opening file", filePath, ": ", err)
-		return "", fmt.Errorf("Error opening file %s: %v", filePath, err)
+		return "", fmt.Errorf("opening file %s: %v", filePath, err)
 	}
 	defer f.Close()
 	hasher := sha256.New()
 	if _, err := io.Copy(hasher, f); err != nil {
 		log.Println("Error calculating file hash", filePath, ": ", err)
-		return "", fmt.Errorf("Error calculating file hash %s: %v", filePath, err)
+		return "", fmt.Errorf("calculating file hash %s: %v", filePath, err)
 	}
 	// log.Println("file hash", filePath, ": ", hex.EncodeToString(hasher.Sum(nil)))
 	return hex.EncodeToString(hasher.Sum(nil)), nil
@@ -169,12 +169,12 @@ func deleteJpgs(jpgroot string, uploadPath string) error {
 	jpgFiles, err := filepath.Glob(jpgPath)
 	if err != nil {
 		log.Println("Error resolving file pattern", jpgPath, ": ", err)
-		return fmt.Errorf("Error resolving file pattern %s: %v", jpgPath, err)
+		return fmt.Errorf("resolving file pattern %s: %v", jpgPath, err)
 	}
 	for _, jpgFile := range jpgFiles {
 		if err := os.Remove(jpgFile); err != nil {
 			log.Println("Error removing", jpgFile, ": ", err)
-			return fmt.Errorf("Error removing %s: %v", jpgFile, err)
+			return fmt.Errorf("removing %s: %v", jpgFile, err)
 		}
 	}
 	return nil
