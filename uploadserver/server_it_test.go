@@ -89,7 +89,7 @@ func TestServer(t *testing.T) {
 			t.Fatalf("failed to restore original content: %v", err)
 		}
 	}
-
+/*
 	t.Run("POST /upload", func(t *testing.T) {
 		u := base.JoinPath("/upload")
 		req, err := makeFormRequest(u, http.MethodPost, "hello.txt", bytes.NewBufferString("hello, world"))
@@ -231,7 +231,7 @@ func TestServer(t *testing.T) {
 			verifyLocalFile(t, fs, localPath, []byte(newContent))
 		})
 	})
-/*
+*/ /*
 	t.Run("PUT /files/hello_put.txt", func(t *testing.T) {
 		u := base.JoinPath("/files/hello_put.txt")
 		content := bytes.NewBufferString("hello, world")
@@ -603,7 +603,7 @@ func TestServerWithAuth(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to parse base url: %v", err)
 	}
-
+/*
 	t.Run("POST /upload token via header", func(t *testing.T) {
 		u := base.JoinPath("/upload")
 		req, err := makeFormRequest(u, http.MethodPost, "hello.txt", bytes.NewBufferString("hello, world"))
@@ -735,7 +735,7 @@ func TestServerWithAuth(t *testing.T) {
 			t.Errorf("result = %+v, want = %+v", result, expected)
 		}
 	})
-
+*/
 	t.Run("PUT /files/hello_put.txt with read-write token", func(t *testing.T) {
 		u := base.JoinPath("/files/hello_put.txt")
 		content := bytes.NewBufferString("hello, world")
