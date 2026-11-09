@@ -16,15 +16,12 @@ import (
 )
 
 func TestGetHandler(t *testing.T) {
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
-	var docRoot string
+	var sqlroot string
 	var fs afero.Fs
-	docRoot = "/sqlroot"
+	sqlroot = "/sqlroot"
 	fs = afero.NewMemMapFs()
-	if err := fs.MkdirAll(docRoot, 0755); err != nil {
-		t.Fatalf("failed to create document root: %v", err)
+	if err := fs.MkdirAll(sqlroot, 0755); err != nil {
+		t.Fatalf("failed to create sql root: %v", err)
 	}
 	type args struct {
 		Method string
