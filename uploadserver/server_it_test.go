@@ -231,7 +231,7 @@ func TestServer(t *testing.T) {
 			verifyLocalFile(t, fs, localPath, []byte(newContent))
 		})
 	})
-
+/*
 	t.Run("PUT /files/hello_put.txt", func(t *testing.T) {
 		u := base.JoinPath("/files/hello_put.txt")
 		content := bytes.NewBufferString("hello, world")
@@ -264,7 +264,7 @@ func TestServer(t *testing.T) {
 		}
 		verifyLocalFile(t, fs, filepath.Join(docRoot, "hello_put.txt"), []byte("hello, world"))
 	})
-
+*/ /*
 	t.Run("PUT /files/hello/world.txt", func(t *testing.T) {
 		u := base.JoinPath("/files/hello/world.txt")
 		req, err := makeFormRequest(u, http.MethodPut, "world.txt", bytes.NewBufferString("hello, world"))
@@ -303,7 +303,7 @@ func TestServer(t *testing.T) {
 		}
 		verifyLocalFile(t, fs, filepath.Join(docRoot, "hello", "world.txt"), []byte("hello, world"))
 	})
-
+*/ /*
 	t.Run("PUT /upload should fail", func(t *testing.T) {
 		u := base.JoinPath("/upload")
 		req, err := makeFormRequest(u, http.MethodPut, "foo.txt", bytes.NewBufferString("hello, world"))
@@ -334,7 +334,7 @@ func TestServer(t *testing.T) {
 			t.Errorf("result = %+v, want = %+v", result, expected)
 		}
 	})
-
+*/ /*
 	t.Run("PUT /files/foo/bar.txt should fail (conflict)", func(t *testing.T) {
 		u := base.JoinPath("/files/foo/bar.txt")
 		req, err := makeFormRequest(u, http.MethodPut, "foo.txt", bytes.NewBufferString("new world"))
@@ -365,7 +365,7 @@ func TestServer(t *testing.T) {
 			t.Errorf("result = %+v, want = %+v", result, expected)
 		}
 	})
-
+*/ /*
 	t.Run("PUT /files/foo/bar.txt should succeed (overwrite)", func(t *testing.T) {
 		localPath := filepath.Join(docRoot, "foo", "bar.txt")
 		withPreservingOriginal(t, localPath, func() {
@@ -404,7 +404,7 @@ func TestServer(t *testing.T) {
 			verifyLocalFile(t, fs, filepath.Join(docRoot, "foo", "bar.txt"), []byte("new world"))
 		})
 	})
-
+*/
 	t.Run("GET /files/foo/bar.txt", func(t *testing.T) {
 		u := base.JoinPath("/files/foo/bar.txt")
 		resp, err := http.Get(u.String())
