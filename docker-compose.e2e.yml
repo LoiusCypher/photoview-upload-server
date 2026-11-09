@@ -24,3 +24,4 @@ services:
       - app
 volumes:
   docroot:
+  sqlroot
