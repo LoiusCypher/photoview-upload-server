@@ -7,8 +7,8 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"iter"
 	"log"
+	"net/http"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -34,7 +34,7 @@ func calcSha(filePath string) (string, error) {
 
 func createJpgFromPdf(pathExe string, pdfPath string, jpgPath string) error {
 	log.Printf("createJpgFromPdf: %s %s %s", pathExe, pdfPath, jpgPath)
-	cmdArgs := []string{ "-dNOPAUSE", "-sDEVICE=jpeg", "-r300", "-sOutputFile=" + jpgPath, "-f", filepath.Base(pdfPath), "-c", "quit"}
+	cmdArgs := []string{ "-dNOPAUSE", "-sDEVICE=jpeg", "-r100", "-sOutputFile=" + jpgPath, "-f", filepath.Base(pdfPath), "-c", "quit"}
 	cmd := exec.Command(pathExe, cmdArgs...)
 	cmd.Dir = filepath.Dir(pdfPath)
 	var out strings.Builder
@@ -64,7 +64,7 @@ type ShaDatabase struct {
 }
 
 func initDb (sqlPath string) error {
-	log.Printf("initDb: %s", sqlPath)
+	// log.Printf("initDb: %s", sqlPath)
 	// os.Remove("/sqlroot/shafiles.db")
 	db, err := sql.Open("sqlite3", "/sqlroot/shafiles.db")
 	if err != nil {
@@ -87,7 +87,7 @@ func initDb (sqlPath string) error {
 }
 
 func openDb (sqlPath string) *ShaDatabase {
-	log.Printf("openDb: %s", sqlPath)
+	// log.Printf("openDb: %s", sqlPath)
 	if err := initDb(sqlPath); err != nil {
 		log.Fatal(err)
 		return nil
@@ -104,37 +104,28 @@ func openDb (sqlPath string) *ShaDatabase {
 
 func (shaDb *ShaDatabase) Close() {
 	shaDb.db.Close()
-	log.Printf("CLOSE shaDb!!!!")
+	// log.Printf("CLOSE shaDb!!!!")
 }
 
 func (shaDb *ShaDatabase) countRows() error {
 	log.Printf("countRows")
-	rows, err := shaDb.db.Query("SELECT COUNT(*) FROM shafiles")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer rows.Close()
-	for rows.Next() {
-		var cnt int
-		err = rows.Scan(&cnt)
-		if err != nil {
-			log.Fatal(err)
-			return err
-		}
-		log.Printf("Count: %d", cnt)
-	}
-	if err = rows.Err(); err != nil {
-		log.Fatal(err)
+	var cnt int
+	if err := shaDb.db.QueryRow("SELECT COUNT(*) FROM shafiles;").Scan(&cnt); err != nil {
+		if err == sql.ErrNoRows {
+			return nil
+        	}
 		return err
 	}
+	log.Printf("Count: %d", cnt)
 	return nil
 }
 
-func (shaDb *ShaDatabase) getList(rootDir string) error {
-	log.Printf("getList: %s\n", rootDir)
+func (shaDb *ShaDatabase) getListShas(w http.ResponseWriter, rootDir string) ( bool, error) {
+	log.Printf("getListShas: %s\n", rootDir)
 	rows, err := shaDb.db.Query("SELECT sha, path FROM shafiles WHERE path LIKE ? ORDER BY path", rootDir + "%")
 	if err != nil {
 		log.Fatal(err)
+		return false, err
 	}
 	defer rows.Close()
 	for rows.Next() {
@@ -142,46 +133,30 @@ func (shaDb *ShaDatabase) getList(rootDir string) error {
 		err = rows.Scan(&sha, &path)
 		if err != nil {
 			log.Fatal(err)
+			return false, err
 		}
-		log.Printf("%s: %s", sha, path)
-		fmt.Sprintf("%s %s", sha, path)
+		// log.Printf("DB LIST %s: %s", sha, path)
+		fmt.Fprintln(w, sha, " ", path)
 	}
 	if err = rows.Err(); err != nil {
 		log.Fatal(err)
+		return false, err
 	}
-	return nil
+	return true, nil
 }
 
-func fileShas(shaDb *ShaDatabase, rootDir string) iter.Seq2[ string, error] {
-	return func (yield func( string, error) bool) {
-		log.Printf("iterateShaList: %s\n", rootDir)
-		rows, err := shaDb.db.Query("SELECT sha, path FROM shafiles WHERE path LIKE ? ORDER BY path", rootDir + "%")
-		if err != nil {
-			log.Fatal(err)
-		}
-		defer rows.Close()
-		for rows.Next() {
-			var sha, path string
-			err = rows.Scan(&sha, &path)
-			if err != nil {
-				log.Fatal(err)
-				if !yield("", err) {
-					return
-				}
-			}
-			log.Printf("%s: %s", sha, path)
-			if !yield(fmt.Sprintf("%s %s", sha, path), nil) {
-				return
-			}
-		}
-		if err = rows.Err(); err != nil {
-			log.Fatal(err)
-			if !yield("", err) {
-				return
-			}
-		}
-		return
+func (shaDb *ShaDatabase) getPathSha(w http.ResponseWriter, reqPath string) (bool, error) {
+	// log.Printf("getPathSha: %s\n", reqPath)
+	var sha string
+	if err := shaDb.db.QueryRow("SELECT sha FROM shafiles WHERE path = ?;", reqPath).Scan(&sha); err != nil {
+		if err == sql.ErrNoRows {
+			return false, nil
+        	}
+		return false, err
 	}
+	fmt.Fprintln(w, sha)
+	// log.Printf("getPathSha: %s\n", sha)
+	return true, nil
 }
 
 func (shaDb *ShaDatabase) registerPdfWithSha (pdfPath string, pdfSha string) error {
@@ -263,31 +238,13 @@ func DeletedPdf(docroot string, jpgroot string, uploadPath string) error {
 	if err := shaDb.countRows(); err != nil {
 		return err
 	}
-	if err := shaDb.getList("/"); err != nil {
-		return err
-	}
-	if err := shaDb.unRegisterPdf(pdfPath); err != nil {
+	if err := shaDb.unRegisterPdf(uploadPath); err != nil {
 		return err
 	}
 	return nil
 }
 
-func GetShaList(requestedPath string) (string, error) {
-	shaDb := openDb("/sqlroot/shafiles.db")
-	if shaDb == nil {
-		return "", fmt.Errorf("openDb failed")
-	}
-	defer shaDb.Close()
-	for line, err := range fileShas(shaDb, requestedPath) {
-		if err != nil {
-			return "", err
-		}
-		log.Printf("XX %s\n", line)
-	}
-	return "", nil
-}
-
-func UpdatedPdf(docroot string, jpgroot string, uploadPath string) error {
+func convertPdfToJpg(pdfPath string, jpgRoot string, uploadPath string) error {
 	var targExe string
 	var pathExe string
 	targExe = "gs"
@@ -298,23 +255,27 @@ func UpdatedPdf(docroot string, jpgroot string, uploadPath string) error {
 		return fmt.Errorf("didn't find %s: %v", targExe, err)
 	}
 	// log.Printf("'%s' executable magick in '%s'\n", targExe, pathExe)
-	pdfPath := docroot + "/" + uploadPath
-	pdfSha, err := calcSha(pdfPath)
-	log.Println("file hash", pdfPath, ": ", pdfSha)
-	if err != nil {
-		log.Printf("making calcSha: %v\n", err)
-		return err
-	}
-	jpgPath := strings.TrimSuffix(jpgroot + "/" + uploadPath, filepath.Ext(uploadPath)) + "-%02d.jpg"
+	jpgPath := strings.TrimSuffix(jpgRoot + "/" + uploadPath, filepath.Ext(uploadPath)) + "-%02d.jpg"
 	err = os.MkdirAll(filepath.Dir(jpgPath), os.ModePerm)
 	if err != nil {
 		log.Printf("making jpgpath dir: %v\n", err)
 		return fmt.Errorf("making jpgpath dir: %v", err)
 	}
-	log.Printf("UpdatedPdf: %s %s %s", uploadPath, pdfPath, jpgPath)
+	log.Printf("convertPdfToJpg: %s %s %s", uploadPath, pdfPath, jpgPath)
 	if err := createJpgFromPdf(pathExe, pdfPath, jpgPath); err != nil {
 		return err
 	}
+	return nil
+}
+
+func recordSha(pdfPath string, uploadPath string) error {
+	// log.Printf("'%s' executable magick in '%s'\n", targExe, pathExe)
+	pdfSha, err := calcSha(pdfPath)
+	if err != nil {
+		log.Printf("making calcSha: %v\n", err)
+		return err
+	}
+	log.Println("file hash", pdfPath, ": ", pdfSha)
 	shaDb := openDb("/sqlroot/shafiles.db")
 	if shaDb == nil {
 		return fmt.Errorf("openDb failed")
@@ -323,10 +284,10 @@ func UpdatedPdf(docroot string, jpgroot string, uploadPath string) error {
 	if err := shaDb.countRows(); err != nil {
 		return err
 	}
-	if err := shaDb.getList("/"); err != nil {
+	if err := shaDb.registerPdfWithSha(uploadPath, pdfSha); err != nil {
 		return err
 	}
-	if err := shaDb.registerPdfWithSha(pdfPath, pdfSha); err != nil {
+	if err := shaDb.countRows(); err != nil {
 		return err
 	}
 	return nil
