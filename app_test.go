@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/loiuscypher/photoview-upload-server/uploadserver "
+	"github.com/loiuscypher/photoview-upload-server/uploadserver"
 )
 
 func Test_parseConfig(t *testing.T) {
@@ -45,7 +45,7 @@ func Test_parseConfig(t *testing.T) {
 			t.Errorf("parseConfig() error = %v", err)
 			return
 		}
-		want := &photoviewuploadserver.ServerConfig{
+		want := &uploadserver.ServerConfig{
 			Addr:               ":8123",
 			DocumentRoot:       "/opt/app",
 			EnableCORS:         true,
@@ -83,7 +83,7 @@ func Test_parseConfig(t *testing.T) {
 			t.Errorf("parseConfig() error = %v", err)
 			return
 		}
-		want := &photoviewuploadserver.ServerConfig{
+		want := &uploadserver.ServerConfig{
 			Addr:               ":8987",
 			DocumentRoot:       "/tmp/sus",
 			EnableCORS:         false,
@@ -147,7 +147,7 @@ func Test_parseConfig(t *testing.T) {
 			t.Errorf("parseConfig() error = %v", err)
 			return
 		}
-		want := &photoviewuploadserver.ServerConfig{
+		want := &uploadserver.ServerConfig{
 			Addr:               ":8987",
 			DocumentRoot:       "/tmp/sus",
 			EnableCORS:         true,
