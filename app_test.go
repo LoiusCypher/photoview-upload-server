@@ -6,12 +6,12 @@ import (
 	"testing"
 	"time"
 
-	simpleuploadserver "github.com/loiuscypher/go-simple-upload-server/v2/pkg"
+	photoviewuploadserver "github.com/loiuscypher/photoview-upload-server"
 )
 
 func Test_parseConfig(t *testing.T) {
 	t.Run("use config file only", func(t *testing.T) {
-		f, err := os.CreateTemp("", "simple-upload-server-config.*.json")
+		f, err := os.CreateTemp("", "photoview-upload-server-config.*.json")
 		if err != nil {
 			t.Fatalf("failed to create temp file: %v", err)
 		}
@@ -45,7 +45,7 @@ func Test_parseConfig(t *testing.T) {
 			t.Errorf("parseConfig() error = %v", err)
 			return
 		}
-		want := &simpleuploadserver.ServerConfig{
+		want := &photoviewuploadserver.ServerConfig{
 			Addr:               ":8123",
 			DocumentRoot:       "/opt/app",
 			EnableCORS:         true,
@@ -83,7 +83,7 @@ func Test_parseConfig(t *testing.T) {
 			t.Errorf("parseConfig() error = %v", err)
 			return
 		}
-		want := &simpleuploadserver.ServerConfig{
+		want := &photoviewuploadserver.ServerConfig{
 			Addr:               ":8987",
 			DocumentRoot:       "/tmp/sus",
 			EnableCORS:         false,
@@ -113,7 +113,7 @@ func Test_parseConfig(t *testing.T) {
 			"-read_timeout", "16s",
 		}
 
-		f, err := os.CreateTemp("", "simple-upload-server-config.*.json")
+		f, err := os.CreateTemp("", "photoview-upload-server-config.*.json")
 		if err != nil {
 			t.Fatalf("failed to create temp file: %v", err)
 		}
@@ -147,7 +147,7 @@ func Test_parseConfig(t *testing.T) {
 			t.Errorf("parseConfig() error = %v", err)
 			return
 		}
-		want := &simpleuploadserver.ServerConfig{
+		want := &photoviewuploadserver.ServerConfig{
 			Addr:               ":8987",
 			DocumentRoot:       "/tmp/sus",
 			EnableCORS:         true,

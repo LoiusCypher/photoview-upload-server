@@ -15,12 +15,12 @@ import (
 	"time"
 
 	"dario.cat/mergo"
-	simpleuploadserver "github.com/loiuscypher/go-simple-upload-server/v2/pkg"
+	"github.com/loiuscypher/photoview-upload-server/uploadserver" 
 )
 
 var DefaultConfig = ServerConfig{
 	DocumentRoot:       ".",
-	Addr:               simpleuploadserver.DefaultAddr,
+	Addr:               uploadserver.DefaultAddr,
 	EnableCORS:         nil,
 	MaxUploadSize:      1024 * 1024,
 	FileNamingStrategy: "uuid",
@@ -107,7 +107,7 @@ func (d *Duration) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-// ServerConfig wraps simpleuploadserver.ServerConfig to provide JSON marshaling.
+// ServerConfig wraps ServerConfig to provide JSON marshaling.
 type ServerConfig struct {
 	// Address where the server listens on.
 	Addr string `json:"addr"`
@@ -133,7 +133,7 @@ type ServerConfig struct {
 	WriteTimeout Duration `json:"write_timeout"`
 }
 
-func (c *ServerConfig) AsConfig() simpleuploadserver.ServerConfig {
+func (c *ServerConfig) AsConfig() uploadserver.ServerConfig {
 	if c.EnableCORS == nil {
 		c.EnableCORS = BoolPointer(true)
 	}
@@ -141,7 +141,7 @@ func (c *ServerConfig) AsConfig() simpleuploadserver.ServerConfig {
 		c.EnableAuth = BoolPointer(false)
 	}
 
-	return simpleuploadserver.ServerConfig{
+	return uploadserver.ServerConfig{
 		Addr:               c.Addr,
 		DocumentRoot:       c.DocumentRoot,
 		EnableCORS:         *c.EnableCORS,
@@ -218,7 +218,7 @@ func (a *app) Run(args []string) {
 		log.Printf("generated read write token: %s", readWriteToken)
 	}
 
-	s := simpleuploadserver.NewServer(*config)
+	s := uploadserver.NewServer(*config)
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer stop()
 	err = s.Start(ctx, nil)
@@ -235,7 +235,7 @@ func generateToken() (string, error) {
 }
 
 // parseConfig parses the configuration from the `src` and merges it with the `orig` configuration.
-func (a *app) ParseConfig(args []string) (*simpleuploadserver.ServerConfig, error) {
+func (a *app) ParseConfig(args []string) (*uploadserver.ServerConfig, error) {
 	if err := a.flagSet.Parse(args); err != nil {
 		return nil, err
 	}

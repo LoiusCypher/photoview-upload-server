@@ -2,11 +2,11 @@ name: Docker Image CI
 
 on:
   push:
-    branches: [ "v2" ]
+    branches: [ "master" ]
     tags:
       - "v*.*.*"
   pull_request:
-    branches: [ "v2" ]
+    branches: [ "master" ]
 
 jobs:
   build:
@@ -14,7 +14,7 @@ jobs:
     steps:
     - uses: actions/checkout@v7
     - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag loiuscypher/simple-upload-server:$(date +%s)
+      run: docker build . --file Dockerfile --tag loiuscypher/photoview-upload-server:$(date +%s)
 
   push:
     runs-on: ubuntu-latest
@@ -24,7 +24,7 @@ jobs:
       uses: docker/metadata-action@v6
       with:
         images: |
-          loiuscypher/simple-upload-server
+          loiuscypher/photoview-upload-server
         tags: |
           type=ref,event=branch
           type=ref,event=pr

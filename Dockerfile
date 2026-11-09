@@ -10,8 +10,10 @@ WORKDIR /go/src/app
 RUN apt update
 RUN apt install --no-install-recommends -y ghostscript sqlite3
 COPY go.mod go.sum ./
+#RUN go get ./photoviewuploadserver
+#RUN go get github.com/loiuscypher/photoview-upload-server/photoviewuploadserver
 RUN go mod download
-# RUN cat go.mod go.sum
+RUN cat go.mod go.sum
 
 # copy other sources & build
 COPY . /go/src/app

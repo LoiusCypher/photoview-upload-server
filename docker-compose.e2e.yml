@@ -3,7 +3,7 @@ services:
     build:
       context: .
       tags:
-        - "loiuscypher/simple-upload-server:testing"
+        - "loiuscypher/photoview-upload-server:testing"
     ports:
       - "127.0.0.1::8080"
     volumes:

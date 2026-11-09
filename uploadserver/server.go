@@ -1,4 +1,4 @@
-package simpleuploadserver
+package uploadserver
 
 import (
 	"context"

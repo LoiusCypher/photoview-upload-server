@@ -1,10 +1,10 @@
 services:
   app:
-    image: loiuscypher/simple-upload-server:v2
+    image: loiuscypher/photoview-upload-server:latest
     build:
       context: .
       tags:
-        - "loiuscypher/simple-upload-server:testing"
+        - "loiuscypher/photoview-upload-server:testing"
     ports:
       - "8080:8080"
     volumes:
