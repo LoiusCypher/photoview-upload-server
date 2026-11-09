@@ -17,6 +17,7 @@ services:
     volumes:
       - .:/app
       - docroot:/docroot
+      - sqlroot:/sqlroot
     working_dir: /app
     command: go test -v -run TestServer ./...
     depends_on:
