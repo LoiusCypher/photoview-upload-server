@@ -18,7 +18,7 @@ import (
 	"os"
 )
 
-func TestGetHandler(t *testing.T) {
+func TestDatabase(t *testing.T) {
 	// os.Remove("/sqlroot/shafiles.db")
 	// var fs afero.Fs
 	if _, err := os.Stat("/sqlroot/shafiles.db"); errors.Is(err, os.ErrNotExist) {
