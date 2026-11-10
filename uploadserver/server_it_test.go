@@ -1151,7 +1151,7 @@ func verifyLocalFile(t *testing.T, fs afero.Fs, path string, content []byte) {
 		t.Errorf("local file content = %s, want = %s", got, content)
 	}
 }
-*/
+
 // containsAll reports whether a contains all elements of b.
 func containsAll[T comparable](a, b []T) bool {
 	for _, x := range b {
@@ -1161,7 +1161,7 @@ func containsAll[T comparable](a, b []T) bool {
 	}
 	return true
 }
-/*
+
 // makeFormRequest creates a new http.Request with multipart/form-data.
 func makeFormRequest(url *url.URL, method, filename string, content io.Reader) (*http.Request, error) {
 	b := new(bytes.Buffer)
