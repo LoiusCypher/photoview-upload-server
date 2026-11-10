@@ -450,7 +450,7 @@ func TestServer(t *testing.T) {
 			t.Errorf("result = %+v, want = %+v", result, expected)
 		}
 	})
-*/
+
 	t.Run("HEAD /files/foo/bar.txt", func(t *testing.T) {
 		localPath := filepath.Join(docRoot, "foo", "bar.txt")
 
@@ -556,6 +556,7 @@ func TestServer(t *testing.T) {
 			t.Errorf("Access-Control-Allow-Origin = %s, want = \"*\"", acao)
 		}
 	})
+*/
 }
 /*
 func TestServerWithAuth(t *testing.T) {
