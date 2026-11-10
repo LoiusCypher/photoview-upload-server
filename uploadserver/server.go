@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"net"
 	"net/http"
@@ -244,7 +243,7 @@ func (s *Server) processUpload(w http.ResponseWriter, r *http.Request, path stri
 	// MaxBytesReader closes the underlying io.Reader on its Close() is called
 	defer src.Close()
 
-	dstFile, err := ioutil.TempFile( "", "*.pdf")
+	dstFile, err := os.CreateTemp( "", "*.pdf")
 	if err != nil {
 		log.Printf("failed to create temp file (path=%s): %v", path, err)
 		return http.StatusInternalServerError, "", fmt.Errorf("cannot open file")

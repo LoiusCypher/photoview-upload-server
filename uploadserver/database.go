@@ -33,7 +33,7 @@ func init() {
 	defer shaDb.Close()
 	err := shaDb.countRows()
 	if err != nil {
-		log.Println( fmt.Errorf("count rows: %v\n", err))
+		log.Println( fmt.Errorf("count rows: %v", err))
 		return
 	}
 }
@@ -41,13 +41,13 @@ func init() {
 func openDb (sqlPath string) *ShaDatabase {
 	// log.Printf("openDb: %s", sqlPath)
 	if err := initDb(sqlPath); err != nil {
-		log.Println( fmt.Errorf("init db: %v\n", err))
+		log.Println( fmt.Errorf("init db: %v", err))
 		return nil
 	}
 
 	db, err := sql.Open("sqlite3", sqlPath)
 	if err != nil {
-		log.Println( fmt.Errorf("open db: %v\n", err))
+		log.Println( fmt.Errorf("open db: %v", err))
 		return nil
 	}
 	shaDb := &ShaDatabase{ sqlPath, db, }
@@ -63,7 +63,7 @@ func initDb (sqlPath string) error {
 	}
 	db, err := sql.Open("sqlite3", "/sqlroot/shafiles.db")
 	if err != nil {
-		log.Println( fmt.Errorf("open db: %v\n", err))
+		log.Println( fmt.Errorf("open db: %v", err))
 		return err
 	}
 	defer db.Close()
@@ -120,7 +120,7 @@ func ListShas( w http.ResponseWriter, listPath string) ( bool, error) {
 		found = true
 	}
 	if err = rows.Err(); err != nil {
-		log.Println( fmt.Errorf("query: %v\n", err))
+		log.Println( fmt.Errorf("query: %v", err))
 		return false, err
 	}
 	return found, nil
