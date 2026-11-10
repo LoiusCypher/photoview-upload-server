@@ -6,11 +6,11 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"net"
 	"net/http"
 	"os"
-	"path/filepath"
 	"slices"
 	"strings"
 	"time"
@@ -235,11 +235,6 @@ func (s *Server) handleDelete(w http.ResponseWriter, r *http.Request) (int, any)
 }
 
 func (s *Server) processUpload(w http.ResponseWriter, r *http.Request, path string) (int, string, error) {
-	allowOverwrite := parseBoolishValue(r.URL.Query().Get(OverwriteQueryKey))
-	if allowOverwrite {
-		log.Printf("allowOverwrite")
-	}
-
 	srcFile, _, err := r.FormFile(FormFileKey)
 	if err != nil {
 		log.Printf("failed to obtain form file: %v", err)
@@ -249,12 +244,12 @@ func (s *Server) processUpload(w http.ResponseWriter, r *http.Request, path stri
 	// MaxBytesReader closes the underlying io.Reader on its Close() is called
 	defer src.Close()
 
-	dstFile, err := os.CreateTemp("", filepath.Base(path))
+	dstFile, err := ioutil.TempFile( "", "*.pdf")
 	if err != nil {
-		log.Printf("failed to open the destination file (path=%s): %v", path, err)
+		log.Printf("failed to create temp file (path=%s): %v", path, err)
 		return http.StatusInternalServerError, "", fmt.Errorf("cannot open file")
 	}
-	defer dstFile.Close()
+	defer os.Remove(dstFile.Name())
 	written, err := io.Copy(dstFile, src)
 	if err != nil {
 		var maxBytesError *http.MaxBytesError
@@ -275,12 +270,7 @@ func (s *Server) handleListGet(w http.ResponseWriter, r *http.Request) (int, any
 	requestPath := strings.TrimPrefix(r.URL.Path, "/filelist")
 	requestPath = strings.TrimPrefix(requestPath, "/")
 	log.Printf("GET %s -> %s", r.URL.Path, requestPath)
-	shaDb := openDb("/sqlroot/shafiles.db")
-	if shaDb == nil {
-		return http.StatusInternalServerError, fmt.Errorf("openDb failed")
-	}
-	defer shaDb.Close()
-	found, err := shaDb.getListShas(w, requestPath)
+	found, err := ListShas(w, requestPath)
 	if err != nil {
 		return http.StatusInternalServerError, err
 	}
@@ -432,7 +422,3 @@ func handleMethodNotAllowed(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func parseBoolishValue(s string) bool {
-	truthyValues := []string{"yes", "true", "1"}
-	return slices.Contains(truthyValues, strings.ToLower(s))
-}

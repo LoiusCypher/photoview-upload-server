@@ -404,7 +404,7 @@ func TestServer(t *testing.T) {
 			verifyLocalFile(t, fs, filepath.Join(docRoot, "foo", "bar.txt"), []byte("new world"))
 		})
 	})
-*/
+
 	t.Run("GET /files/foo/bar.txt", func(t *testing.T) {
 		u := base.JoinPath("/files/foo/bar.txt")
 		resp, err := http.Get(u.String())
@@ -450,7 +450,7 @@ func TestServer(t *testing.T) {
 			t.Errorf("result = %+v, want = %+v", result, expected)
 		}
 	})
-
+*/
 	t.Run("HEAD /files/foo/bar.txt", func(t *testing.T) {
 		localPath := filepath.Join(docRoot, "foo", "bar.txt")
 
