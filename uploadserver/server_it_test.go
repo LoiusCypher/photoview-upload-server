@@ -5,18 +5,18 @@ import (
 	"context"
 	// "encoding/json"
 	// // "fmt"
-	"io"
+	// // "io"
 	// // "mime/multipart"
 	"net"
-	"net/http"
+	// // "net/http"
 	"net/url"
 	"os"
 	"path"
-	"path/filepath"
+	// // "path/filepath"
 	// // "reflect"
 	"slices"
 	"strconv"
-	"strings"
+	// // "strings"
 	"testing"
 
 	"github.com/spf13/afero"
@@ -74,7 +74,8 @@ func TestServer(t *testing.T) {
 		<-ready
 	}
 
-	base, err := url.Parse("http://" + target)
+	// base, err := url.Parse("http://" + target)
+	_, err := url.Parse("http://" + target)
 	if err != nil {
 		t.Fatalf("failed to parse base url: %v", err)
 	}
