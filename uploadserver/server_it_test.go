@@ -1139,7 +1139,7 @@ func TestServerWithAuth(t *testing.T) {
 		}
 	})
 }
-*/
+
 func verifyLocalFile(t *testing.T, fs afero.Fs, path string, content []byte) {
 	got, err := afero.ReadFile(fs, path)
 	if err != nil {
@@ -1149,7 +1149,7 @@ func verifyLocalFile(t *testing.T, fs afero.Fs, path string, content []byte) {
 		t.Errorf("local file content = %s, want = %s", got, content)
 	}
 }
-
+*/
 // containsAll reports whether a contains all elements of b.
 func containsAll[T comparable](a, b []T) bool {
 	for _, x := range b {
@@ -1159,7 +1159,7 @@ func containsAll[T comparable](a, b []T) bool {
 	}
 	return true
 }
-
+/*
 // makeFormRequest creates a new http.Request with multipart/form-data.
 func makeFormRequest(url *url.URL, method, filename string, content io.Reader) (*http.Request, error) {
 	b := new(bytes.Buffer)
@@ -1184,7 +1184,7 @@ func makeFormRequest(url *url.URL, method, filename string, content io.Reader) (
 	req.Header.Set("Content-Type", w.FormDataContentType())
 	return req, nil
 }
-
+*/
 // getAvailablePort returns an available port number randomly.
 func getAvailablePort() (int, error) {
 	addr, err := net.ResolveTCPAddr("tcp", "127.0.0.1:0")
