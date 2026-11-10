@@ -103,7 +103,7 @@ func ListShas( w http.ResponseWriter, listPath string) ( bool, error) {
 	defer shaDb.Close()
 	rows, err := shaDb.db.Query("SELECT sha, path FROM shafiles WHERE path LIKE ? ORDER BY path", listPath + "%")
 	if err != nil {
-		log.Println( fmt.Errorf("query: %v\n", err))
+		log.Println( fmt.Errorf("query: %v", err))
 		return false, err
 	}
 	defer rows.Close()
@@ -112,7 +112,7 @@ func ListShas( w http.ResponseWriter, listPath string) ( bool, error) {
 		var sha, path string
 		err = rows.Scan(&sha, &path)
 		if err != nil {
-			log.Println( fmt.Errorf("query: %v\n", err))
+			log.Println( fmt.Errorf("query: %v", err))
 			return false, err
 		}
 		// log.Printf("DB LIST %s: %s", sha, path)
