@@ -11,11 +11,12 @@ import (
 	"path/filepath"
 	"reflect"
 	"strings"
-	"testing"
 
 	"github.com/spf13/afero"
 */
+	"errors"
 	"os"
+	"testing"
 )
 
 func TestDatabase(t *testing.T) {
