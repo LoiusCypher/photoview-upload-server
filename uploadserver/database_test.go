@@ -16,7 +16,6 @@ import (
 	"github.com/spf13/afero"
 */
 	"os"
-	"github.com/loiuscypher/photoview-upload-server/uploadserver" 
 )
 
 func TestGetHandler(t *testing.T) {
