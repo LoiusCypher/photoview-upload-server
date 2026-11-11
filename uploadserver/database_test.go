@@ -67,12 +67,19 @@ func TestDatabase(t *testing.T) {
                 t.Fatalf("empty test file is not empty:")
 	}
 	tmpFilePath := f.Name()
-	f.Close()
+	// f.Close()
 	emptyFile_db_path := "arbitrary / file / path"
+	var sha string
+	sha, err = calcSha( tmpFilePath)
+	if err != nil {
+		t.Errorf("error calculating sha of empty file %v", err)
+	}
 	err = recordSha( tmpFilePath, emptyFile_db_path)
 	if err != nil {
-		t.Fatalf("error recording sha of empty file %v", err)
+		t.Errorf("error recording sha of empty file %v", err)
 	}
+	f.Close()
+
 	w = httptest.NewRecorder()
 	found, err = ListShas( w, "")
 	if err != nil {
