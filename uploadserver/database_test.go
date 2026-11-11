@@ -48,7 +48,7 @@ func TestDatabase(t *testing.T) {
 	if found {
 		t.Fatalf("sha list was expected to be empty first")
 	}
-	w.Close()
+	// w.Close()
 	tmpPath := "/tmp"
 	if err := fs.MkdirAll( path.Dir(tmpPath), 0755); err != nil {
 		t.Fatalf("failed to create temp folder: %v", err)
@@ -72,7 +72,7 @@ func TestDatabase(t *testing.T) {
 	if err != nil {
 		t.Fatalf("error recording sha of empty file %v", err)
 	}
-	// w = httptest.NewRecorder()
+	w = httptest.NewRecorder()
 	found, err = ListShas( w, "")
 	if err != nil {
 		t.Fatalf("error reading sha list: %v", err)
