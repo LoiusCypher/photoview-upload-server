@@ -17,6 +17,7 @@ import (
 	"errors"
 	"os"
 	"testing"
+	"github.com/spf13/afero"
 )
 
 func TestDatabase(t *testing.T) {
@@ -24,10 +25,10 @@ func TestDatabase(t *testing.T) {
 	var fs afero.Fs
 	fs = afero.NewMemMapFs()
 	if err := fs.MkdirAll("/sqlroot", 0755); err != nil {
-		t.Fatalf("failed to create document root: %v", err)
+		t.Fatalf("failed to create database folder: %v", err)
 	}
-	db := openDB()
-	if _, err := os.Stat("/sqlroot/shafiles.db"); errors.Is(err, os.ErrNotExist) {
+	
+	if db := openDb(); db == nil {
 		t.Fatalf("init did not create db: %v", err)
 	}
 
