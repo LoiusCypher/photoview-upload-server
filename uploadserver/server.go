@@ -286,12 +286,7 @@ func (s *Server) handleListGet(w http.ResponseWriter, r *http.Request) (int, any
 func (s *Server) handleGet(w http.ResponseWriter, r *http.Request) (int, any) {
 	requestPath := strings.TrimPrefix(r.URL.Path, "/files/")
 	log.Printf("GET %s -> %s", r.URL.Path, requestPath)
-	shaDb := openDb("/sqlroot/shafiles.db")
-	if shaDb == nil {
-		return http.StatusInternalServerError, fmt.Errorf("openDb failed")
-	}
-	defer shaDb.Close()
-	found, err := shaDb.getPathSha(w, requestPath)
+	found, err := GetPathSha(w, requestPath)
 	if err != nil {
 		return http.StatusInternalServerError, err
 	}

@@ -21,7 +21,12 @@ import (
 
 func TestDatabase(t *testing.T) {
 	// os.Remove("/sqlroot/shafiles.db")
-	// var fs afero.Fs
+	var fs afero.Fs
+	fs = afero.NewMemMapFs()
+	if err := fs.MkdirAll("/sqlroot", 0755); err != nil {
+		t.Fatalf("failed to create document root: %v", err)
+	}
+	db := openDB()
 	if _, err := os.Stat("/sqlroot/shafiles.db"); errors.Is(err, os.ErrNotExist) {
 		t.Fatalf("init did not create db: %v", err)
 	}
