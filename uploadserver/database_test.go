@@ -27,15 +27,16 @@ func TestDatabase(t *testing.T) {
 	if err := fs.MkdirAll( path.Dir(sqlPath), 0755); err != nil {
 		t.Fatalf("failed to create database folder: %v", err)
 	}
-	if *SetDbPath(sqlPath) != "/opt/app" {
-		t.Fatalf("set db path failed")
-	}
-	if db := openDb(); db == nil {
-		t.Fatalf("init did not create db")
+	dbPath := *SetDbPath(sqlPath)
+	if dbPath != sqlPath {
+		t.Fatalf("set db path failed %s", dbPath)
 	}
 	found, err := afero.Exists(fs, sqlPath)
 	if err != nil {
 		t.Fatalf("db file check error: %v", err)
+	}
+	if db := openDb(); db == nil {
+		t.Fatalf("init did not create db")
 	}
 	if ! found {
 		t.Fatalf("db file was not createb")
