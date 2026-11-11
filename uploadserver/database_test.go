@@ -72,7 +72,7 @@ func TestDatabase(t *testing.T) {
 	if err != nil {
 		t.Fatalf("error recording sha of empty file %v", err)
 	}
-	w = httptest.NewRecorder()
+	// w = httptest.NewRecorder()
 	found, err = ListShas( w, "")
 	if err != nil {
 		t.Fatalf("error reading sha list: %v", err)
@@ -80,7 +80,7 @@ func TestDatabase(t *testing.T) {
 	if ! found {
 		t.Fatalf("sha list was expected to have an entry")
 	}
-	w.Close()
+	// w.Close()
 	f, err = afero.TempFile( fs, tmpPath, "*.pdf")
 	if err != nil {
 		t.Fatalf("error creating temp file: %v", err)
