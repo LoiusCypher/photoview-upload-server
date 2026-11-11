@@ -15,7 +15,7 @@ import (
 */
 	//"errors"
 	"net/http/httptest"
-	//"os"
+	"os"
 	"testing"
 	"github.com/spf13/afero"
 )
@@ -33,11 +33,15 @@ func TestDatabase(t *testing.T) {
 	if db := openDb(); db == nil {
 		t.Fatalf("init did not create db")
 	}
-	if ! afero.Exists(sqlPath); db == nil {
+	found, err := afero.Exists(sqlPath)
+	if err != nil {
+		t.Fatalf("db file check error: %v", err)
+	}
+	if ! found {
 		t.Fatalf("db file was not createb")
 	}
 	w := httptest.NewRecorder()
-	found, err := ListShas( w, "")
+	found, err = ListShas( w, "")
 	if err != nil {
 		t.Fatalf("error reading sha list: %v", err)
 	}
