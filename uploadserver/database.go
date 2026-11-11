@@ -74,12 +74,12 @@ func SetDbPath( sqlPath string) *string {
 
 func initDb (sqlPath string) error {
 	// log.Printf("initDb: %s", sqlPath)
-	// os.Remove("/sqlroot/shafiles.db")
+	// os.Remove(sqlPath)
 	if err := os.MkdirAll(filepath.Dir(sqlPath), os.ModePerm); err != nil {
 		log.Printf("making sqlPath dir: %v\n", err)
 		return fmt.Errorf("making sqlPath dir: %v", err)
 	}
-	db, err := sql.Open("sqlite3", "/sqlroot/shafiles.db")
+	db, err := sql.Open("sqlite3", sqlPath)
 	if err != nil {
 		log.Println( fmt.Errorf("open db: %v", err))
 		return err
