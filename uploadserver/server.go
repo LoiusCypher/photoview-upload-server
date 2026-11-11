@@ -194,6 +194,7 @@ func (s *Server) handle(f func(w http.ResponseWriter, r *http.Request) (int, any
 func (s *Server) handlePut(w http.ResponseWriter, r *http.Request) (int, any) {
 	path := strings.TrimPrefix(r.URL.Path, "/files/")
 
+	log.Printf("PUT %s -> %s", r.URL.Path, path)
 	status, pdfPath, err := s.processUpload(w, r, path)
 	if err != nil {
 		return status, err
@@ -237,6 +238,7 @@ func (s *Server) handleDelete(w http.ResponseWriter, r *http.Request) (int, any)
 
 func (s *Server) processUpload(w http.ResponseWriter, r *http.Request, path string) (int, string, error) {
 	srcFile, _, err := r.FormFile(FormFileKey)
+	log.Printf("processUpload file: %s", srcFile)
 	if err != nil {
 		log.Printf("failed to obtain form file: %v", err)
 		return http.StatusInternalServerError, "", fmt.Errorf("cannot obtain the uploaded content")
@@ -251,6 +253,7 @@ func (s *Server) processUpload(w http.ResponseWriter, r *http.Request, path stri
 		return http.StatusInternalServerError, "", fmt.Errorf("cannot open file")
 	}
 	defer os.Remove(dstFile.Name())
+	log.Printf("processUpload dstFile: %s", dstFile.Name)
 	written, err := io.Copy(dstFile, src)
 	if err != nil {
 		var maxBytesError *http.MaxBytesError
