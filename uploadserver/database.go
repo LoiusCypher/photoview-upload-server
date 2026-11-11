@@ -177,13 +177,13 @@ func GetPathSha(w http.ResponseWriter, reqPath string) (bool, error) {
 	return true, nil
 }
 
-func recordSha(pdfPath string, registerPath string) error {
-	pdfSha, err := calcSha(pdfPath)
+func recordSha(filePath string, registerPath string) error {
+	pdfSha, err := calcSha(filePath)
 	if err != nil {
 		log.Printf("making calcSha: %v\n", err)
 		return err
 	}
-	// log.Println("file hash", pdfPath, ": ", pdfSha)
+	// log.Println("file hash", filePath, ": ", pdfSha)
 	shaDb := openDb()
 	if shaDb == nil {
 		return fmt.Errorf("openDb failed")
