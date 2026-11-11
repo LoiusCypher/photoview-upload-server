@@ -151,6 +151,7 @@ type ErrorResult struct {
 type SuccessfullyUploadedResult struct {
 	OK   bool   `json:"ok"`
 	Path string `json:"path"`
+	Sha  string `json:"sha"`
 }
 
 func justOK() (int, any) {
@@ -201,7 +202,8 @@ func (s *Server) handlePut(w http.ResponseWriter, r *http.Request) (int, any) {
 	if err != nil {
 		return http.StatusInternalServerError, err
 	}
-	err = recordSha( pdfPath, path)
+	var sha string
+	sha, err = recordSha( pdfPath, path)
 	if err != nil {
 		return http.StatusInternalServerError, err
 	}
@@ -212,7 +214,7 @@ func (s *Server) handlePut(w http.ResponseWriter, r *http.Request) (int, any) {
 	if s.EnableCORS {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 	}
-	return http.StatusCreated, SuccessfullyUploadedResult{true, r.URL.Path}
+	return http.StatusCreated, SuccessfullyUploadedResult{true, r.URL.Path, sha}
 }
 
 func (s *Server) handleDelete(w http.ResponseWriter, r *http.Request) (int, any) {

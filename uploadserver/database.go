@@ -180,33 +180,34 @@ func GetPathSha(w http.ResponseWriter, reqPath string) (bool, error) {
 	return true, nil
 }
 
-func recordSha(filePath string, registerPath string) error {
+func recordSha(filePath string, registerPath string) ( string, error) {
 	pdfSha, err := calcSha(filePath)
 	if err != nil {
 		log.Printf("making calcSha: %v\n", err)
-		return err
+		return "", err
 	}
 	// log.Println("file hash", filePath, ": ", pdfSha)
 	shaDb := openDb()
 	if shaDb == nil {
-		return fmt.Errorf("openDb failed")
+		return "", fmt.Errorf("openDb failed")
 	}
 	defer shaDb.Close()
 	tx, err := shaDb.Begin()
 	if err != nil {
 		log.Fatal(err)
-		return err
+		return "", err
 	}
 	_, err = tx.Exec("INSERT OR REPLACE INTO shafiles(sha, path) VALUES(?, ?)", pdfSha, registerPath)
 	if err != nil {
 		log.Fatal(err)
-		return err
+		return "", err
 	}
 	err = tx.Commit()
 	if err != nil {
 		log.Fatal(err)
+		return "", err
 	}
-	return nil
+	return pdfSha, nil
 }
 
 func deleteSha(registerPath string) error {

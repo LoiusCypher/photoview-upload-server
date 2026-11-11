@@ -68,18 +68,21 @@ func TestDatabase(t *testing.T) {
                 t.Fatalf("empty test file is not empty:")
 	}
 	tmpFilePath := f.Name()
-	// f.Close()
+	f.Close()
 	emptyFile_db_path := "arbitrary / file / path"
-	// var sha string
-	_, err = calcSha( tmpFilePath)
+	var shaCalc string
+	shaCalc, err = calcSha( tmpFilePath)
 	if err != nil {
 		t.Errorf("error calculating sha of empty file %v", err)
 	}
-	err = recordSha( tmpFilePath, emptyFile_db_path)
+	var shaRec string
+	shaRec, err = recordSha( tmpFilePath, emptyFile_db_path)
 	if err != nil {
 		t.Errorf("error recording sha of empty file %v", err)
 	}
-	f.Close()
+	if shaCalc != shaRec {
+		t.Errorf("sha shoul be same %s %s", shaCalc, shaRec)
+	}
 
 	w = httptest.NewRecorder()
 	found, err = ListShas( w, "")
@@ -104,9 +107,19 @@ func TestDatabase(t *testing.T) {
 	tmpFilePath = f.Name()
 	f.Close()
 	helloFile_db_path := "arbitrary / say / hello"
-	err = recordSha( tmpFilePath, helloFile_db_path)
+	_, err = recordSha( tmpFilePath, helloFile_db_path)
 	if err != nil {
 		t.Fatalf("error recording sha of hello file %v", err)
 	}
+
+	w = httptest.NewRecorder()
+	found, err = GetPathSha( w, emptyFile_db_path) (bool, error) {
+	if err != nil {
+		t.Fatalf("error getting sha of empty file %v", err)
+	}
+	if ! found {
+		t.Fatalf("sha getting was expected to have an entry")
+	}
+	// found, err = ListShas( w, "")
 }
 
