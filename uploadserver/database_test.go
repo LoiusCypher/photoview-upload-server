@@ -33,7 +33,7 @@ func TestDatabase(t *testing.T) {
 	}
 	found, err := afero.Exists(fs, sqlPath)
 	if err != nil {
-		t.Fatal("db file check error: %v", err)
+		t.Fatalf("db file check error: %v", err)
 	}
 	if !found {
 		t.Error("db file was not created")
