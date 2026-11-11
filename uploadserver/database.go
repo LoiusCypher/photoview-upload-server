@@ -75,7 +75,7 @@ func SetDbPath( sqlPath string) *string {
 	return &dbPath
 }
 
-func initDb (sqlPath string) error {
+func initDb( sqlPath string) error {
 	// log.Printf("initDb: %s", sqlPath)
 	// os.Remove(sqlPath)
 	if err := os.MkdirAll(filepath.Dir(sqlPath), os.ModePerm); err != nil {
