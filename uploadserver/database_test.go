@@ -14,8 +14,8 @@ import (
 
 	"github.com/spf13/afero"
 */
-	"errors"
-	"os"
+	//"errors"
+	//"os"
 	"testing"
 	"github.com/spf13/afero"
 )
@@ -29,7 +29,7 @@ func TestDatabase(t *testing.T) {
 	}
 	
 	if db := openDb(); db == nil {
-		t.Fatalf("init did not create db: %v", err)
+		t.Fatalf("init did not create db")
 	}
 
 /*
