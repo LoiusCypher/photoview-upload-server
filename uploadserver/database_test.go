@@ -33,7 +33,7 @@ func TestDatabase(t *testing.T) {
 	if db := openDb(); db == nil {
 		t.Fatalf("init did not create db")
 	}
-	found, err := fs.Fs.Exists(sqlPath)
+	found, err := afero.Exists(sqlPath)
 	if err != nil {
 		t.Fatalf("db file check error: %v", err)
 	}
@@ -49,10 +49,10 @@ func TestDatabase(t *testing.T) {
 		t.Fatalf("sha list was expected to be empty first")
 	}
 	tmpPath := "/tmp"
-	if err := fs.MkdirAll( path.Dir(sqlPath), 0755); err != nil {
-		t.Fatalf("failed to create database folder: %v", err)
+	if err := fs.MkdirAll( path.Dir(tmpPath), 0755); err != nil {
+		t.Fatalf("failed to create temp folder: %v", err)
 	}
-	f, err := fs.TempFile( "/tmp", "*.pdf")
+	f, err := fs.TempFile( tmpPath, "*.pdf")
 	var cnt int
 	cnt, err = f.WriteString( "")
 	if err != nil {
@@ -67,7 +67,7 @@ func TestDatabase(t *testing.T) {
 	if err != nil {
 		t.Fatalf("error recording sha of empty file %v", err)
 	}
-	f, err = fs.TempFile( "/tmp", "*.pdf")
+	f, err = fs.TempFile( tmpPath, "*.pdf")
 	cnt, err = f.WriteString( "Hello")
 	if err != nil {
                 t.Fatalf("failed to create hello test file: %v", err)
