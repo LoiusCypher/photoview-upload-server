@@ -113,7 +113,7 @@ func TestDatabase(t *testing.T) {
 	}
 
 	w = httptest.NewRecorder()
-	found, err = GetPathSha( w, emptyFile_db_path) (bool, error) {
+	found, err = GetPathSha( w, emptyFile_db_path)
 	if err != nil {
 		t.Fatalf("error getting sha of empty file %v", err)
 	}
