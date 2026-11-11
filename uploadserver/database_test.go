@@ -27,7 +27,7 @@ func TestDatabase(t *testing.T) {
 	//if err := fs.MkdirAll("/sqlroot", 0755); err != nil {
 		t.Fatalf("failed to create database folder: %v", err)
 	}
-	if "/opt/app" != *SetDbPath("/opt/app") {
+	if *SetDbPath("/opt/app") != "/opt/app" {
 		t.Fatalf("set db path failed")
 	}
 	if db := openDb(); db == nil {
