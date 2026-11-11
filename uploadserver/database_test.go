@@ -14,7 +14,7 @@ import (
 */
 	//"errors"
 	"net/http/httptest"
-	"os"
+	//"os"
 	"path"
 	"testing"
 	"github.com/spf13/afero"
@@ -33,7 +33,7 @@ func TestDatabase(t *testing.T) {
 	if db := openDb(); db == nil {
 		t.Fatalf("init did not create db")
 	}
-	found, err := fs.Exists(sqlPath)
+	found, err := fs.Fs.Exists(sqlPath)
 	if err != nil {
 		t.Fatalf("db file check error: %v", err)
 	}
@@ -54,24 +54,32 @@ func TestDatabase(t *testing.T) {
 	}
 	f, err := fs.TempFile( "/tmp", "*.pdf")
 	var cnt int
-	cnt, err := f.WriteString( "")
+	cnt, err = f.WriteString( "")
 	if err != nil {
                 t.Fatalf("failed to create empty test file: %v", err)
 	}
 	if cnt != 0 {
                 t.Fatalf("empty test file is not empty:")
 	}
+	f.Close()
 	emptyFile_db_path := "arbitrary / file / path"
-	err = recordSha( emptyFile_path, emptyFile_db_path)
+	err = recordSha( tmpFile, emptyFile_db_path)
 	if err != nil {
-		t.Fatalf("error recording sha of empiy file %v", err)
+		t.Fatalf("error recording sha of empty file %v", err)
 	}
-/*
-	helloFile_path := "arbitrary / say / hello"
+	f, err = fs.TempFile( "/tmp", "*.pdf")
+	cnt, err = f.WriteString( "Hello")
+	if err != nil {
+                t.Fatalf("failed to create hello test file: %v", err)
+	}
+	if cnt != 5 {
+                t.Fatalf("empty hello file is not empty right size")
+	}
+	f.Close()
 	helloFile_db_path := "arbitrary / say / hello"
-	if err := afero.WriteFile(fs, helloFile_path), []byte("Hello"), 0644); err != nil {
-                t.Fatalf("failed to create empiy test file: %v", err)
+	err = recordSha( tmpFile, helloFile_db_path)
+	if err != nil {
+		t.Fatalf("error recording sha of hello file %v", err)
 	}
-*/
 }
 
