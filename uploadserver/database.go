@@ -66,6 +66,9 @@ func SetDbPath( sqlPath string) *string {
 		err := initDb( sqlPath)
 		if err == nil {
 			dbPath = sqlPath
+			log.Printf("success SetDbPath: %s %s\n", sqlPath, dbPath)
+		} else {
+			log.Printf("failed SetDbPath: %s %v\n", sqlPath, err)
 		}
 		return err
 	})

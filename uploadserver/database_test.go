@@ -35,11 +35,11 @@ func TestDatabase(t *testing.T) {
 	if err != nil {
 		t.Fatalf("db file check error: %v", err)
 	}
+	if ! found {
+		t.Fatalf("db file was not created")
+	}
 	if db := openDb(); db == nil {
 		t.Fatalf("init did not create db")
-	}
-	if ! found {
-		t.Fatalf("db file was not createb")
 	}
 	w := httptest.NewRecorder()
 	found, err = ListShas( w, "")
