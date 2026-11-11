@@ -48,6 +48,7 @@ func TestDatabase(t *testing.T) {
 	if found {
 		t.Fatalf("sha list was expected to be empty first")
 	}
+	w.Close()
 	tmpPath := "/tmp"
 	if err := fs.MkdirAll( path.Dir(tmpPath), 0755); err != nil {
 		t.Fatalf("failed to create temp folder: %v", err)
@@ -71,6 +72,15 @@ func TestDatabase(t *testing.T) {
 	if err != nil {
 		t.Fatalf("error recording sha of empty file %v", err)
 	}
+	w = httptest.NewRecorder()
+	found, err = ListShas( w, "")
+	if err != nil {
+		t.Fatalf("error reading sha list: %v", err)
+	}
+	if ! found {
+		t.Fatalf("sha list was expected to have an entry")
+	}
+	w.Close()
 	f, err = afero.TempFile( fs, tmpPath, "*.pdf")
 	if err != nil {
 		t.Fatalf("error creating temp file: %v", err)
