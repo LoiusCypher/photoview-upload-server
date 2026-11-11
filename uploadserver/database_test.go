@@ -52,7 +52,10 @@ func TestDatabase(t *testing.T) {
 	if err := fs.MkdirAll( path.Dir(tmpPath), 0755); err != nil {
 		t.Fatalf("failed to create temp folder: %v", err)
 	}
-	f, err := afero.TempFile( fs, tmpPath, "*.pdf")
+	f, err2 := afero.TempFile( fs, tmpPath, "*.pdf")
+	if err2 != nil {
+		t.Fatalf("error creating temp file: %v", err)
+	}
 	var cnt int
 	cnt, err = f.WriteString( "")
 	if err != nil {
@@ -69,6 +72,9 @@ func TestDatabase(t *testing.T) {
 		t.Fatalf("error recording sha of empty file %v", err)
 	}
 	f, err = afero.TempFile( fs, tmpPath, "*.pdf")
+	if err != nil {
+		t.Fatalf("error creating temp file: %v", err)
+	}
 	cnt, err = f.WriteString( "Hello")
 	if err != nil {
                 t.Fatalf("failed to create hello test file: %v", err)
