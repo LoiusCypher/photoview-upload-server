@@ -69,8 +69,8 @@ func TestDatabase(t *testing.T) {
 	tmpFilePath := f.Name()
 	// f.Close()
 	emptyFile_db_path := "arbitrary / file / path"
-	var sha string
-	sha, err = calcSha( tmpFilePath)
+	// var sha string
+	_, err = calcSha( tmpFilePath)
 	if err != nil {
 		t.Errorf("error calculating sha of empty file %v", err)
 	}
