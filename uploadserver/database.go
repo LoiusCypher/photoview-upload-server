@@ -61,7 +61,7 @@ func getDbPath() *string {
 	return &dbPath
 }
 
-func setDbPath( sqlPath string) *string {
+func SetDbPath( sqlPath string) *string {
 	setPathOnce.Do(func() error {
 		err := initDb( sqlPath)
 		if err == nil {
