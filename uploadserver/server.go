@@ -152,10 +152,6 @@ type SuccessFileInfosResult struct {
 	Files []FileInfo
 }
 
-func justOK() (int, any) {
-	return 0, nil
-}
-
 func (s *Server) handle(f func(w http.ResponseWriter, r *http.Request) (int, any)) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		status, result := f(w, r)
