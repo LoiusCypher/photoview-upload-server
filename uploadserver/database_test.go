@@ -122,6 +122,6 @@ func TestDatabase(t *testing.T) {
 	if ! found {
 		t.Fatalf("sha getting was expected to have an entry")
 	}
-	// found, err = listShas( w, "")
+	found, err = listShas( w, "")
 }
 

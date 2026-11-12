@@ -1,6 +1,6 @@
-module github.com/loiuscypher/photoview-upload-server
+module github.com/LoiusCypher/photoview-upload-server
 
-go 1.25.0
+go 1.27.0
 
 require (
 	dario.cat/mergo v1.0.2

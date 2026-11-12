@@ -4,17 +4,15 @@ photoview-upload-server
 Simple HTTP server to save artifacts
 
 - [Usage](#usage)
-- [Authentication](#authentication)
-- [TLS](#tls)
 - [Timeouts](#timeouts)
 - [Testing](#testing)
 - [API](#api)
-  - [`GET /filelist/:path`](#put-filespath)
-  - [`OPTIONS /filelist/:path`](#options-upload)
-  - [`PUT /files/:path`](#put-filespath)
-  - [`GET /files/:path`](#get-filespath)
-  - [`DELETE /files/:path`](#delete-filespath)
-  - [`OPTIONS /files/:path`](#options-filespath)
+  - [`GET /list?name=path`](#get-list)
+  - [`OPTIONS /list`](#options-list)
+  - [`PUT /file?name=path`](#put-file)
+  - [`GET /file?name=path`](#get-file)
+  - [`DELETE /file?name=path`](#delete-file)
+  - [`OPTIONS /file`](#options-file)
 
 
 ## Usage
@@ -53,7 +51,7 @@ Configurations via the arguments take precedence over those came from the config
 (Since v2.1.0)
 
 There are 2 timeout configurations: read and write.
-The terms "read" and "write" are from the server's perspective. From clients, they are "upload" (`POST`/`PUT`) and "download" (`GET`) respectively.
+The terms "read" and "write" are from the server's perspective. From clients, they are "upload" (`PUT`) and "get info" (`GET`) respectively.
 
 Read timeout (`-read_timeout`) is the maximum duration for the server reading the request.
 Clients should finish sending request headers and the entire content within this timeout.
@@ -96,7 +94,57 @@ $ docker compose -f docker-compose.e2e.yml down --rmi local --volumes
 
 ## API
 
-### `PUT /files/:path`
+### `GET /list?name=path`
+
+Request a list of uploaded files in the specified directory tree.
+
+#### Request
+
+Parameters:
+
+|  Name  | Required? |   Type   |     Description     | Default |
+| ------ | :-------: | -------- | ------------------- | ------- |
+| `path` |     x     | `string` | A path name filter. |         |
+
+#### Response
+
+##### On Successful
+
+Status Code
+: `200 OK`
+
+Content-Type
+: `application/json`
+
+Body
+
+Array of:
+
+|  Name  |   Type    |               Description               |
+| ------ | --------- | --------------------------------------- |
+| `path` | `string`  | A path to access this file in this API. |
+| `sha`  | `string`  | Sha256 of the uploaded file contents.   |
+
+##### On Failure
+
+Content-Type
+: `application/json`
+
+|   StatusCode    |          When          |
+| --------------- | ---------------------- |
+| `404 Not Found` | There is no such file. |
+
+#### Example
+
+```
+$ curl "http://localhost:25478/list"
+[{"path":"my files/foobar.txt","sha":"dbc08b031f67a6a5bf77a911a02542d91accb466750276452637ab050994547c"}
+ {"path":"my files/my samples/sample.txt","sha":"f982b83f83557bbb1d7d7e330a2c038137a1df0ff9462ff4eb7c8bacc020d971"}]
+
+$ curl --url-query "path=my files" "http://localhost:25478/list"
+[{"path":"my files/foobar.txt","sha":"dbc08b031f67a6a5bf77a911a02542d91accb466750276452637ab050994547c"}]
+
+### `PUT /file?name=path`
 
 Uploads a file. The original file name is ignored and the name is taken from the path in the request URL.
 
@@ -104,9 +152,8 @@ Uploads a file. The original file name is ignored and the name is taken from the
 
 |    Name     | Required? |   Type    |                    Description                     | Default |
 | ----------- | :-------: | --------- | -------------------------------------------------- | ------- |
-| `:path`     |     x     | `string`  | Path to the file.                                  |         |
-| `file`      |     x     | Form Data | A content of the file.                             |         |
-| `overwrite` |           | `boolean` | Allow overwriting the existing file on the server. | `false` |
+| `path`      |     x     | `string`  | Path to the file.                                  |         |
+| `file`      |     x     | Form Data | Content of the file.                               |         |
 
 #### Response
 
@@ -122,28 +169,24 @@ Body:
 
 |  Name  |   Type    |               Description               |
 | ------ | --------- | --------------------------------------- |
-| `ok`   | `boolean` | `true` if successful.                   |
 | `path` | `string`  | A path to access this file in this API. |
+| `sha`  | `string`  | Sha256 of the uploaded file contents.   |
 
 ##### On Failure
 
 |   StatusCode   |                                              When                                              |
 | -------------- | ---------------------------------------------------------------------------------------------- |
-| `409 Conflict` | There is the file whose name is the same as the uploading file and overwriting is not allowed. |
+|                |                                                                                                |
 
 #### Example
 
 ```
-$ curl -XPUT -Ffile=@sample.txt "http://localhost:25478/files/foobar.txt"
-{"ok":true,"path":"/files/foobar.txt"}
+$ curl -XPUT -Ffile=@examples/sample.txt --url-query "path=my files/foobar.txt" "http://localhost:25478/file"
+{"path":"my files/foobar.txt","sha":"dbc08b031f67a6a5bf77a911a02542d91accb466750276452637ab050994547c"}
 
-$ cat $DOCROOT/foobar.txt
-Hello, world!
-```
+### `GET /file?name=path`
 
-### `GET /files/:path`
-
-Downloads a file.
+Check if file was uploaded before and get its sha256 sum if so.
 
 #### Request
 
@@ -161,10 +204,14 @@ Status Code
 : `200 OK`
 
 Content-Type
-: Depends on the content.
+: `application/json`
 
 Body
-: The content of the request file.
+
+|  Name  |   Type    |               Description               |
+| ------ | --------- | --------------------------------------- |
+| `path` | `string`  | A path to access this file in this API. |
+| `sha`  | `string`  | Sha256 of the uploaded file contents.   |
 
 ##### On Failure
 
@@ -178,11 +225,10 @@ Content-Type
 #### Example
 
 ```
-$ curl http://localhost:25478/files/sample.txt
-Hello, world!
-```
+$ curl --url-query "name=my files/foobar.txt" "http://localhost:25478/file"
+{"path":"my files/foobar.txt","sha":"dbc08b031f67a6a5bf77a911a02542d91accb466750276452637ab050994547c"}
 
-### `DELTE /files/:path`
+### `DELETE /file?name=path`
 
 Deletes a file. The name is taken from the path in the request URL.
 
@@ -190,7 +236,7 @@ Deletes a file. The name is taken from the path in the request URL.
 
 |    Name     | Required? |   Type    |                    Description                     | Default |
 | ----------- | :-------: | --------- | -------------------------------------------------- | ------- |
-| `:path`     |     x     | `string`  | Path to the file.                                  |         |
+| `path`      |     x     | `string`  | Path to the file.                                  |         |
 
 #### Response
 
@@ -206,7 +252,6 @@ Body:
 
 |  Name  |   Type    |               Description               |
 | ------ | --------- | --------------------------------------- |
-| `ok`   | `boolean` | `true` if successful.                   |
 | `path` | `string`  | A path to access this file in this API. |
 
 ##### On Failure
@@ -218,45 +263,11 @@ Body:
 #### Example
 
 ```
-$ curl -XDELETE "http://localhost:25478/files/foobar.txt"
-{"ok":true,"path":"/files/foobar.txt"}
+$ curl -X DELETE --url-query "path=my files/foobar.txt" "http://localhost:25478/file"
+{"path":"my files/foobar.txt"}
 
-### `HEAD /files/:path`
-
-Check existence of a file.
-
-#### Request
-
-Parameters:
-
-|  Name  | Required? |   Type   |     Description     | Default |
-| ------ | :-------: | -------- | ------------------- | ------- |
-| `path` |     x     | `string` | A path to the file. |         |
-
-#### Response
-
-##### On Successful
-
-Status Code
-: `200 OK`
-
-Body
-: Not Available
-
-##### On Failure
-
-|   StatusCode   |                                              When                                              |
-| -------------- | ---------------------------------------------------------------------------------------------- |
-| `404 Not Found` | No such file on the server. |
-
-#### Example
-
-```
-$ curl -I http://localhost:25478/files/foobar.txt
-```
-
-### `OPTIONS /files/:path`
-### `OPTIONS /filelist/:path`
+### `OPTIONS /file`
+### `OPTIONS /list`
 
 CORS preflight request.
 

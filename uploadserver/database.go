@@ -4,11 +4,9 @@ import (
 	"crypto/sha256"
 	"database/sql"
 	"encoding/hex"
-	//"errors"
 	"fmt"
 	"io"
 	"log"
-	"net/http"
 	"os"
 	"path/filepath"
 	"sync"
@@ -129,64 +127,68 @@ func openDb() *sql.DB {
 	return db
 }
 
-func listShas( w http.ResponseWriter, listPath string) ( bool, error) {
-	log.Printf("ListShas: %s\n", listPath)
+type FileInfo struct {
+	Path string `json:"path"`
+	Sha  string `json:"sha"`
+}
+
+func listShas( listPath string) ( []FileInfo, error) {
+	log.Printf("listShas: %s\n", listPath)
+	var fileInfos []FileInfo
 	shaDb := openDb()
 	if shaDb == nil {
-		return false, fmt.Errorf("openDb failed")
+		return fileInfos, fmt.Errorf("openDb failed")
 	}
 	defer shaDb.Close()
 	rows, err := shaDb.Query("SELECT sha, path FROM shafiles WHERE path LIKE ? ORDER BY path", listPath + "%")
 	if err != nil {
 		log.Println( fmt.Errorf("query: %v", err))
-		return false, err
+		return fileInfos, err
 	}
 	defer rows.Close()
-	found := false
 	for rows.Next() {
-		var sha, path string
-		err = rows.Scan(&sha, &path)
+		var fileInfo FileInfo
+		err = rows.Scan(&fileInfo.Sha, &fileInfo.Path)
 		if err != nil {
 			log.Println( fmt.Errorf("query: %v", err))
-			return false, err
+			return fileInfos, err
 		}
-		// log.Printf("DB LIST %s: %s", sha, path)
-		fmt.Fprintln(w, sha, path)
-		found = true
+		// log.Printf("DB LIST %s: %s", fileInfo.Sha, fileInfo.Path)
+		fileInfos = append( fileInfos, fileInfo)
+		// fmt.Fprintln(w, fileInfo.Sha, fileInfo.Path)
 	}
 	if err = rows.Err(); err != nil {
 		log.Println( fmt.Errorf("query: %v", err))
-		return false, err
+		return fileInfos, err
 	}
-	return found, nil
+	return fileInfos, nil
 }
 
-func getPathSha(w http.ResponseWriter, reqPath string) (bool, error) {
-	// log.Printf("GetPathSha: %s\n", reqPath)
+func getPathSha( reqPath string) ( string, error) {
+	// log.Printf("getPathSha: %s\n", reqPath)
 	shaDb := openDb()
 	if shaDb == nil {
-		return false, fmt.Errorf("openDb failed")
+		return "", fmt.Errorf("openDb failed")
 	}
 	defer shaDb.Close()
 	var sha string
 	if err := shaDb.QueryRow("SELECT sha FROM shafiles WHERE path = ?;", reqPath).Scan(&sha); err != nil {
 		if err == sql.ErrNoRows {
-			return false, nil
-		  	}
-		return false, err
+			return "", nil
+		}
+		return "", err
 	}
-	fmt.Fprintln(w, sha)
-	// log.Printf("GetPathSha: %s\n", sha)
-	return true, nil
+	// log.Printf("getPathSha: %s\n", sha)
+	return sha, nil
 }
 
 func recordSha(filePath string, registerPath string) ( string, error) {
-	pdfSha, err := calcSha(filePath)
+	fileSha, err := calcSha(filePath)
 	if err != nil {
 		log.Printf("making calcSha: %v\n", err)
 		return "", err
 	}
-	// log.Println("file hash", filePath, ": ", pdfSha)
+	// log.Println("file hash", filePath, ": ", fileSha)
 	shaDb := openDb()
 	if shaDb == nil {
 		return "", fmt.Errorf("openDb failed")
@@ -197,7 +199,7 @@ func recordSha(filePath string, registerPath string) ( string, error) {
 		log.Fatal(err)
 		return "", err
 	}
-	_, err = tx.Exec("INSERT OR REPLACE INTO shafiles(sha, path) VALUES(?, ?)", pdfSha, registerPath)
+	_, err = tx.Exec("INSERT OR REPLACE INTO shafiles(sha, path) VALUES(?, ?)", fileSha, registerPath)
 	if err != nil {
 		log.Fatal(err)
 		return "", err
@@ -207,31 +209,35 @@ func recordSha(filePath string, registerPath string) ( string, error) {
 		log.Fatal(err)
 		return "", err
 	}
-	return pdfSha, nil
+	return fileSha, nil
 }
 
-func deleteSha(registerPath string) error {
+func deleteSha(registerPath string) ( string, error) {
 	log.Printf("deleteSha: %s", registerPath)
 	shaDb := openDb()
 	if shaDb == nil {
-		return fmt.Errorf("openDb failed")
+		return "", fmt.Errorf("openDb failed")
 	}
 	defer shaDb.Close()
 	tx, err := shaDb.Begin()
 	if err != nil {
 		log.Fatal(err)
-		return err
+		return "", err
 	}
-	_, err = tx.Exec("DELETE FROM shafiles WHERE path = ?", registerPath)
-	if err != nil {
+	var sha string
+	if err := tx.QueryRow("DELETE FROM shafiles WHERE path = ? RETURNING sha", registerPath).Scan(&sha); err != nil {
+		if err == sql.ErrNoRows {
+			return "", nil
+		}
 		log.Fatal(err)
-		return err
+		return "", err
 	}
 	err = tx.Commit()
 	if err != nil {
 		log.Fatal(err)
+		return "", err
 	}
-	return nil
+	return sha, nil
 }
 
 func calcSha(filePath string) (string, error) {

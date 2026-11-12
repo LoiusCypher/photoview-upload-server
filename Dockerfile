@@ -11,13 +11,17 @@ RUN apt update
 RUN apt install --no-install-recommends -y ghostscript sqlite3
 COPY go.mod go.sum ./
 #RUN go get ./photoviewuploadserver
-#RUN go get github.com/loiuscypher/photoview-upload-server/photoviewuploadserver
+#RUN go get github.com/LoiusCypher/photoview-upload-server
+RUN go get encoding/json/v2
+RUN go clean -modcache
 RUN go mod download
+RUN go mod tidy
 RUN cat go.mod go.sum
 
 # copy other sources & build
 COPY . /go/src/app
 RUN GOOS=linux GOARCH=${ARCH} CGO_ENABLED=1 go build -o /go/bin/app
+RUN cat go.mod go.sum
 
 # # hadolint ignore=DL3007 # distroless does not provide fixed tag.
 # FROM gcr.io/distroless/static-debian13:latest

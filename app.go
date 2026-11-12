@@ -15,7 +15,7 @@ import (
 	"time"
 
 	"dario.cat/mergo"
-	"github.com/loiuscypher/photoview-upload-server/uploadserver" 
+	"github.com/LoiusCypher/photoview-upload-server/uploadserver" 
 )
 
 var DefaultConfig = ServerConfig{
