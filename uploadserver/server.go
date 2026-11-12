@@ -267,7 +267,7 @@ func (s *Server) handleListGet(w http.ResponseWriter, r *http.Request) (int, any
 	requestPath := strings.TrimPrefix(r.URL.Path, "/filelist")
 	requestPath = strings.TrimPrefix(requestPath, "/")
 	log.Printf("GET %s -> %s", r.URL.Path, requestPath)
-	found, err := ListShas(w, requestPath)
+	found, err := listShas(w, requestPath)
 	if err != nil {
 		return http.StatusInternalServerError, err
 	}
@@ -284,7 +284,7 @@ func (s *Server) handleListGet(w http.ResponseWriter, r *http.Request) (int, any
 func (s *Server) handleGet(w http.ResponseWriter, r *http.Request) (int, any) {
 	requestPath := strings.TrimPrefix(r.URL.Path, "/files/")
 	log.Printf("GET %s -> %s", r.URL.Path, requestPath)
-	found, err := GetPathSha(w, requestPath)
+	found, err := getPathSha(w, requestPath)
 	if err != nil {
 		return http.StatusInternalServerError, err
 	}

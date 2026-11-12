@@ -43,10 +43,9 @@ func TestDatabase(t *testing.T) {
 	if db := openDb(); db == nil {
 		t.Fatalf("init did not create db")
 	}
-	db.Close()
 	// =========================================Add a file
 	w := httptest.NewRecorder()
-	found, err = ListShas( w, "")
+	found, err = listShas( w, "")
 	if err != nil {
 		t.Fatalf("error reading sha list: %v", err)
 	}
@@ -88,7 +87,7 @@ func TestDatabase(t *testing.T) {
 	}
 	// =========================================dd a file
 	w = httptest.NewRecorder()
-	found, err = ListShas( w, "")
+	found, err = listShas( w, "")
 	if err != nil {
 		t.Fatalf("error reading sha list: %v", err)
 	}
@@ -116,13 +115,13 @@ func TestDatabase(t *testing.T) {
 	}
 	// =========================================
 	w = httptest.NewRecorder()
-	found, err = GetPathSha( w, emptyFile_db_path)
+	found, err = getPathSha( w, emptyFile_db_path)
 	if err != nil {
 		t.Fatalf("error getting sha of empty file %v", err)
 	}
 	if ! found {
 		t.Fatalf("sha getting was expected to have an entry")
 	}
-	// found, err = ListShas( w, "")
+	// found, err = listShas( w, "")
 }
 

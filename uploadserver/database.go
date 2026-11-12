@@ -129,7 +129,7 @@ func openDb() *sql.DB {
 	return db
 }
 
-func ListShas( w http.ResponseWriter, listPath string) ( bool, error) {
+func listShas( w http.ResponseWriter, listPath string) ( bool, error) {
 	log.Printf("ListShas: %s\n", listPath)
 	shaDb := openDb()
 	if shaDb == nil {
@@ -161,7 +161,7 @@ func ListShas( w http.ResponseWriter, listPath string) ( bool, error) {
 	return found, nil
 }
 
-func GetPathSha(w http.ResponseWriter, reqPath string) (bool, error) {
+func getPathSha(w http.ResponseWriter, reqPath string) (bool, error) {
 	// log.Printf("GetPathSha: %s\n", reqPath)
 	shaDb := openDb()
 	if shaDb == nil {
