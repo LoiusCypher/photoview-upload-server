@@ -45,7 +45,7 @@ func TestDatabase(t *testing.T) {
 	}
 	// =========================================Add a file
 	var fileInfos []FileInfo
-	fileInfo, err = listShas( "")
+	fileInfos, err = listShas( "")
 	if err != nil {
 		t.Fatalf("error reading sha list: %v", err)
 	}
@@ -113,11 +113,12 @@ func TestDatabase(t *testing.T) {
 		t.Fatalf("error recording sha of hello file %v", err)
 	}
 	// =========================================
-	fileInfos, err = getPathSha( emptyFile_db_path)
+	var sha string
+	sha, err = getPathSha( emptyFile_db_path)
 	if err != nil {
 		t.Fatalf("error getting sha of empty file %v", err)
 	}
-	if len(fileInfos) != 1 {
+	if sha != "" {
 		t.Fatalf("sha getting was expected to have an entry")
 	}
 	fileInfos, err = listShas( "")

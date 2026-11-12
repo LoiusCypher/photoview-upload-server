@@ -103,7 +103,7 @@ func TestGetHandler(t *testing.T) {
 			}
 
 			rr := httptest.NewRecorder()
-			handler := http.HandlerFunc(server.handle(server.handleGet))
+			handler := http.HandlerFunc(server.handle(server.handleFileGet))
 			handler.ServeHTTP(rr, req)
 
 			if status := rr.Code; status != tt.want {
@@ -239,7 +239,7 @@ func TestServer_PutHandler(t *testing.T) {
 			req.Header.Set("Content-Type", w.FormDataContentType())
 
 			rr := httptest.NewRecorder()
-			handler := http.HandlerFunc(server.handle(server.handlePut))
+			handler := http.HandlerFunc(server.handle(server.handleFilePut))
 			handler.ServeHTTP(rr, req)
 
 			if status := rr.Code; status != tt.want {
