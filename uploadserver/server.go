@@ -371,10 +371,11 @@ var allowedMethodsFile = []string{http.MethodGet, http.MethodPut, http.MethodDel
 
 func (s *Server) handleOptions(w http.ResponseWriter, r *http.Request) (int, any) {
 	var allowedMethods []string
-	if r.URL.Path == "/list" {
-		allowedMethods = allowedMethodsList
-	} else if r.URL.Path == "/file" {
-		allowedMethods = allowedMethodsFile
+	switch r.URL.Path {
+		case "/list":
+			allowedMethods = allowedMethodsList
+		case "/file":
+			allowedMethods = allowedMethodsFile
 	}
 	if s.EnableCORS {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -385,10 +386,11 @@ func (s *Server) handleOptions(w http.ResponseWriter, r *http.Request) (int, any
 
 func handleMethodNotAllowed(w http.ResponseWriter, r *http.Request) {
 	var allowedMethods []string
-	if r.URL.Path == "/list" {
-		allowedMethods = allowedMethodsList
-	} else if r.URL.Path == "/file" {
-		allowedMethods = allowedMethodsFile
+	switch r.URL.Path {
+		case "/list":
+			allowedMethods = allowedMethodsList
+		case "/file":
+			allowedMethods = allowedMethodsFile
 	}
 	w.Header().Set("Allow", strings.Join(allowedMethods, ", "))
 	resp := ErrorResult{false, fmt.Sprintf("%s is not allowed on %s", r.Method, r.URL.Path)}
