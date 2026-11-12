@@ -13,7 +13,7 @@ import (
 	"github.com/spf13/afero"
 */
 	//"errors"
-	"net/http/httptest"
+	//"net/http/httptest"
 	//"os"
 	"path"
 	"testing"
@@ -44,12 +44,12 @@ func TestDatabase(t *testing.T) {
 		t.Fatalf("init did not create db")
 	}
 	// =========================================Add a file
-	w := httptest.NewRecorder()
-	found, err = listShas( w, "")
+	var fileInfos []FileInfo
+	fileInfo, err = listShas( "")
 	if err != nil {
 		t.Fatalf("error reading sha list: %v", err)
 	}
-	if found {
+	if len(fileInfos) !=0 {
 		t.Fatalf("sha list was expected to be empty first")
 	}
 	// w.Close()
@@ -86,12 +86,11 @@ func TestDatabase(t *testing.T) {
 		t.Errorf("sha shoul be same %s %s", shaCalc, shaRec)
 	}
 	// =========================================dd a file
-	w = httptest.NewRecorder()
-	found, err = listShas( w, "")
+	fileInfos, err = listShas( "")
 	if err != nil {
 		t.Fatalf("error reading sha list: %v", err)
 	}
-	if ! found {
+	if len(fileInfos) != 1 {
 		t.Fatalf("sha list was expected to have an entry")
 	}
 	// w.Close()
@@ -114,14 +113,19 @@ func TestDatabase(t *testing.T) {
 		t.Fatalf("error recording sha of hello file %v", err)
 	}
 	// =========================================
-	w = httptest.NewRecorder()
-	found, err = getPathSha( w, emptyFile_db_path)
+	fileInfos, err = getPathSha( emptyFile_db_path)
 	if err != nil {
 		t.Fatalf("error getting sha of empty file %v", err)
 	}
-	if ! found {
+	if len(fileInfos) != 1 {
 		t.Fatalf("sha getting was expected to have an entry")
 	}
-	found, err = listShas( w, "")
+	fileInfos, err = listShas( "")
+	if err != nil {
+		t.Fatalf("error reading sha list: %v", err)
+	}
+	if len(fileInfos) != 2 {
+		t.Fatalf("sha list was expected to have two entries")
+	}
 }
 

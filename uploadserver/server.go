@@ -148,8 +148,8 @@ type ErrorResult struct {
 }
 
 type SuccessFileInfosResult struct {
-	OK   bool   `json:"ok"`
-	Infos []FileInfo
+	OK    bool   `json:"ok"`
+	Files []FileInfo
 }
 
 func justOK() (int, any) {
