@@ -43,7 +43,6 @@ func TestDatabase(t *testing.T) {
 	if db := openDb(); db == nil {
 		t.Fatalf("init did not create db")
 	}
-	// =========================================Add a file
 	var fileInfos []FileInfo
 	fileInfos, err = listShas( "")
 	if err != nil {
@@ -52,11 +51,11 @@ func TestDatabase(t *testing.T) {
 	if len(fileInfos) !=0 {
 		t.Fatalf("sha list was expected to be empty first")
 	}
-	// w.Close()
 	tmpPath := "/tmp"
 	if err := fs.MkdirAll( path.Dir(tmpPath), 0755); err != nil {
 		t.Fatalf("failed to create temp folder: %v", err)
 	}
+	// =========================================Add a file
 	f, err2 := afero.TempFile( fs, tmpPath, "*.pdf")
 	if err2 != nil {
 		t.Fatalf("error creating temp file: %v", err)
@@ -85,7 +84,6 @@ func TestDatabase(t *testing.T) {
 	if shaCalc != shaRec {
 		t.Errorf("sha shoul be same %s %s", shaCalc, shaRec)
 	}
-	// =========================================dd a file
 	fileInfos, err = listShas( "")
 	if err != nil {
 		t.Fatalf("error reading sha list: %v", err)
@@ -93,7 +91,7 @@ func TestDatabase(t *testing.T) {
 	if len(fileInfos) != 1 {
 		t.Fatalf("sha list was expected to have an entry")
 	}
-	// w.Close()
+	// =========================================dd a file
 	f, err = afero.TempFile( fs, tmpPath, "*.pdf")
 	if err != nil {
 		t.Fatalf("error creating temp file: %v", err)
@@ -112,13 +110,12 @@ func TestDatabase(t *testing.T) {
 	if err != nil {
 		t.Fatalf("error recording sha of hello file %v", err)
 	}
-	// =========================================
 	var sha string
-	sha, err = getPathSha( emptyFile_db_path)
+	sha, err = getPathSha( helloFile_db_path)
 	if err != nil {
 		t.Fatalf("error getting sha of empty file %v", err)
 	}
-	if sha != "" {
+	if sha == "" {
 		t.Fatalf("sha getting was expected to have an entry")
 	}
 	fileInfos, err = listShas( "")
@@ -128,5 +125,6 @@ func TestDatabase(t *testing.T) {
 	if len(fileInfos) != 2 {
 		t.Fatalf("sha list was expected to have two entries")
 	}
+	// =========================================
 }
 
