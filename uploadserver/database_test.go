@@ -21,6 +21,7 @@ import (
 )
 
 func TestDatabase(t *testing.T) {
+	// =========================================Setup Database
 	// sqlPath := "/sqlroot/shafiles.db"
 	//fs := afero.NewMemMapFs()
 	fs := afero.NewOsFs()
@@ -42,6 +43,8 @@ func TestDatabase(t *testing.T) {
 	if db := openDb(); db == nil {
 		t.Fatalf("init did not create db")
 	}
+	db.Close()
+	// =========================================Add a file
 	w := httptest.NewRecorder()
 	found, err = ListShas( w, "")
 	if err != nil {
@@ -83,7 +86,7 @@ func TestDatabase(t *testing.T) {
 	if shaCalc != shaRec {
 		t.Errorf("sha shoul be same %s %s", shaCalc, shaRec)
 	}
-
+	// =========================================dd a file
 	w = httptest.NewRecorder()
 	found, err = ListShas( w, "")
 	if err != nil {
@@ -111,7 +114,7 @@ func TestDatabase(t *testing.T) {
 	if err != nil {
 		t.Fatalf("error recording sha of hello file %v", err)
 	}
-
+	// =========================================
 	w = httptest.NewRecorder()
 	found, err = GetPathSha( w, emptyFile_db_path)
 	if err != nil {

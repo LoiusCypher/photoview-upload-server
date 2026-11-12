@@ -9,6 +9,6 @@ services:
       - "8080:8080"
     volumes:
       - .:/go/src/app
-      - ./_container_data/docroot:/docroot
+      - ./_container_data/jpgroot:/jpgroot
       - ./_container_data/sqlroot:/sqlroot
-    command: -document_root=/docroot -addr=:8080 -max_upload_size 10485760
+    command: -document_root=/jpgroot -addr=:8080 -max_upload_size 10485760

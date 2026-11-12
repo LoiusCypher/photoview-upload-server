@@ -195,22 +195,9 @@ func (s *Server) handlePut(w http.ResponseWriter, r *http.Request) (int, any) {
 	path := strings.TrimPrefix(r.URL.Path, "/files/")
 
 	log.Printf("PUT %s -> %s", r.URL.Path, path)
-	status, pdfPath, err := s.processUpload(w, r, path)
+	status, sha, err := s.processUpload(w, r, path)
 	if err != nil {
 		return status, err
-	}
-	err = convertPdfToJpg( pdfPath, s.DocumentRoot, path)
-	if err != nil {
-		return http.StatusInternalServerError, err
-	}
-	var sha string
-	sha, err = recordSha( pdfPath, path)
-	if err != nil {
-		return http.StatusInternalServerError, err
-	}
-	err = os.Remove(pdfPath)
-	if err != nil {
-		return http.StatusInternalServerError, err
 	}
 	if s.EnableCORS {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -237,12 +224,12 @@ func (s *Server) handleDelete(w http.ResponseWriter, r *http.Request) (int, any)
 }
 
 func (s *Server) processUpload(w http.ResponseWriter, r *http.Request, path string) (int, string, error) {
-	srcFile, _, err := r.FormFile(FormFileKey)
-	log.Printf("processUpload file: %s", srcFile)
+	srcFile, srcHeader, err := r.FormFile(FormFileKey)
 	if err != nil {
 		log.Printf("failed to obtain form file: %v", err)
 		return http.StatusInternalServerError, "", fmt.Errorf("cannot obtain the uploaded content")
 	}
+	log.Printf("processUpload file: %s", srcHeader.Filename)
 	src := http.MaxBytesReader(w, srcFile, s.MaxUploadSize)
 	// MaxBytesReader closes the underlying io.Reader on its Close() is called
 	defer src.Close()
@@ -253,7 +240,7 @@ func (s *Server) processUpload(w http.ResponseWriter, r *http.Request, path stri
 		return http.StatusInternalServerError, "", fmt.Errorf("cannot open file")
 	}
 	defer os.Remove(dstFile.Name())
-	log.Printf("processUpload dstFile: %s", dstFile.Name)
+	log.Printf("processUpload dstFile: %s", dstFile.Name())
 	written, err := io.Copy(dstFile, src)
 	if err != nil {
 		var maxBytesError *http.MaxBytesError
@@ -264,10 +251,16 @@ func (s *Server) processUpload(w http.ResponseWriter, r *http.Request, path stri
 		return http.StatusInternalServerError, "", fmt.Errorf("failed to write the content")
 	}
 	log.Printf("uploaded by PUT to %s (%d bytes)", dstFile.Name(), written)
-	if s.EnableCORS {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
+	err = convertPdfToJpg( dstFile.Name(), s.DocumentRoot, path)
+	if err != nil {
+		return http.StatusInternalServerError, "", err
 	}
-	return http.StatusCreated, dstFile.Name(), nil
+	var sha string
+	sha, err = recordSha( dstFile.Name(), path)
+	if err != nil {
+		return http.StatusInternalServerError, "", err
+	}
+	return http.StatusCreated, sha, nil
 }
 
 func (s *Server) handleListGet(w http.ResponseWriter, r *http.Request) (int, any) {
