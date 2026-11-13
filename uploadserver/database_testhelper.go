@@ -3,6 +3,7 @@ package uploadserver
 import (
 	// "context"
 	"database/sql"
+	"path/filepath"
 	"testing"
 	"github.com/spf13/afero"
 
@@ -34,7 +35,8 @@ func CreateDatabase_TestHelper(t *testing.T) *sql.DB {
 	if !found {
 		t.Error("db file was not created")
 	}
-	if db := openDb(); db == nil {
+	db := openDb()
+	if db == nil {
 		t.Fatalf("init did not create db")
 	}
 	// =========================================Setup Database
