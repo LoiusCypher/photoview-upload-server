@@ -20,7 +20,7 @@ import (
 )
 
 func TestDatabase(t *testing.T) {
-	db := sqltest.CreateDatabase( t)
+	db := CreateDatabase_TestHelper( t)
 /*
 	// =========================================Setup Database
 	// sqlPath := "/sqlroot/shafiles.db"
