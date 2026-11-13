@@ -58,7 +58,7 @@ func TestDatabase(t *testing.T) {
 	DeleteFile_TestHelper( t, emptyFile_db_dir, emptyFile_db_path, sha_empty, 2, 0)
 	// ========================================Check tat we con overwrite
 	tmpFilePath_hello2 := CreateFile_TestHelper( t, fs, tmpPath, "*.pdf", "Hello 2")
-	sha_hello2 := RecordFile_TestHelper( t, tmpFilePath_hello2, helloFile_db_dir, helloFile_db_path, 2, 1)
+	sha_hello2 := RecordFile_TestHelper( t, tmpFilePath_hello2, helloFile_db_dir, helloFile_db_path, 2, 2)
 	assert.NotEqual( t, sha_hello, sha_hello2)
 	// =========================================
 }
