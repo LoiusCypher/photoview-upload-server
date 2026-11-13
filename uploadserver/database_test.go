@@ -9,8 +9,6 @@ import (
 	"path/filepath"
 	"reflect"
 	"strings"
-
-	"github.com/spf13/afero"
 */
 	//"errors"
 	//"net/http/httptest"
@@ -18,9 +16,13 @@ import (
 	"path"
 	"testing"
 	"github.com/spf13/afero"
+	"github.com/LoiusCypher/photoview-upload-server/sqltest"
 )
 
 func TestDatabase(t *testing.T) {
+)
+	db := sqltest.CreateDatabase( t)
+/*
 	// =========================================Setup Database
 	// sqlPath := "/sqlroot/shafiles.db"
 	//fs := afero.NewMemMapFs()
@@ -43,6 +45,7 @@ func TestDatabase(t *testing.T) {
 	if db := openDb(); db == nil {
 		t.Fatalf("init did not create db")
 	}
+*/
 	var fileInfos []FileInfo
 	fileInfos, err = listShas( "")
 	if err != nil {

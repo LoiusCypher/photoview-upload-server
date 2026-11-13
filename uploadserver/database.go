@@ -86,6 +86,12 @@ func initDb( sqlPath string) error {
 		return err
 	}
 	defer db.Close()
+	var version string
+	err = db.QueryRow("SELECT SQLITE_VERSION()").Scan(&version)
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Println("Sqlite", version)
 	sqlStmt := `CREATE TABLE IF NOT EXISTS shafiles (id INTEGER PRIMARY KEY AUTOINCREMENT, sha CHARACTER(64) NOT NULL, path TEXT UNIQUE NOT NULL);`
 	_, err = db.Exec(sqlStmt)
 	if err != nil {
