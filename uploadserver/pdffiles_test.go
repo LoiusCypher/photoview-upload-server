@@ -30,13 +30,13 @@ func TestPdfFiles(t *testing.T) {
 	err := fs.MkdirAll( pdfRoot, 0777)
 	assert.Nil( t, err)
 	jpgRoot := "/opt/app/jpgs"
-	// jpgRoot := "/tmp"
+	 jpgRoot := "/tmp"
 	// err = fs.MkdirAll( jpgRoot, 0755)
 	err = fs.MkdirAll( jpgRoot, 0777)
 	assert.Nil( t, err)
 	// =========================================convert a file
-	// pdfPath_Empty := pdfRoot + "/" + "uploadedEmpty.pdf"
-	pdfPath_Empty := pdfRoot + "/" + "upempty.pdf"
+	pdfPath_Empty := pdfRoot + "/" + "uploadedEmpty.pdf"
+	// pdfPath_Empty := pdfRoot + "/" + "upempty.pdf"
 	CreatePdf_TestHelper( t, "", pdfPath_Empty)
 	// jpgPath_Empty := "path/subdir/" + "Empty.pdf"
 	jpgPath_Empty := "" + "xmpty.pdf"
