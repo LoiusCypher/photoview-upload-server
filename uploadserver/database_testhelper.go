@@ -2,9 +2,9 @@ package uploadserver
 
 import (
 	// "context"
+	"database/sql"
 	"testing"
 	"github.com/spf13/afero"
-	_ "github.com/mattn/go-sqlite3"
 
 	// "github.com/maragudk/env"
 )
