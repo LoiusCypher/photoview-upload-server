@@ -35,6 +35,7 @@ func CreateDatabase_TestHelper(t *testing.T) *sql.Database {
 	}
 	if db := openDb(); db == nil {
 		t.Fatalf("init did not create db")
+	}
 	// =========================================Setup Database
 
 	// if err := db.MigrateUp(context.Background()); err != nil {
