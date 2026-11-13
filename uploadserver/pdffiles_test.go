@@ -24,10 +24,10 @@ func TestPdfFiles(t *testing.T) {
 	fs := afero.NewOsFs()
 	//var fileInfos []FileInfo
 	// =========================================Add a file
-	pdfRoot := "/pdfs"
+	pdfRoot := "/opt/app/pdfs"
 	err := fs.MkdirAll( pdfRoot, 0755)
 	assert.Nil( t, err)
-	jpgRoot := "/jpgs"
+	jpgRoot := "/opt/app/jpgs"
 	err = fs.MkdirAll( jpgRoot, 0755)
 	assert.Nil( t, err)
 	// =========================================convert a file
