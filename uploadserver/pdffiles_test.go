@@ -25,7 +25,7 @@ func TestPdfFiles(t *testing.T) {
 	//var fileInfos []FileInfo
 	// =========================================Add a file
 	pdfRoot := "/pdfs"
-	err = fs.MkdirAll( pdfRoot, 0755)
+	err := fs.MkdirAll( pdfRoot, 0755)
 	assert.Nil( t, err)
 	jpgRoot := "/jpgs"
 	err = fs.MkdirAll( jpgRoot, 0755)
