@@ -19,12 +19,12 @@ import (
 )
 
 func TestDatabase(t *testing.T) {
-	db := CreateDatabase_TestHelper( t)
-/*
+	_ := CreateDatabase_TestHelper( t)
 	// =========================================Setup Database
 	// sqlPath := "/sqlroot/shafiles.db"
 	//fs := afero.NewMemMapFs()
 	fs := afero.NewOsFs()
+/*
 	sqlPath := "/opt/app/shafiles.db"
 	if err := fs.MkdirAll( path.Dir(sqlPath), 0755); err != nil {
 		t.Fatalf("failed to create database folder: %v", err)
