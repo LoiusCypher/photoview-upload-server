@@ -23,24 +23,14 @@ func CreateDatabase_TestHelper(t *testing.T) {
 	//fs := afero.NewMemMapFs()
 	fs := afero.NewOsFs()
 	sqlPath := "/opt/app/shafiles.db"
-	if err := fs.MkdirAll( path.Dir(sqlPath), 0755); err != nil {
-		t.Fatalf("failed to create database folder: %v", err)
-	}
+	err1 := fs.MkdirAll( path.Dir(sqlPath), 0755)
+	assert.Nil( t, err1)
 	dbPath := *SetDbPath(sqlPath)
-	if dbPath != sqlPath {
-		t.Fatalf("set db path failed %s", dbPath)
-	}
-	found, err := afero.Exists(fs, sqlPath)
-	if err != nil {
-		t.Fatalf("db file check error: %v", err)
-	}
-	if !found {
-		t.Error("db file was not created")
-	}
+	assert.Equal( t, dbPath, sqlPath)
+	found, err2 := afero.Exists(fs, sqlPath)
+	assert.Nil( t, err2)
 	db := openDb()
-	if db == nil {
-		t.Fatalf("init did not create db")
-	}
+	assert.NotNil( t, db)
 	defer db.Close()
 	// =========================================Setup Database
 
@@ -60,4 +50,33 @@ func CreateFile_TestHelper(t *testing.T, fs afero.FS, tmpPath string, fileName s
 	tmpFilePath := f.Name()
 	f.Close()
 	return tmpFilePath
-=
+}
+
+func RecordFile_TestHelper(t *testing.T, tmpFilePath string, dir_db_path string, record_db_path string, db_entries_expected int) string {
+	shaCalc, err1 := calcSha( tmpFilePath)
+	assert.Nil( t, err1)
+	shaRec, err2 := recordSha( tmpFilePath, record_db_path)
+	assert.Nil( t, err2)
+	assert.True( t, shaRec.Ok)
+	assert.Equal( t, len(shaRec.Infos), 1)
+	assert.Equal( t, shaCalc, shaRec.Infos[0].Sha)
+	assert.Equal( t, record_db_path, shaRec.Infos[0].Path)
+	shaGet, err3 = getPathSha( record_db_path)
+	assert.Nil( t, err3)
+	assert.True( t, shaGet.Ok)
+	assert.Equal( t, len(shaGet.Infos), 1)
+	assert.Equal( t, shaCalc, shaGet.Infos[0].Sha)
+	assert.Equal( t, record_db_path, shaGet.Infos[0].Path)
+	listInfos, err4 := listShas( "")
+	assert.Nil( t, err4)
+	assert.Equal( t, len(listInfos.Infos, db_entries_expected)
+	dirInfos, err5 := listShas( dir_db_path)
+	assert.Nil( t, err5)
+	assert.True( t, dirInfos.Ok)
+	assert.Equal( t, len(dirInfos.Infos), 1)
+	assert.Equal( t, shaCalc, dirInfos.Infos[0].Sha)
+	assert.Equal( t, record_db_path, dirInfos.Infos[0].Path)
+	return shaCalc
+}
+
+}
