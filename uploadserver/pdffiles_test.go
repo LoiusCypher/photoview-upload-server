@@ -29,8 +29,8 @@ func TestPdfFiles(t *testing.T) {
 	// err := fs.MkdirAll( pdfRoot, 0755)
 	err := fs.MkdirAll( pdfRoot, 0777)
 	assert.Nil( t, err)
-	// jpgRoot := "/opt/app/jpgs"
-	jpgRoot := "/tmp"
+	jpgRoot := "/opt/app/jpgs"
+	// jpgRoot := "/tmp"
 	// err = fs.MkdirAll( jpgRoot, 0755)
 	err = fs.MkdirAll( jpgRoot, 0777)
 	assert.Nil( t, err)
