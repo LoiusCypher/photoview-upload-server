@@ -3,7 +3,8 @@ package uploadserver
 import (
 	// "context"
 	"database/sql"
-	"path/filepath"
+	"path"
+	// "path/filepath"
 	"testing"
 	"github.com/spf13/afero"
 
