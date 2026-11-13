@@ -1,14 +1,11 @@
 package uploadserver
 
 import (
-	// "context"
 	"database/sql"
 	"path"
-	// "path/filepath"
 	"testing"
 	"github.com/spf13/afero"
-
-	// "github.com/maragudk/env"
+	"github.com/stretchr/testify/assert"
 )
 
 // CreateDatabase_TestHelper for testing.
@@ -69,6 +66,24 @@ func RecordFile_TestHelper(t *testing.T, tmpFilePath string, dir_db_path string,
 	assert.Equal( t, len(dirInfos), 1)
 	assert.Equal( t, shaCalc, dirInfos[0].Sha)
 	assert.Equal( t, record_db_path, dirInfos[0].Path)
+	return shaCalc
+}
+
+func DeleteFile_TestHelper(t *testing.T, dir_db_path string, record_db_path string, sha string, db_entries_expected int)  {
+	shaDel, err1 := deleteSha( record_db_path)
+	assert.Nil( t, err1)
+	assert.Equal( t, sha, shaDel)
+	listInfos, err2 := listShas( "")
+	assert.Nil( t, err2)
+	assert.Equal( t, len(listInfos), db_entries_expected)
+	dirInfos, err3 := listShas( dir_db_path)
+	assert.Nil( t, err3)
+	assert.Equal( t, len(dirInfos), 1)
+	assert.Equal( t, shaCalc, dirInfos[0].Sha)
+	assert.Equal( t, record_db_path, dirInfos[0].Path)
+	shaGet, err4 := getPathSha( record_db_path)
+	assert.Nil( t, err4)
+	assert.Equal( t, "", shaGet)
 	return shaCalc
 }
 
