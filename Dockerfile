@@ -12,9 +12,7 @@ RUN apt install --no-install-recommends -y ghostscript sqlite3
 COPY go.mod go.sum ./
 RUN go clean -modcache
 #RUN go get ./photoviewuploadserver
-RUN go get github.com/stretchr/testify/assert && cat go.mod go.sum
-#RUN go get github.com/stretchr/testify && cat go.mod go.sum
-#RUN go get github.com/LoiusCypher/photoview-upload-server/uploadserver
+RUN go get github.com/jung-kurt/gofpdf
 RUN go mod download
 RUN go mod tidy
 RUN cat go.mod go.sum
