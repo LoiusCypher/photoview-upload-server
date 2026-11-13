@@ -12,7 +12,8 @@ import (
 )
 
 // CreateDatabase_TestHelper for testing.
-func CreateDatabase_TestHelper(t *testing.T) *sql.DB {
+//func CreateDatabase_TestHelper(t *testing.T) *sql.DB {
+func CreateDatabase_TestHelper(t *testing.T) {
 	t.Helper()
 
 	// _ = env.Load("../.env-test")
@@ -40,11 +41,23 @@ func CreateDatabase_TestHelper(t *testing.T) *sql.DB {
 	if db == nil {
 		t.Fatalf("init did not create db")
 	}
+	defer db.Close()
 	// =========================================Setup Database
 
 	// if err := db.MigrateUp(context.Background()); err != nil {
 		// t.Fatal(err)
 	// }
 
-	return db
+	//return db
 }
+
+func CreateFile_TestHelper(t *testing.T, fs afero.FS, tmpPath string, fileName string, content string) string {
+	f, err2 := afero.TempFile( fs, tmpPath, fileName)
+	assert.Nil( t, err2)
+	cnt, err3 := f.WriteString( content
+	assert.Nil( t, err3)
+	assert.Equal( t, cnt, len(content))
+	tmpFilePath := f.Name()
+	f.Close()
+	return tmpFilePath
+=
