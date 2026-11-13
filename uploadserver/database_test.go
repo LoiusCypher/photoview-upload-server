@@ -20,7 +20,6 @@ import (
 )
 
 func TestDatabase(t *testing.T) {
-)
 	db := sqltest.CreateDatabase( t)
 /*
 	// =========================================Setup Database
