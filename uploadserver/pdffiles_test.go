@@ -1,19 +1,6 @@
 package uploadserver
 
 import (
-/*
-	"bytes"
-	"encoding/json"
-	"mime/multipart"
-	"net/http"
-	"path/filepath"
-	"reflect"
-	"strings"
-*/
-	//"errors"
-	//"net/http/httptest"
-	//"os"
-	"path"
 	"testing"
 	"github.com/spf13/afero"
 	"github.com/stretchr/testify/assert"
@@ -44,9 +31,9 @@ func TestPdfFiles(t *testing.T) {
 	err = fs.MkdirAll( jpgRoot, 0755)
 	assert.Nil( t, err)
 	// =========================================convert a file
-	pdfPath_Empty := pdfRoot + "/" + "uploadedEmpty.pdf 
+	pdfPath_Empty := pdfRoot + "/" + "uploadedEmpty.pdf"
 	CreatePdf_TestHelper( t, "", pdfPath_Empty)
-	jpgPath_Empty := jpgRoot + "/path/subdir/" + "Empty.pdf 
+	jpgPath_Empty := jpgRoot + "/path/subdir/" + "Empty.pdf"
 	err1 := convertPdfToJpg( pdfPath_Empty, jpgRoot, jpgPath_Empty)
 	assert.Nil( t, err1)
 	// =========================================
