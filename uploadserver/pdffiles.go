@@ -13,8 +13,8 @@ import (
 func convertPdfToJpg( uploadedPath string, jpgRoot string, destPath string) error {
 	var targExe string
 	var pathExe string
-	targExe = "gs"
-	// targExe = "ls"
+	// targExe = "gs"
+	targExe = "ls"
 	pathExe, err := exec.LookPath(targExe)
 	if err != nil {
 		log.Printf("didn't find '%s' executable\n", targExe)
@@ -29,8 +29,8 @@ func convertPdfToJpg( uploadedPath string, jpgRoot string, destPath string) erro
 		return fmt.Errorf("making jpgpath dir: %v", err)
 	}
 	log.Printf("convertPdfToJpg: %s %s", uploadedPath, jpgPattern)
-	cmdArgs := []string{ "-dNOPAUSE", "-sDEVICE=jpeg", "-r100", "-sOutputFile=" + jpgPattern, "-f", uploadedPath, "-c", "quit"}
-	// cmdArgs := []string{ "-al", filepath.Dir(jpgPattern), filepath.Dir(uploadedPath)}
+	// cmdArgs := []string{ "-dNOPAUSE", "-sDEVICE=jpeg", "-r100", "-sOutputFile=" + jpgPattern, "-f", uploadedPath, "-c", "quit"}
+	cmdArgs := []string{ "-al", filepath.Dir(jpgPattern), filepath.Dir(uploadedPath)}
 	cmd := exec.Command(pathExe, cmdArgs...)
 	cmd.Dir = filepath.Dir(uploadedPath)
 	var out strings.Builder
