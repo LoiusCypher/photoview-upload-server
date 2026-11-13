@@ -63,7 +63,7 @@ func RecordFile_TestHelper(t *testing.T, tmpFilePath string, dir_db_path string,
 	assert.Equal( t, shaCalc, shaGet)
 	listInfos, err4 := listShas( "")
 	assert.Nil( t, err4)
-	assert.Equal( t, len(listInfos.Infos, db_entries_expected)
+	assert.Equal( t, len(listInfos), db_entries_expected)
 	dirInfos, err5 := listShas( dir_db_path)
 	assert.Nil( t, err5)
 	assert.Equal( t, len(dirInfos), 1)
@@ -72,4 +72,3 @@ func RecordFile_TestHelper(t *testing.T, tmpFilePath string, dir_db_path string,
 	return shaCalc
 }
 
-}
