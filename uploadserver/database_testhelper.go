@@ -10,7 +10,7 @@ import (
 )
 
 // CreateDatabase_TestHelper for testing.
-func CreateDatabase_TestHelper(t *testing.T) *sql.Database {
+func CreateDatabase_TestHelper(t *testing.T) *sql.DB {
 	t.Helper()
 
 	// _ = env.Load("../.env-test")
