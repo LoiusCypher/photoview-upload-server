@@ -22,7 +22,7 @@ func convertPdfToJpg( uploadedPath string, jpgRoot string, destPath string) erro
 	}
 	// log.Printf("'%s' executable in '%s'\n", targExe, pathExe)
 	jpgPattern := strings.TrimSuffix(jpgRoot + "/" + destPath, filepath.Ext(destPath)) + "-%02d.jpg"
-	err = os.MkdirAll(filepath.Dir(jpgPattern), os.ModePerm)
+	err = os.MkdirAll(filepath.Dir(jpgPattern), 0777) // os.ModePerm)
 	if err != nil {
 		log.Printf("making jpgpath dir: %v\n", err)
 		return fmt.Errorf("making jpgpath dir: %v", err)
