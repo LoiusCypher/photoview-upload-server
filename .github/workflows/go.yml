@@ -22,7 +22,7 @@ jobs:
         go-version: stable
 
     - name: Install gs
-      run: apt-get install ghostscript
+      run: sudo apt-get install ghostscript
 
     - name: Build
       run: go build -v ./...
