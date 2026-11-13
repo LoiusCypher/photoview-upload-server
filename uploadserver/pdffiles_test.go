@@ -19,24 +19,21 @@ func CreatePdf_TestHelper(t *testing.T, content string, pdfFilePath string) {
 
 func TestPdfFiles(t *testing.T) {
 	// =========================================Setup Database
-	// sqlPath := "/sqlroot/shafiles.db"
 	//fs := afero.NewMemMapFs()
 	fs := afero.NewOsFs()
-	//var fileInfos []FileInfo
 	// =========================================Add a file
-	// pdfRoot := "/opt/app/pdfs"
-	pdfRoot := "/tmp"
+	pdfRoot := "/opt/app/pdfs"
+	// pdfRoot := "/tmp"
 	// err := fs.MkdirAll( pdfRoot, 0755)
 	err := fs.MkdirAll( pdfRoot, 0777)
 	assert.Nil( t, err)
 	// jpgRoot := "/opt/app/jpgs"
 	jpgRoot := "/tmp"
-	// err = fs.MkdirAll( jpgRoot, 0755)
-	err = fs.MkdirAll( jpgRoot, 0777)
+	err = fs.MkdirAll( jpgRoot, 0755)
+	// err = fs.MkdirAll( jpgRoot, 0777)
 	assert.Nil( t, err)
 	// =========================================convert a file
 	pdfPath_Empty := pdfRoot + "/" + "uploadedEmpty.pdf"
-	// pdfPath_Empty := pdfRoot + "/" + "upempty.pdf"
 	CreatePdf_TestHelper( t, "", pdfPath_Empty)
 	// jpgPath_Empty := "path/subdir/" + "Empty.pdf"
 	jpgPath_Empty := "" + "xmpty.pdf"
