@@ -44,8 +44,8 @@ func TestDatabase(t *testing.T) {
 		t.Fatalf("init did not create db")
 	}
 */
-	var fileInfos []FileInfo
-	fileInfos, err = listShas( "")
+	//var fileInfos []FileInfo
+	fileInfos, err := listShas( "")
 	if err != nil {
 		t.Fatalf("error reading sha list: %v", err)
 	}
