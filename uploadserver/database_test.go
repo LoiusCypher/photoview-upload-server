@@ -16,7 +16,6 @@ import (
 	"path"
 	"testing"
 	"github.com/spf13/afero"
-	"github.com/LoiusCypher/photoview-upload-server/sqltest"
 )
 
 func TestDatabase(t *testing.T) {
