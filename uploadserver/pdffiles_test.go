@@ -22,10 +22,10 @@ func TestPdfFiles(t *testing.T) {
 	//fs := afero.NewMemMapFs()
 	fs := afero.NewOsFs()
 	// =========================================Add a file
-	pdfRoot := "/opt/app/pdfs"
-	// pdfRoot := "/tmp"
-	// err := fs.MkdirAll( pdfRoot, 0755)
-	err := fs.MkdirAll( pdfRoot, 0777)
+	// pdfRoot := "/opt/app/pdfs"
+	pdfRoot := "/tmp"
+	err := fs.MkdirAll( pdfRoot, 0755)
+	// err := fs.MkdirAll( pdfRoot, 0777)
 	assert.Nil( t, err)
 	// jpgRoot := "/opt/app/jpgs"
 	jpgRoot := "/tmp"
