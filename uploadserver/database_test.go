@@ -19,8 +19,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-const empty_sha_std := "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-const abcde_sha_std := "248d6a61d20638b8e5c026930c3e6039a33ce45964ff2167f6ecedd419db06c1"
+const empty_sha_std string = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+const abcde_sha_std string = "248d6a61d20638b8e5c026930c3e6039a33ce45964ff2167f6ecedd419db06c1"
 
 func TestDatabase(t *testing.T) {
 	CreateDatabase_TestHelper( t)
