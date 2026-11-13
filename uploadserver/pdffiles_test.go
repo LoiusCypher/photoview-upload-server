@@ -27,7 +27,8 @@ func TestPdfFiles(t *testing.T) {
 	pdfRoot := "/opt/app/pdfs"
 	err := fs.MkdirAll( pdfRoot, 0755)
 	assert.Nil( t, err)
-	jpgRoot := "/opt/app/jpgs"
+	// jpgRoot := "/opt/app/jpgs"
+	jpgRoot := "/tmp"
 	err = fs.MkdirAll( jpgRoot, 0755)
 	assert.Nil( t, err)
 	// =========================================convert a file
