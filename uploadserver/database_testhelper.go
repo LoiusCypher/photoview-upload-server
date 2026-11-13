@@ -1,7 +1,7 @@
 package uploadserver
 
 import (
-	"database/sql"
+	//"database/sql"
 	"path"
 	"testing"
 	"github.com/spf13/afero"
@@ -26,6 +26,7 @@ func CreateDatabase_TestHelper(t *testing.T) {
 	assert.Equal( t, dbPath, sqlPath)
 	found, err2 := afero.Exists(fs, sqlPath)
 	assert.Nil( t, err2)
+	assert.True( t, found)
 	db := openDb()
 	assert.NotNil( t, db)
 	defer db.Close()
@@ -38,7 +39,7 @@ func CreateDatabase_TestHelper(t *testing.T) {
 	//return db
 }
 
-func CreateFile_TestHelper(t *testing.T, fs afero.FS, tmpPath string, fileName string, content string) string {
+func CreateFile_TestHelper(t *testing.T, fs afero.Fs, tmpPath string, fileName string, content string) string {
 	f, err2 := afero.TempFile( fs, tmpPath, fileName)
 	assert.Nil( t, err2)
 	cnt, err3 := f.WriteString( content)
@@ -78,12 +79,9 @@ func DeleteFile_TestHelper(t *testing.T, dir_db_path string, record_db_path stri
 	assert.Equal( t, len(listInfos), db_entries_expected)
 	dirInfos, err3 := listShas( dir_db_path)
 	assert.Nil( t, err3)
-	assert.Equal( t, len(dirInfos), 1)
-	assert.Equal( t, shaCalc, dirInfos[0].Sha)
-	assert.Equal( t, record_db_path, dirInfos[0].Path)
+	assert.Equal( t, len(dirInfos), 0)
 	shaGet, err4 := getPathSha( record_db_path)
 	assert.Nil( t, err4)
 	assert.Equal( t, "", shaGet)
-	return shaCalc
 }
 
