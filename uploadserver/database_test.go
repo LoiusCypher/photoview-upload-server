@@ -40,25 +40,25 @@ func TestDatabase(t *testing.T) {
 	tmpFilePath_empty := CreateFile_TestHelper( t, fs, tmpPath, "*.pdf", "")
 	emptyFile_db_dir := "arbitrary / file "
 	emptyFile_db_path := emptyFile_db_dir + "/" + " path"
-	sha_empty := RecordFile_TestHelper( t, tmpFilePath_empty, emptyFile_db_dir, emptyFile_db_path, 1)
+	sha_empty := RecordFile_TestHelper( t, tmpFilePath_empty, emptyFile_db_dir, emptyFile_db_path, 1, 1)
 	assert.Equal( t, sha_empty, empty_sha_std)
 	// =========================================Add another file
 	tmpFilePath_hello := CreateFile_TestHelper( t, fs, tmpPath, "*.pdf", "Hello")
 	helloFile_db_dir := "arbitrary / say "
 	helloFile_db_path := helloFile_db_dir + "/" + " hello"
-	sha_hello := RecordFile_TestHelper( t, tmpFilePath_hello, helloFile_db_dir, helloFile_db_path, 2)
+	sha_hello := RecordFile_TestHelper( t, tmpFilePath_hello, helloFile_db_dir, helloFile_db_path, 2, 1)
 	// =========================================Add a third file
 	tmpFilePath_abcde := CreateFile_TestHelper( t, fs, tmpPath, "*.pdf", "abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq")
 	abcdeFile_db_dir := "arbitrary / say / test"
 	abcdeFile_db_path := abcdeFile_db_dir + "/" + " abcde "
-	sha_abcde := RecordFile_TestHelper( t, tmpFilePath_abcde, abcdeFile_db_dir, abcdeFile_db_path, 3)
+	sha_abcde := RecordFile_TestHelper( t, tmpFilePath_abcde, abcdeFile_db_dir, abcdeFile_db_path, 3, 1)
 	assert.Equal( t, sha_abcde, abcde_sha_std)
 	// =========================================Check that we can delete entries
 	assert.NotEqual( t, sha_empty, sha_hello)
-	DeleteFile_TestHelper( t, emptyFile_db_dir, emptyFile_db_path, sha_empty, 2)
+	DeleteFile_TestHelper( t, emptyFile_db_dir, emptyFile_db_path, sha_empty, 2, 0)
 	// ========================================Check tat we con overwrite
 	tmpFilePath_hello2 := CreateFile_TestHelper( t, fs, tmpPath, "*.pdf", "Hello 2")
-	sha_hello2 := RecordFile_TestHelper( t, tmpFilePath_hello2, helloFile_db_dir, helloFile_db_path, 2)
+	sha_hello2 := RecordFile_TestHelper( t, tmpFilePath_hello2, helloFile_db_dir, helloFile_db_path, 2, 1)
 	assert.NotEqual( t, sha_hello, sha_hello2)
 	// =========================================
 }

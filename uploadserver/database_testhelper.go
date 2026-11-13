@@ -50,7 +50,7 @@ func CreateFile_TestHelper(t *testing.T, fs afero.Fs, tmpPath string, fileName s
 	return tmpFilePath
 }
 
-func RecordFile_TestHelper(t *testing.T, tmpFilePath string, dir_db_path string, record_db_path string, db_entries_expected int) string {
+func RecordFile_TestHelper(t *testing.T, tmpFilePath string, dir_db_path string, record_db_path string, db_entries_expected int, dir_entries_expected int) string {
 	shaCalc, err1 := calcSha( tmpFilePath)
 	assert.Nil( t, err1)
 	shaRec, err2 := recordSha( tmpFilePath, record_db_path)
@@ -64,13 +64,13 @@ func RecordFile_TestHelper(t *testing.T, tmpFilePath string, dir_db_path string,
 	assert.Equal( t, len(listInfos), db_entries_expected)
 	dirInfos, err5 := listShas( dir_db_path)
 	assert.Nil( t, err5)
-	assert.Equal( t, len(dirInfos), 1)
+	assert.Equal( t, len(dirInfos), dir_entries_expected)
 	assert.Equal( t, shaCalc, dirInfos[0].Sha)
 	assert.Equal( t, record_db_path, dirInfos[0].Path)
 	return shaCalc
 }
 
-func DeleteFile_TestHelper(t *testing.T, dir_db_path string, record_db_path string, sha string, db_entries_expected int)  {
+func DeleteFile_TestHelper(t *testing.T, dir_db_path string, record_db_path string, sha string, db_entries_expected int, dir_entries_expected int)  {
 	shaDel, err1 := deleteSha( record_db_path)
 	assert.Nil( t, err1)
 	assert.Equal( t, sha, shaDel)
@@ -79,7 +79,7 @@ func DeleteFile_TestHelper(t *testing.T, dir_db_path string, record_db_path stri
 	assert.Equal( t, len(listInfos), db_entries_expected)
 	dirInfos, err3 := listShas( dir_db_path)
 	assert.Nil( t, err3)
-	assert.Equal( t, len(dirInfos), 0)
+	assert.Equal( t, len(dirInfos), dir_entries_expected)
 	shaGet, err4 := getPathSha( record_db_path)
 	assert.Nil( t, err4)
 	assert.Equal( t, "", shaGet)
