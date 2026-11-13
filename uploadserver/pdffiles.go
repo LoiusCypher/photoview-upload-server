@@ -34,7 +34,9 @@ func convertPdfToJpg( uploadedPath string, jpgRoot string, destPath string) erro
 	cmd := exec.Command(pathExe, cmdArgs...)
 	cmd.Dir = filepath.Dir(uploadedPath)
 	var out strings.Builder
+	log.Println("cmd:", pathExe, cmdArgs)
 	cmd.Stdout = &out
+	log.Printf("stdout: %q\n", out.String())
 	if err := cmd.Run(); err != nil {
 		log.Println("cmd workdir:", filepath.Dir(uploadedPath))
 		log.Println("cmd:", pathExe, cmdArgs)
