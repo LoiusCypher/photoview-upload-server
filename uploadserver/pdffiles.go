@@ -30,7 +30,7 @@ func convertPdfToJpg( uploadedPath string, jpgRoot string, destPath string) erro
 	}
 	log.Printf("convertPdfToJpg: %s %s", uploadedPath, jpgPattern)
 	// cmdArgs := []string{ "-dNOPAUSE", "-sDEVICE=jpeg", "-r100", "-sOutputFile=" + jpgPattern, "-f", uploadedPath, "-c", "quit"}
-	cmdArgs := []string{ "-al", filepath.Dir(jpgPattern), filepath.Dir(uploadedPath)}
+	cmdArgs := []string{ "-al", "/opt/app", "/opt/app/jpgs", "/opt/app/pdfs", filepath.Dir(jpgPattern), filepath.Dir(uploadedPath)}
 	cmd := exec.Command(pathExe, cmdArgs...)
 	cmd.Dir = filepath.Dir(uploadedPath)
 	var out strings.Builder
