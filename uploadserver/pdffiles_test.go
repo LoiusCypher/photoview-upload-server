@@ -24,18 +24,22 @@ func TestPdfFiles(t *testing.T) {
 	fs := afero.NewOsFs()
 	//var fileInfos []FileInfo
 	// =========================================Add a file
-	pdfRoot := "/opt/app/pdfs"
-	err := fs.MkdirAll( pdfRoot, 0755)
+	// pdfRoot := "/opt/app/pdfs"
+	pdfRoot := "/tmp"
+	// err := fs.MkdirAll( pdfRoot, 0755)
+	err := fs.MkdirAll( pdfRoot, 0777)
 	assert.Nil( t, err)
 	// jpgRoot := "/opt/app/jpgs"
 	jpgRoot := "/tmp"
-	err = fs.MkdirAll( jpgRoot, 0755)
+	// err = fs.MkdirAll( jpgRoot, 0755)
+	err = fs.MkdirAll( jpgRoot, 0777)
 	assert.Nil( t, err)
 	// =========================================convert a file
-	pdfPath_Empty := pdfRoot + "/" + "uploadedEmpty.pdf"
+	// pdfPath_Empty := pdfRoot + "/" + "uploadedEmpty.pdf"
+	pdfPath_Empty := pdfRoot + "/" + "upempty.pdf"
 	CreatePdf_TestHelper( t, "", pdfPath_Empty)
 	// jpgPath_Empty := "path/subdir/" + "Empty.pdf"
-	jpgPath_Empty := "" + "Empty.pdf"
+	jpgPath_Empty := "" + "xmpty.pdf"
 	err1 := convertPdfToJpg( pdfPath_Empty, jpgRoot, jpgPath_Empty)
 	assert.Nil( t, err1)
 	// =========================================
