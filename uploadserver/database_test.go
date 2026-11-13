@@ -19,7 +19,7 @@ import (
 )
 
 func TestDatabase(t *testing.T) {
-	_ := CreateDatabase_TestHelper( t)
+	_ = CreateDatabase_TestHelper( t)
 	// =========================================Setup Database
 	// sqlPath := "/sqlroot/shafiles.db"
 	//fs := afero.NewMemMapFs()
