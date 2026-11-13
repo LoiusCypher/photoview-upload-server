@@ -54,7 +54,7 @@ func CreateDatabase_TestHelper(t *testing.T) {
 func CreateFile_TestHelper(t *testing.T, fs afero.FS, tmpPath string, fileName string, content string) string {
 	f, err2 := afero.TempFile( fs, tmpPath, fileName)
 	assert.Nil( t, err2)
-	cnt, err3 := f.WriteString( content
+	cnt, err3 := f.WriteString( content)
 	assert.Nil( t, err3)
 	assert.Equal( t, cnt, len(content))
 	tmpFilePath := f.Name()
