@@ -32,37 +32,37 @@ func TestPdfFiles(t *testing.T) {
 	err = fs.MkdirAll( jpgRoot, 0755)
 	assert.Nil( t, err)
 	// =========================================convert a file
-	pdfPath_Empty := pdfRoot + "/" + "uploadedEmpty.pdf"
+	pdfPath_Empty := pdfRoot + "/" + "uploadedEmpty.tmp"
 	CreatePdf_TestHelper( t, []string{ "",}, pdfPath_Empty)
 	jpgPath_Empty := "path/subdir/" + "Empty.pdf"
 	err1 := convertPdfToJpg( pdfPath_Empty, jpgRoot, jpgPath_Empty)
 	assert.Nil( t, err1)
-	assert.FileExists( t, jpgRoot + "/" + strings.TrimSuffix( jpgPath_Empty, ".pdf") + "-01.pdf")
-	assert.NoFileExists( t, jpgRoot + "/" + strings.TrimSuffix( jpgPath_Empty, ".pdf") + "-02.pdf")
+	assert.FileExists( t, jpgRoot + "/" + strings.TrimSuffix( jpgPath_Empty, ".pdf") + "-01.jpg")
+	assert.NoFileExists( t, jpgRoot + "/" + strings.TrimSuffix( jpgPath_Empty, ".pdf") + "-02.jpg")
 	// =========================================
-	pdfPath_Multi := pdfRoot + "/" + "uploadedMulti.pdf"
+	pdfPath_Multi := pdfRoot + "/" + "uploadedMulti.tmp"
 	CreatePdf_TestHelper( t, []string{ "Multi 1", "Multi 2", "Multi 3", "Multi 4", "Multi 5",}, pdfPath_Multi)
 	jpgPath_Multi := "path/subdir/" + "Multi.pdf"
 	err2 := convertPdfToJpg( pdfPath_Multi, jpgRoot, jpgPath_Multi)
 	assert.Nil( t, err2)
-	assert.FileExists( t, jpgRoot + "/" + strings.TrimSuffix( jpgPath_Multi, ".pdf") + "-01.pdf")
-	assert.FileExists( t, jpgRoot + "/" + strings.TrimSuffix( jpgPath_Multi, ".pdf") + "-02.pdf")
-	assert.FileExists( t, jpgRoot + "/" + strings.TrimSuffix( jpgPath_Multi, ".pdf") + "-03.pdf")
-	assert.FileExists( t, jpgRoot + "/" + strings.TrimSuffix( jpgPath_Multi, ".pdf") + "-04.pdf")
-	assert.FileExists( t, jpgRoot + "/" + strings.TrimSuffix( jpgPath_Multi, ".pdf") + "-05.pdf")
-	assert.NoFileExists( t, jpgRoot + "/" + strings.TrimSuffix( jpgPath_Multi, ".pdf") + "-06.pdf")
+	assert.FileExists( t, jpgRoot + "/" + strings.TrimSuffix( jpgPath_Multi, ".pdf") + "-01.jpg")
+	assert.FileExists( t, jpgRoot + "/" + strings.TrimSuffix( jpgPath_Multi, ".pdf") + "-02.jpg")
+	assert.FileExists( t, jpgRoot + "/" + strings.TrimSuffix( jpgPath_Multi, ".pdf") + "-03.jpg")
+	assert.FileExists( t, jpgRoot + "/" + strings.TrimSuffix( jpgPath_Multi, ".pdf") + "-04.jpg")
+	assert.FileExists( t, jpgRoot + "/" + strings.TrimSuffix( jpgPath_Multi, ".pdf") + "-05.jpg")
+	assert.NoFileExists( t, jpgRoot + "/" + strings.TrimSuffix( jpgPath_Multi, ".pdf") + "-06.jpg")
 	// =========================================
 	err3 := deleteJpgs( jpgRoot, jpgPath_Multi)
 	assert.Nil( t, err3)
-	assert.NoFileExists( t, jpgRoot + "/" + strings.TrimSuffix( jpgPath_Multi, ".pdf") + "-01.pdf")
-	assert.NoFileExists( t, jpgRoot + "/" + strings.TrimSuffix( jpgPath_Multi, ".pdf") + "-02.pdf")
-	assert.NoFileExists( t, jpgRoot + "/" + strings.TrimSuffix( jpgPath_Multi, ".pdf") + "-03.pdf")
-	assert.NoFileExists( t, jpgRoot + "/" + strings.TrimSuffix( jpgPath_Multi, ".pdf") + "-04.pdf")
-	assert.NoFileExists( t, jpgRoot + "/" + strings.TrimSuffix( jpgPath_Multi, ".pdf") + "-05.pdf")
+	assert.NoFileExists( t, jpgRoot + "/" + strings.TrimSuffix( jpgPath_Multi, ".pdf") + "-01.jpg")
+	assert.NoFileExists( t, jpgRoot + "/" + strings.TrimSuffix( jpgPath_Multi, ".pdf") + "-02.jpg")
+	assert.NoFileExists( t, jpgRoot + "/" + strings.TrimSuffix( jpgPath_Multi, ".pdf") + "-03.jpg")
+	assert.NoFileExists( t, jpgRoot + "/" + strings.TrimSuffix( jpgPath_Multi, ".pdf") + "-04.jpg")
+	assert.NoFileExists( t, jpgRoot + "/" + strings.TrimSuffix( jpgPath_Multi, ".pdf") + "-05.jpg")
 	// =========================================
 	err4 := deleteJpgs( jpgRoot, jpgPath_Empty)
 	assert.Nil( t, err4)
-	assert.NoFileExists( t, jpgRoot + "/" + strings.TrimSuffix( jpgPath_Empty, ".pdf") + "-01.pdf")
+	assert.NoFileExists( t, jpgRoot + "/" + strings.TrimSuffix( jpgPath_Empty, ".pdf") + "-01.jpg")
 	// =========================================
 }
 
