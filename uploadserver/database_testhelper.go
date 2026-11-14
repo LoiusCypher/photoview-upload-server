@@ -18,21 +18,25 @@ func CreateDatabase_TestHelper(t *testing.T) {
 
 	// =========================================Setup Database
 	// sqlPath := "/sqlroot/shafiles.db"
-	// sqlMemo := ":memory:"
 	// sqlPath := "/opt/app/shafiles.db"
+	sqlMemo := ":memory:"
 	sqlPath := "/tmp/shafiles.db"
-	err0 := os.Remove(sqlPath)
-	if err0 != nil {
-		require.True( t, os.IsNotExist(err0))
-	}
 	err1 := os.MkdirAll( path.Dir(sqlPath), 0755)
 	assert.Nil( t, err1)
 	dbPath := *SetDbPath(sqlPath)
 	assert.Equal( t, dbPath, sqlPath)
-	require.FileExists( t, dbPath)
+	if dbPath != sqlMemo {
+		require.FileExists( t, dbPath)
+	}
 	db := openDb()
 	assert.NotNil( t, db)
 	defer db.Close()
+	tx, err3 := db.Begin()
+	assert.Nil( t, err3)
+	err4 := tx.Exec("DELETE FROM shafiles")
+	assert.Nil( t, err4)
+	err5 = tx.Commit()
+	assert.Nil( t, err5)
 	// =========================================Setup Database
 
 	// if err := db.MigrateUp(context.Background()); err != nil {
