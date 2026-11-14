@@ -51,6 +51,7 @@ func TestServer(t *testing.T) {
 	}
 
 	CreateDatabase_TestHelper( t)
+	shaRecs := 0
 
 	var target string
 	if addr, ok := os.LookupEnv("TEST_TARGET_ADDR"); ok && addr != "" {
@@ -199,7 +200,7 @@ func TestServer(t *testing.T) {
 
 		helloFile_db_dir := "arbitrary / file "
 		helloFile_db_path := helloFile_db_dir + "/" + " path"
-		sha_hello := RecordFile_TestHelper( t, pdfFilePath, helloFile_db_dir, helloFile_db_path, 1, 1)
+		sha_hello := RecordFile_TestHelper( t, pdfFilePath, helloFile_db_dir, helloFile_db_path, 1, 2)
 		assert.Equal( t, shaOld, sha_hello)
 
 		localPath := filepath.Join(docRoot, "test.txt")
@@ -227,7 +228,7 @@ func TestServer(t *testing.T) {
 			var result SuccessFileInfosResult
 			err6 := json.Unmarshal(body, &result)
 			assert.Nil(t, err6, fmt.Sprintf("failed to decode response body: %v", err6))
-			expected := SuccessFileInfosResult{ true, []FileInfo{{ pdfFilePath, shaNew},},}
+			expected := SuccessFileInfosResult{ true, []FileInfo{{ helloFile_db_path, shaNew},},}
 			assert.True(t, reflect.DeepEqual(result, expected), fmt.Sprintf("result = %+v, want = %+v", result, expected))
 			assert.FileExists(t, filepath.Join(docRoot, "hello-01.jpg"))
 		})
