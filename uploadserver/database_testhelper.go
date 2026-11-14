@@ -2,6 +2,7 @@ package uploadserver
 
 import (
 	//"database/sql"
+	"os"
 	"path"
 	"testing"
 	"github.com/spf13/afero"
