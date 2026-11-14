@@ -18,7 +18,9 @@ func CreateDatabase_TestHelper(t *testing.T) {
 
 	// =========================================Setup Database
 	// sqlPath := "/sqlroot/shafiles.db"
-	sqlPath := "/opt/app/shafiles.db"
+	// sqlMemo := ":memory:"
+	// sqlPath := "/opt/app/shafiles.db"
+	sqlPath := "/tmp/shafiles.db"
 	err0 := os.Remove(sqlPath)
 	if err0 != nil {
 		require.True( t, os.IsNotExist(err0))
