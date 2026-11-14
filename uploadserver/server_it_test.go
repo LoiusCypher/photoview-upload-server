@@ -444,8 +444,30 @@ func TestServer(t *testing.T) {
 		assert.Equal(t, expected.OK, result.OK, fmt.Sprintf("result = %+v, want = %+v", result, expected))
 		assert.Equal(t, expected.Files, result.Files, fmt.Sprintf("result = %+v, want = %+v", result, expected))
 		assert.True(t, slices.Equal( expected.Files, result.Files), fmt.Sprintf("result = %+v, want = %+v", result, expected))
-		//assert.True(t, reflect.DeepEqual( expected.Files, result.Files), fmt.Sprintf("result = %+v, want = %+v", result, expected))
-		//assert.True(t, reflect.DeepEqual(result, expected), fmt.Sprintf("result = %+v, want = %+v", result, expected))
+		assert.True(t, reflect.DeepEqual(result, expected), fmt.Sprintf("result = %+v, want = %+v", result, expected))
+	})
+
+	t.Run("DELETE /file?name=hello.pdf", func(t *testing.T) {
+		u := base.JoinPath("/file")
+		pdfFilePath := "hello.pdf"
+		q := url.Values{}
+        	q.Add("name", pdfFilePath)
+		u.RawQuery = q.Encode()
+		resp, err4 := http.Delete(u.String())
+		assert.Nil(t, err4, fmt.Sprintf("failed to GET: %v", err4))
+		defer resp.Body.Close()
+		assert.Equal(t, resp.StatusCode, http.StatusOK)
+		assert.Equal(t, resp.Header.Get("Content-Type"), "application/json")
+		body, err5 := io.ReadAll(resp.Body)
+		assert.Nil(t, err5, fmt.Sprintf("failed to read response body: %v", err5))
+		var result SuccessFileInfosResult
+		err6 := json.Unmarshal(body, &result)
+		assert.Nil(t, err6, fmt.Sprintf("failed to decode response body: %v", err6))
+		expected := SuccessFileInfosResult{ true, []FileInfo{{ pdfFilePath, lastPdfSha},},}
+		assert.Equal(t, expected.OK, result.OK, fmt.Sprintf("result = %+v, want = %+v", result, expected))
+		assert.Equal(t, expected.Files, result.Files, fmt.Sprintf("result = %+v, want = %+v", result, expected))
+		assert.True(t, slices.Equal( expected.Files, result.Files), fmt.Sprintf("result = %+v, want = %+v", result, expected))
+		assert.True(t, reflect.DeepEqual(result, expected), fmt.Sprintf("result = %+v, want = %+v", result, expected))
 	})
 
 	t.Run("OPTIONS /list", func(t *testing.T) {
