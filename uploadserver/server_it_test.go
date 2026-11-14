@@ -23,6 +23,14 @@ import (
 	"github.com/spf13/afero"
 )
 
+
+func GenerateUrl_TestHelper(t *testing.T, u *http.URL, filePath string) string {
+	q := url.Values{}
+        q.Add("name", filePath)
+	u.RawQuery = q.Encode()
+}
+
+
 func TestServer(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -112,11 +120,11 @@ func TestServer(t *testing.T) {
 		defer file.Close()
 		sha, err2 := calcSha( pdfFilePath)
 		assert.Nil(t, err2)
+		GenerateUrl_TestHelper( t, u, pdfFilePath)
 		req, err3 := makeFormRequest(u, http.MethodPut, pdfFilePath, file)
 		assert.Nil(t, err3)
-		q := req.URL.Query()
-        	q.Add("name", pdfFilePath)
-		req.URL.RawQuery = q.Encode()
+        	// q.Add("name", pdfFilePath)
+		// req.URL.RawQuery = q.Encode()
 		//fmt.Println("Req", req)
 		resp, err4 := http.DefaultClient.Do(req)
 		assert.Nil(t, err4, fmt.Sprintf("failed to PUT: %v", err4))
@@ -163,11 +171,12 @@ func TestServer(t *testing.T) {
 		CreatePdf_TestHelper( t, []string{ "hello, world",}, pdfFilePath)
 		file, err1 := os.Open( pdfFilePath)
 		assert.Nil(t, err1)
+		GenerateUrl_TestHelper( t, u, pdfFilePath)
 		req, err3 := makeFormRequest(u, http.MethodPost, pdfFilePath, file)
 		assert.Nil(t, err3)
-		q := req.URL.Query()
-        	q.Add("name", pdfFilePath)
-		req.URL.RawQuery = q.Encode()
+		// q := req.URL.Query()
+        	// q.Add("name", pdfFilePath)
+		// req.URL.RawQuery = q.Encode()
 		defer file.Close()
 		resp, err4 := http.DefaultClient.Do(req)
 		assert.Nil(t, err4, fmt.Sprintf("failed to POST: %v", err4))
