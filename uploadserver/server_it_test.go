@@ -409,7 +409,7 @@ func TestServer(t *testing.T) {
 	t.Run("GET /file?name=hello.pdf", func(t *testing.T) {
 		u := base.JoinPath("/file")
 		pdfFilePath := "hello.pdf"
-		req, err1 := http.NewRequest( http.MethodGet, string(u), nil)
+		req, err1 := http.NewRequest( http.MethodGet, string(*u), nil)
 		assert.Nil(t, err1)
 		q := req.URL.Query()
         	q.Add("name", pdfFilePath)
