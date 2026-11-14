@@ -196,7 +196,7 @@ func TestServer(t *testing.T) {
 		assert.Nil(t, err2)
 
 		helloFile_db_dir := "arbitrary / file "
-		helloFile_db_path := emptyFile_db_dir + "/" + " path"
+		helloFile_db_path := helloFile_db_dir + "/" + " path"
 		sha_hello := RecordFile_TestHelper( t, pdfFilePath, helloFile_db_dir, helloFile_db_path, 1, 1)
 		assert.Equal( t, shaOld, sha_hello)
 
