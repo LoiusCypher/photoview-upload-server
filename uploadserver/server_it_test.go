@@ -62,7 +62,7 @@ func TestServer(t *testing.T) {
 			Addr:            target,
 			DocumentRoot:    docRoot,
 			EnableCORS:      true,
-			MaxUploadSize:   16,
+			MaxUploadSize:   1024,
 			ShutdownTimeout: 5000,
 		}
 		ready := make(chan struct{})
