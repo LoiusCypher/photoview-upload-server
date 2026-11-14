@@ -27,7 +27,7 @@ func CreateDatabase_TestHelper(t *testing.T) {
 	dbPath := *SetDbPath(sqlPath)
 	assert.Equal( t, dbPath, sqlPath)
 	_, err2 := os.Stat( sqlPath)
-	assert.Nil( t, err2)
+	require.Nil( t, err2)
 	db := openDb()
 	assert.NotNil( t, db)
 	defer db.Close()
