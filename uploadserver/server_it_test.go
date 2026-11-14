@@ -149,7 +149,7 @@ func TestServer(t *testing.T) {
 		resp, err4 := http.DefaultClient.Do(req)
 		assert.Nil(t, err4, fmt.Sprintf("failed to PUT: %v", err4))
 		defer resp.Body.Close()
-		result := CheckResponseSuccess_TestHelper( t, resp, http.StatusCreated
+		result := CheckResponseSuccess_TestHelper( t, resp, http.StatusCreated)
 		expected := SuccessFileInfosResult{ true, []FileInfo{{ pdfFilePath, sha},},}
 		assert.Equal(t, expected.OK, result.OK, fmt.Sprintf("result = %+v, want = %+v", result, expected))
 		assert.Equal(t, expected.Files, result.Files, fmt.Sprintf("result = %+v, want = %+v", result, expected))
