@@ -93,41 +93,31 @@ func TestServer(t *testing.T) {
 */
 	t.Run("PUT /file", func(t *testing.T) {
 		u := base.JoinPath("/file")
-		CreatePdf_TestHelper( t, []string{ "hello, world",}, "hello.pdf")
-		file, err := os.Open("hello.pdf")
+		pdfFilePath := "hello.pdf"
+		CreatePdf_TestHelper( t, []string{ "hello, world",}, pdfFilePath)
+		file, err := os.Open( pdfFilePath)
 		assert.Nil(t, err)
 		defer file.Close()
-		//req, err := makeFormRequest(u, http.MethodPut, "hello.txt", bytes.NewBufferString("hello, world"))
-		req, err := makeFormRequest(u, http.MethodPut, "hello.pdf", file)
+		sha, err2 :calcSha( pdfFilePath)
+		assert.Nil(t, err2)
+		req, err := makeFormRequest(u, http.MethodPut, pdfFilePath, file)
 		assert.Nil(t, err)
 		q := req.URL.Query()
-        	q.Add("name", "hello.pdf")
+        	q.Add("name", pdfFilePath)
 		req.URL.RawQuery = q.Encode()
-
 		//fmt.Println("Req", req)
 		resp, err := http.DefaultClient.Do(req)
-		assert.Nil(t, err, fmt.Prinf("failed to PUT: %v", err))
+		assert.Nil(t, err, fmt.Printf("failed to PUT: %v", err))
 		defer resp.Body.Close()
-		if resp.StatusCode != http.StatusCreated {
-			t.Errorf("status = %d, want = %d", resp.StatusCode, http.StatusCreated)
-		}
-		if ct := resp.Header.Get("Content-Type"); ct != "application/json" {
-			t.Errorf("Content-Type = %s, want = \"application/json\"", ct)
-		}
+		assert.Equal(t, resp.StatusCode, http.StatusCreated, fmt.Printf("status = %d, want = %d", resp.StatusCode, http.StatusCreated))
+		assert.Equal(t, resp.Header.Get("Content-Type"), "application/json", fmt.Printf("Content-Type = %s, want = \"application/json\"", ct))
 		body, err := io.ReadAll(resp.Body)
-		assert.Nil(t, err)
-		if err != nil {
-			t.Fatalf("failed to read response body: %v", err)
-		}
+		assert.Nil(t, err, fmt.Printf("failed to read response body: %v", err))
 		var result SuccessFileInfosResult
-		if err := json.Unmarshal(body, &result); err != nil {
-			t.Fatalf("failed to decode response body: %v", err)
-		}
-		expected := SuccessFileInfosResult{ true, []FileInfo{{ "hello.pdf", "d035c3be926f9818dad67edcea55506c013bd60ed983b6e67e1371804cb0b200"},},}
-		if !reflect.DeepEqual(result, expected) {
-			t.Errorf("result = %+v, want = %+v", result, expected)
-		}
-		//verifyLocalFile(t, fs, filepath.Join(docRoot, "hello-01.jpg"), []byte("hello, world"))
+		err9 := json.Unmarshal(body, &result); err != nil {
+		assert.Nil(t, err9, fmt.Printf("failed to decode response body: %v", err9))
+		expected := SuccessFileInfosResult{ true, []FileInfo{{ pdfFilePath, sha},},}
+		assert.True(t, reflect.DeepEqual(result, expected), fmt.Printf("result = %+v, want = %+v", result, expected))
 		assert.FileExists(t, filepath.Join(docRoot, "hello-01.jpg"))
 	})
 /*
