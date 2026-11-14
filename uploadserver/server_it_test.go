@@ -456,7 +456,7 @@ func TestServer(t *testing.T) {
 		req, err1 := http.NewRequest(http.MethodDelete, u.String(), nil)
 		assert.Nil(t, err1)
 		resp, err2 := http.DefaultClient.Do(req)
-		assert.Nil(t, err2, fmt.Sprintf("failed to DELETE: %v", err4))
+		assert.Nil(t, err2, fmt.Sprintf("failed to DELETE: %v", err2))
 		defer resp.Body.Close()
 		assert.Equal(t, resp.StatusCode, http.StatusOK)
 		assert.Equal(t, resp.Header.Get("Content-Type"), "application/json")
