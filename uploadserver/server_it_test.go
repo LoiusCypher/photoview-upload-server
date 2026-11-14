@@ -449,37 +449,6 @@ func TestServer(t *testing.T) {
 			t.Errorf("result = %+v, want = %+v", result, expected)
 		}
 	})
-*/ /*
-	t.Run("OPTIONS /file", func(t *testing.T) {
-		u := base.JoinPath("/files/foo/bar.txt")
-		req, err := http.NewRequest(http.MethodOptions, u.String(), nil)
-		if err != nil {
-			t.Fatalf("failed to create OPTIONS request: %v", err)
-		}
-		resp, err := http.DefaultClient.Do(req)
-		if err != nil {
-			t.Fatalf("failed to request: %v", err)
-		}
-		defer resp.Body.Close()
-		if resp.StatusCode != http.StatusNoContent {
-			t.Errorf("status = %d, want = %d", resp.StatusCode, http.StatusNoContent)
-		}
-		acam := resp.Header.Get("Access-Control-Allow-Methods")
-		if acam == "" {
-			t.Errorf("Access-Control-Allow-Methods got empty, want not empty")
-		}
-		allowedMethods := strings.Split(acam, ",")
-		for i := range allowedMethods {
-			allowedMethods[i] = strings.TrimSpace(allowedMethods[i])
-		}
-		expectedAllowedMethods := []string{"GET", "HEAD", "PUT"}
-		if !containsAll(allowedMethods, expectedAllowedMethods) {
-			t.Errorf("Access-Control-Allow-Methods = %v, want = %v", allowedMethods, expectedAllowedMethods)
-		}
-		if acao := resp.Header.Get("Access-Control-Allow-Origin"); acao != "*" {
-			t.Errorf("Access-Control-Allow-Origin = %s, want = \"*\"", acao)
-		}
-	})
 */
 	t.Run("OPTIONS /list", func(t *testing.T) {
 		u := base.JoinPath("/list")
@@ -490,13 +459,34 @@ func TestServer(t *testing.T) {
 		defer resp.Body.Close()
 		assert.Equal(t, resp.StatusCode, http.StatusNoContent)
 		assert.Equal(t, resp.Header.Get("Content-Type"), "application/json")
-		assert.NotEqual(t, acam := resp.Header.Get("Access-Control-Allow-Methods"), "")
+		acam := resp.Header.Get("Access-Control-Allow-Methods")
+		assert.NotEqual(t, acam, "")
+		allowedMethods := strings.Split(acam, ",")
+		for i := range allowedMethods {
+			allowedMethods[i] = strings.TrimSpace(allowedMethods[i])
+		}
+		expectedAllowedMethods := []string{ "GET", "DELETE",}
+		assert.True( t, containsAll(allowedMethods, expectedAllowedMethods), fmt.Sprints("Access-Control-Allow-Methods = %v, want = %v", allowedMethods, expectedAllowedMethods))
+		assert.Equal( resp.Header.Get("Access-Control-Allow-Origin"), "*")
+	})
+
+	t.Run("OPTIONS /file", func(t *testing.T) {
+		u := base.JoinPath("/file")
+		req, err1 := http.NewRequest(http.MethodOptions, u.String(), nil)
+		assert.Nil(t, err1)
+		resp, err2 := http.DefaultClient.Do(req)
+		assert.Nil(t, err2)
+		defer resp.Body.Close()
+		assert.Equal(t, resp.StatusCode, http.StatusNoContent)
+		assert.Equal(t, resp.Header.Get("Content-Type"), "application/json")
+		acam := resp.Header.Get("Access-Control-Allow-Methods")
+		assert.NotEqual(t, acam, "")
 		allowedMethods := strings.Split(acam, ",")
 		for i := range allowedMethods {
 			allowedMethods[i] = strings.TrimSpace(allowedMethods[i])
 		}
 		expectedAllowedMethods := []string{ "PUT", "GET", "DELETE",}
-		assert.True( t, containsAll(allowedMethods, expectedAllowedMethods, fmt.Sprints("Access-Control-Allow-Methods = %v, want = %v", allowedMethods, expectedAllowedMethods))
+		assert.True( t, containsAll(allowedMethods, expectedAllowedMethods), fmt.Sprints("Access-Control-Allow-Methods = %v, want = %v", allowedMethods, expectedAllowedMethods))
 		assert.Equal( resp.Header.Get("Access-Control-Allow-Origin"), "*")
 	})
 }
