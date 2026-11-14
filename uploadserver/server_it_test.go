@@ -93,7 +93,7 @@ func TestServer(t *testing.T) {
 	t.Run("PUT /file", func(t *testing.T) {
 		u := base.JoinPath("/upload")
 		CreatePdf_TestHelper( t, []string{ "hello, world",}, "hello.pdf")
-		file, err := os.Open("hello.txt")
+		file, err := os.Open("hello.pdf")
 		if err != nil {
 			t.Fatal(err)
 		}
