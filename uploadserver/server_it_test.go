@@ -449,52 +449,8 @@ func TestServer(t *testing.T) {
 			t.Errorf("result = %+v, want = %+v", result, expected)
 		}
 	})
-
-	t.Run("HEAD /files/foo/bar.txt", func(t *testing.T) {
-		localPath := filepath.Join(docRoot, "foo", "bar.txt")
-
-		u := base.JoinPath("/files/foo/bar.txt")
-		resp, err := http.Head(u.String())
-		if err != nil {
-			t.Fatalf("failed to HEAD: %v", err)
-		}
-		defer resp.Body.Close()
-		if resp.StatusCode != http.StatusOK {
-			t.Errorf("status = %d, want = %d", resp.StatusCode, http.StatusOK)
-		}
-		info, err := fs.Stat(localPath)
-		if err != nil {
-			t.Fatalf("failed to stat local file: %v", err)
-		}
-		cl, err := strconv.ParseInt(resp.Header.Get("Content-Length"), 10, 64)
-		if err != nil {
-			t.Fatalf("failed to parse Content-Length: %v", err)
-		}
-		if cl != info.Size() {
-			t.Errorf("Content-Length = %d, want = %d", cl, info.Size())
-		}
-	})
-
-	t.Run("HEAD /files/foo/bar/baz.txt", func(t *testing.T) {
-		u := base.JoinPath("/files/foo/bar/baz.txt")
-		resp, err := http.Head(u.String())
-		if err != nil {
-			t.Fatalf("failed to HEAD: %v", err)
-		}
-		defer resp.Body.Close()
-		if resp.StatusCode != http.StatusNotFound {
-			t.Errorf("status = %d, want = %d", resp.StatusCode, http.StatusNotFound)
-		}
-		body, err := io.ReadAll(resp.Body)
-		if err != nil {
-			t.Fatalf("failed to read response body: %v", err)
-		}
-		if len(body) > 0 {
-			t.Errorf("body = %s, want empty", body)
-		}
-	})
-
-	t.Run("OPTIONS /files/foo/bar.txt", func(t *testing.T) {
+*/ /*
+	t.Run("OPTIONS /file", func(t *testing.T) {
 		u := base.JoinPath("/files/foo/bar.txt")
 		req, err := http.NewRequest(http.MethodOptions, u.String(), nil)
 		if err != nil {
@@ -524,38 +480,25 @@ func TestServer(t *testing.T) {
 			t.Errorf("Access-Control-Allow-Origin = %s, want = \"*\"", acao)
 		}
 	})
-
-	t.Run("OPTIONS /upload", func(t *testing.T) {
-		u := base.JoinPath("/upload")
-		req, err := http.NewRequest(http.MethodOptions, u.String(), nil)
-		if err != nil {
-			t.Fatalf("failed to create OPTIONS request: %v", err)
-		}
-		resp, err := http.DefaultClient.Do(req)
-		if err != nil {
-			t.Fatalf("failed to request: %v", err)
-		}
+*/
+	t.Run("OPTIONS /list", func(t *testing.T) {
+		u := base.JoinPath("/list")
+		req, err1 := http.NewRequest(http.MethodOptions, u.String(), nil)
+		assert.Nil(t, err1)
+		resp, err2 := http.DefaultClient.Do(req)
+		assert.Nil(t, err2)
 		defer resp.Body.Close()
-		if resp.StatusCode != http.StatusNoContent {
-			t.Errorf("status = %d, want = %d", resp.StatusCode, http.StatusNoContent)
-		}
-		acam := resp.Header.Get("Access-Control-Allow-Methods")
-		if acam == "" {
-			t.Errorf("Access-Control-Allow-Methods got empty, want not empty")
-		}
+		assert.Equal(t, resp.StatusCode, http.StatusNoContent)
+		assert.Equal(t, resp.Header.Get("Content-Type"), "application/json")
+		assert.NotEqual(t, acam := resp.Header.Get("Access-Control-Allow-Methods"), "")
 		allowedMethods := strings.Split(acam, ",")
 		for i := range allowedMethods {
 			allowedMethods[i] = strings.TrimSpace(allowedMethods[i])
 		}
-		expectedAllowedMethods := []string{"POST"}
-		if !containsAll(allowedMethods, expectedAllowedMethods) {
-			t.Errorf("Access-Control-Allow-Methods = %v, want = %v", allowedMethods, expectedAllowedMethods)
-		}
-		if acao := resp.Header.Get("Access-Control-Allow-Origin"); acao != "*" {
-			t.Errorf("Access-Control-Allow-Origin = %s, want = \"*\"", acao)
-		}
+		expectedAllowedMethods := []string{ "PUT", "GET", "DELETE",}
+		assert.True( t, containsAll(allowedMethods, expectedAllowedMethods, fmt.Sprints("Access-Control-Allow-Methods = %v, want = %v", allowedMethods, expectedAllowedMethods))
+		assert.Equal( resp.Header.Get("Access-Control-Allow-Origin"), "*")
 	})
-*/
 }
 /*
 func TestServerWithAuth(t *testing.T) {
