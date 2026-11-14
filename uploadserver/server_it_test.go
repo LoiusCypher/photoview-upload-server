@@ -47,7 +47,7 @@ func CheckResponseCode_TestHelper(t *testing.T, resp *http.Response, statusCode 
 func CheckResponse_TestHelper(t *testing.T, resp *http.Response, statusCode int) []byte {
 	CheckResponseCode_TestHelper( t, resp, statusCode)
 	body, err1 := io.ReadAll(resp.Body)
-	assert.Nil(t, err1, fmt.Sprintf("failed to read response body: %v", err5))
+	assert.Nil(t, err1, fmt.Sprintf("failed to read response body: %v", err1))
 	return body
 }
 
@@ -529,7 +529,7 @@ func TestServer(t *testing.T) {
 		resp, err2 := http.DefaultClient.Do(req)
 		assert.Nil(t, err2)
 		defer resp.Body.Close()
-		CheckResponsebody := _TestHelper( t, resp, http.StatusNoContent)
+		body := CheckResponse_TestHelper( t, resp, http.StatusNoContent)
 		acam := resp.Header.Get("Access-Control-Allow-Methods")
 		assert.NotEqual(t, acam, "")
 		allowedMethods := strings.Split(acam, ",")
