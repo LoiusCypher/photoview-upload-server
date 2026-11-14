@@ -4,16 +4,16 @@ import (
 	"bytes"
 	"context"
 	"encoding/json/v2"
-	// // "fmt"
+	"fmt"
 	"io"
-	// // "mime/multipart"
+	"mime/multipart"
 	"net"
 	"net/http"
 	"net/url"
 	"os"
 	"path"
-	// // "path/filepath"
-	// // "reflect"
+	"path/filepath"
+	"reflect"
 	// // "slices"
 	"strconv"
 	// // "strings"
@@ -116,7 +116,7 @@ func TestServer(t *testing.T) {
 		if err := json.Unmarshal(body, &result); err != nil {
 			t.Fatalf("failed to decode response body: %v", err)
 		}
-		expected := SuccessFileInfosResult{ true, []FileInfo{"", "/files/hello.txt"}}
+		expected := SuccessFileInfosResult{ true, []FileInfo{{"", "/files/hello.txt"},},}
 		if !reflect.DeepEqual(result, expected) {
 			t.Errorf("result = %+v, want = %+v", result, expected)
 		}
