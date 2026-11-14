@@ -7,6 +7,7 @@ import (
 	"testing"
 	"github.com/spf13/afero"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 // CreateDatabase_TestHelper for testing.
@@ -26,8 +27,7 @@ func CreateDatabase_TestHelper(t *testing.T) {
 	assert.Nil( t, err1)
 	dbPath := *SetDbPath(sqlPath)
 	assert.Equal( t, dbPath, sqlPath)
-	_, err2 := os.Stat( sqlPath)
-	require.Nil( t, err2)
+	require.FileExists( t, dbPath)
 	db := openDb()
 	assert.NotNil( t, db)
 	defer db.Close()
