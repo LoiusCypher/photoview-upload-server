@@ -103,6 +103,10 @@ func TestServer(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
+		q := req.URL.Query()
+        	q.Add("name", "hello.pdf")
+		req.URL.RawQuery = q.Encode()
+
 		fmt.Println("Req", req)
 		resp, err := http.DefaultClient.Do(req)
 		if err != nil {
