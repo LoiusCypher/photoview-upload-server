@@ -109,7 +109,7 @@ func TestServer(t *testing.T) {
 		resp, err4 := http.DefaultClient.Do(req)
 		assert.Nil(t, err4, fmt.Sprintf("failed to PUT: %v", err4))
 		defer resp.Body.Close()
-		assert.Equal(t, resp.StatusCode, http.StatusCreated, fmt.Sprintf("status = %d, want = %d", resp.StatusCode, http.StatusCreated))
+		assert.Equal(t, resp.StatusCode, http.StatusCreated)
 		assert.Equal(t, resp.Header.Get("Content-Type"), "application/json")
 		body, err5 := io.ReadAll(resp.Body)
 		assert.Nil(t, err5, fmt.Sprintf("failed to read response body: %v", err5))
@@ -120,38 +120,33 @@ func TestServer(t *testing.T) {
 		assert.True(t, reflect.DeepEqual(result, expected), fmt.Sprintf("result = %+v, want = %+v", result, expected))
 		assert.FileExists(t, filepath.Join(docRoot, "hello-01.jpg"))
 	})
-/*
-	t.Run("POST /files/foo.txt should fail due to an invalid method", func(t *testing.T) {
-		u := base.JoinPath("/files/foo.txt")
-		req, err := makeFormRequest(u, http.MethodPost, "foo.txt", bytes.NewBufferString("hello, world"))
-		if err != nil {
-			t.Fatal(err)
-		}
-		resp, err := http.DefaultClient.Do(req)
-		if err != nil {
-			t.Fatalf("failed to POST: %v", err)
-		}
-		defer resp.Body.Close()
-		if resp.StatusCode != http.StatusMethodNotAllowed {
-			t.Errorf("status = %d, want = %d", resp.StatusCode, http.StatusMethodNotAllowed)
-		}
-		if resp.Header.Get("Content-Type") != "application/json" {
-			t.Errorf("Content-Type = %s, want = \"application/json\"", resp.Header.Get("Content-Type"))
-		}
-		body, err := io.ReadAll(resp.Body)
-		if err != nil {
-			t.Fatalf("failed to read response body: %v", err)
-		}
-		var result ErrorResult
-		if err := json.Unmarshal(body, &result); err != nil {
-			t.Fatalf("failed to decode response body: %v", err)
-		}
-		expected := ErrorResult{false, "POST is not allowed on /files"}
-		if !reflect.DeepEqual(result, expected) {
-			t.Errorf("result = %+v, want = %+v", result, expected)
-		}
-	})
 
+	t.Run("POST /files should fail due to an invalid method", func(t *testing.T) {
+		u := base.JoinPath("/files")
+		pdfFilePath := "foo.pdf"
+		CreatePdf_TestHelper( t, []string{ "hello, world",}, pdfFilePath)
+		file, err1 := os.Open( pdfFilePath)
+		assert.Nil(t, err1)
+		req, err3 := makeFormRequest(u, http.MethodPost, pdfFilePath, file)
+		assert.Nil(t, err3)
+		q := req.URL.Query()
+        	q.Add("name", pdfFilePath)
+		req.URL.RawQuery = q.Encode()
+		defer file.Close()
+		resp, err4 := http.DefaultClient.Do(req)
+		assert.Nil(t, err4, fmt.Sprintf("failed to POST: %v", err4))
+		defer resp.Body.Close()
+		assert.Equal(t, resp.StatusCode, http.StatusMethodNotAllowed)
+		assert.Equal(t, resp.Header.Get("Content-Type"), "application/json")
+		body, err5 := io.ReadAll(resp.Body)
+		assert.Nil(t, err5, fmt.Sprintf("failed to read response body: %v", err5))
+		var result ErrorResult
+		err6 := json.Unmarshal(body, &result)
+		assert.Nil(t, err6, fmt.Sprintf("failed to decode response body: %v", err6))
+		expected := ErrorResult{false, "POST is not allowed on /files"}
+		assert.True(t, reflect.DeepEqual(result, expected), fmt.Sprintf("result = %+v, want = %+v", result, expected))
+	})
+/*
 	t.Run("POST /upload should fail due to duplication", func(t *testing.T) {
 		localPath := filepath.Join(docRoot, "test.txt")
 		localOriginal, err := afero.ReadFile(fs, localPath)
