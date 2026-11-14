@@ -79,7 +79,7 @@ func TestServer(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to parse base url: %v", err)
 	}
-/*
+
 	withPreservingOriginal := func(t *testing.T, path string, f func()) {
 		original, err := afero.ReadFile(fs, path)
 		if err != nil {
@@ -90,7 +90,7 @@ func TestServer(t *testing.T) {
 			t.Fatalf("failed to restore original content: %v", err)
 		}
 	}
-*/
+
 	t.Run("PUT /file", func(t *testing.T) {
 		u := base.JoinPath("/file")
 		pdfFilePath := "hello.pdf"
@@ -186,7 +186,6 @@ func TestServer(t *testing.T) {
 	})
 */
 	t.Run("POST /upload should succeed even on overwrite", func(t *testing.T) {
-		u := base.JoinPath("/file")
 		pdfFilePath := "hello.pdf"
 
 		CreatePdf_TestHelper( t, []string{ "hello, world",}, pdfFilePath)
@@ -199,7 +198,7 @@ func TestServer(t *testing.T) {
 		helloFile_db_dir := "arbitrary / file "
 		helloFile_db_path := emptyFile_db_dir + "/" + " path"
 		sha_hello := RecordFile_TestHelper( t, pdfFilePath, helloFile_db_dir, helloFile_db_path, 1, 1)
-		assert.Equal( t, sha, sha_hello)
+		assert.Equal( t, shaOld, sha_hello)
 
 		localPath := filepath.Join(docRoot, "test.txt")
 		withPreservingOriginal(t, localPath, func() {
