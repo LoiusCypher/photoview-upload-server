@@ -415,9 +415,6 @@ func TestServer(t *testing.T) {
 		u.RawQuery = q.Encode()
 		req, err1 := http.NewRequest( http.MethodGet, u.String(), nil)
 		assert.Nil(t, err1)
-		//q := req.URL.Query()
-        	//q.Add("name", pdfFilePath)
-		//req.URL.RawQuery = q.Encode()
 		//fmt.Println("Req", req)
 		resp, err4 := http.DefaultClient.Do(req)
 		//resp, err := http.Get(u.String())
@@ -430,37 +427,34 @@ func TestServer(t *testing.T) {
 		var result SuccessFileInfosResult
 		err6 := json.Unmarshal(body, &result)
 		assert.Nil(t, err6, fmt.Sprintf("failed to decode response body: %v", err6))
-		expected := SuccessFileInfosResult{ true, []FileInfo{{ pdfFilePath, "b6f7b6ace760a07c54c4143e8e76a252d262b8e70eceaddf518b5f3a075e6960"},},}
+		expected := SuccessFileInfosResult{ true, []FileInfo{{ pdfFilePath, "2ae8ce7236fba2ae9ed14d35616d3e2251ceeaf0e5f74dd32ce5ac57d126e490"},},}
 		assert.True(t, reflect.DeepEqual(result, expected), fmt.Sprintf("result = %+v, want = %+v", result, expected))
 	})
-/*
-	t.Run("GET /files/foo/bar/baz.txt should fail (not found)", func(t *testing.T) {
-		u := base.JoinPath("/files/foo/bar/baz.txt")
-		resp, err := http.Get(u.String())
-		if err != nil {
-			t.Fatalf("failed to GET: %v", err)
-		}
+
+	t.Run("GET /files?name=foo/bar/baz.txt should fail (not found)", func(t *testing.T) {
+		u := base.JoinPath("/file")
+		pdfFilePath := "foo/bar/baz.txt"
+		q := url.Values{}
+        	q.Add("name", pdfFilePath)
+		u.RawQuery = q.Encode()
+		//req, err1 := http.NewRequest( http.MethodGet, u.String(), nil)
+		//assert.Nil(t, err1)
+		////fmt.Println("Req", req)
+		//resp, err4 := http.DefaultClient.Do(req)
+		resp, err4 := http.Get(u.String())
+		assert.Nil(t, err4, fmt.Sprintf("failed to GET: %v", err4))
 		defer resp.Body.Close()
-		if resp.StatusCode != http.StatusNotFound {
-			t.Errorf("status = %d, want = %d", resp.StatusCode, http.StatusNotFound)
-		}
-		if resp.Header.Get("Content-Type") != "application/json" {
-			t.Errorf("Content-Type = %s, want = \"application/json\"", resp.Header.Get("Content-Type"))
-		}
-		body, err := io.ReadAll(resp.Body)
-		if err != nil {
-			t.Fatalf("failed to read response body: %v", err)
-		}
-		var result ErrorResult
-		if err := json.Unmarshal(body, &result); err != nil {
-			t.Fatalf("failed to decode response body: %v", err)
-		}
-		expected := ErrorResult{false, "file not found"}
-		if !reflect.DeepEqual(result, expected) {
-			t.Errorf("result = %+v, want = %+v", result, expected)
-		}
+		assert.Equal(t, http.StatusNotFound, resp.StatusCode)
+		assert.Equal(t, "application/json", resp.Header.Get("Content-Type"))
+		body, err5 := io.ReadAll(resp.Body)
+		assert.Nil(t, err5, fmt.Sprintf("failed to read response body: %v", err5))
+		var result SuccessFileInfosResult
+		err6 := json.Unmarshal(body, &result)
+		assert.Nil(t, err6, fmt.Sprintf("failed to decode response body: %v", err6))
+		expected := SuccessFileInfosResult{ true, []FileInfo{{ pdfFilePath, "2ae8ce7236fba2ae9ed14d35616d3e2251ceeaf0e5f74dd32ce5ac57d126e490"},},}
+		assert.True(t, reflect.DeepEqual(result, expected), fmt.Sprintf("result = %+v, want = %+v", result, expected))
 	})
-*/
+
 	t.Run("OPTIONS /list", func(t *testing.T) {
 		u := base.JoinPath("/list")
 		req, err1 := http.NewRequest(http.MethodOptions, u.String(), nil)
