@@ -61,7 +61,7 @@ func TestPdfFiles(t *testing.T) {
 	assert.NoFileExists( t, jpgRoot + "/" + strings.TrimSuffix( jpgPath_Multi, ".pdf") + "-05.pdf")
 	// =========================================
 	err4 := deleteJpgs( jpgRoot, jpgPath_Empty)
-	assert.Nil( t, err1)
+	assert.Nil( t, err4)
 	assert.NoFileExists( t, jpgRoot + "/" + strings.TrimSuffix( jpgPath_Empty, ".pdf") + "-01.pdf")
 	// =========================================
 }
