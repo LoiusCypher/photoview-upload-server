@@ -1154,7 +1154,7 @@ func TestServerWithAuth(t *testing.T) {
 		}
 	})
 }
-*/
+*/ /*
 func verifyLocalFile(t *testing.T, fs afero.Fs, path string, content []byte) {
 	got, err := afero.ReadFile(fs, path)
 	if err != nil {
@@ -1164,7 +1164,7 @@ func verifyLocalFile(t *testing.T, fs afero.Fs, path string, content []byte) {
 		t.Errorf("local file content = %s, want = %s", got, content)
 	}
 }
-/*
+*/ /*
 // containsAll reports whether a contains all elements of b.
 func containsAll[T comparable](a, b []T) bool {
 	for _, x := range b {
