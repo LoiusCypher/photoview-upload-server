@@ -21,7 +21,7 @@ func CreateDatabase_TestHelper(t *testing.T) {
 	sqlPath := "/opt/app/shafiles.db"
 	err0 := os.Remove(sqlPath)
 	if err0 != nil {
-		require.True( t, IsNotExist(err0))
+		require.True( t, os.IsNotExist(err0))
 	}
 	err1 := os.MkdirAll( path.Dir(sqlPath), 0755)
 	assert.Nil( t, err1)
