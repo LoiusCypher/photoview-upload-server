@@ -14,9 +14,9 @@ import (
 	"path"
 	"path/filepath"
 	"reflect"
-	// // "slices"
+	"slices"
 	"strconv"
-	// // "strings"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -466,8 +466,8 @@ func TestServer(t *testing.T) {
 			allowedMethods[i] = strings.TrimSpace(allowedMethods[i])
 		}
 		expectedAllowedMethods := []string{ "GET", "DELETE",}
-		assert.True( t, containsAll(allowedMethods, expectedAllowedMethods), fmt.Sprints("Access-Control-Allow-Methods = %v, want = %v", allowedMethods, expectedAllowedMethods))
-		assert.Equal( resp.Header.Get("Access-Control-Allow-Origin"), "*")
+		assert.True( t, containsAll(allowedMethods, expectedAllowedMethods), fmt.Sprintf("Access-Control-Allow-Methods = %v, want = %v", allowedMethods, expectedAllowedMethods))
+		assert.Equal( t, resp.Header.Get("Access-Control-Allow-Origin"), "*")
 	})
 
 	t.Run("OPTIONS /file", func(t *testing.T) {
@@ -486,8 +486,8 @@ func TestServer(t *testing.T) {
 			allowedMethods[i] = strings.TrimSpace(allowedMethods[i])
 		}
 		expectedAllowedMethods := []string{ "PUT", "GET", "DELETE",}
-		assert.True( t, containsAll(allowedMethods, expectedAllowedMethods), fmt.Sprints("Access-Control-Allow-Methods = %v, want = %v", allowedMethods, expectedAllowedMethods))
-		assert.Equal( resp.Header.Get("Access-Control-Allow-Origin"), "*")
+		assert.True( t, containsAll(allowedMethods, expectedAllowedMethods), fmt.Sprintf("Access-Control-Allow-Methods = %v, want = %v", allowedMethods, expectedAllowedMethods))
+		assert.Equal( t, resp.Header.Get("Access-Control-Allow-Origin"), "*")
 	})
 }
 /*
@@ -1082,7 +1082,7 @@ func verifyLocalFile(t *testing.T, fs afero.Fs, path string, content []byte) {
 		t.Errorf("local file content = %s, want = %s", got, content)
 	}
 }
-*/ /*
+*/
 // containsAll reports whether a contains all elements of b.
 func containsAll[T comparable](a, b []T) bool {
 	for _, x := range b {
@@ -1092,7 +1092,7 @@ func containsAll[T comparable](a, b []T) bool {
 	}
 	return true
 }
-*/
+
 // makeFormRequest creates a new http.Request with multipart/form-data.
 func makeFormRequest(url *url.URL, method, filename string, content io.Reader) (*http.Request, error) {
 	b := new(bytes.Buffer)
