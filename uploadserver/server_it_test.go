@@ -30,6 +30,35 @@ func GenerateUrl_TestHelper(t *testing.T, u *url.URL, filePath string) {
 	u.RawQuery = q.Encode()
 }
 
+func GenerateRequest_TestHelper(t *testing.T, method string, u *url.URL, filePath string) *http.Request {
+	q := url.Values{}
+        q.Add("name", filePath)
+	u.RawQuery = q.Encode()
+	req, err1 := http.NewRequest( method, u.String(), nil)
+	assert.Nil(t, err1)
+	return req
+}
+
+func CheckResponseCode_TestHelper(t *testing.T, resp *http.Response, statusCode int) {
+	assert.Equal(t, resp.StatusCode, resp.StatusCode)
+	assert.Equal(t, "application/json", resp.Header.Get("Content-Type"))
+}
+
+func CheckResponse_TestHelper(t *testing.T, resp *http.Response, statusCode int) []byte {
+	CheckResponseCode_TestHelper( t, resp, statusCode)
+	body, err1 := io.ReadAll(resp.Body)
+	assert.Nil(t, err1, fmt.Sprintf("failed to read response body: %v", err5))
+	return body
+}
+
+func CheckResponseSuccess_TestHelper(t *testing.T, resp *http.Response, statusCode int) SuccessFileInfosResult {
+	body := CheckResponse_TestHelper( t, resp, statusCode)
+	var result SuccessFileInfosResult
+	err2 := json.Unmarshal(body, &result)
+	assert.Nil(t, err2, fmt.Sprintf("failed to decode response body: %v", err2))
+	return result
+}
+
 
 func TestServer(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
@@ -97,13 +126,7 @@ func TestServer(t *testing.T) {
 		resp, err4 := http.Get(u.String())
 		assert.Nil(t, err4, fmt.Sprintf("failed to GET: %v", err4))
 		defer resp.Body.Close()
-		assert.Equal(t, http.StatusNotFound, resp.StatusCode)
-		assert.Equal(t, resp.Header.Get("Content-Type"), "application/json")
-		body, err5 := io.ReadAll(resp.Body)
-		assert.Nil(t, err5, fmt.Sprintf("failed to read response body: %v", err5))
-		var result SuccessFileInfosResult
-		err6 := json.Unmarshal(body, &result)
-		assert.Nil(t, err6, fmt.Sprintf("failed to decode response body: %v", err6))
+		result := CheckResponseSuccess_TestHelper( t, resp, http.StatusNotFound)
 		expected := SuccessFileInfosResult{ false, nil,}
 		assert.Equal(t, expected.OK, result.OK, fmt.Sprintf("result = %+v, want = %+v", result, expected))
 		assert.Equal(t, expected.Files, result.Files, fmt.Sprintf("result = %+v, want = %+v", result, expected))
@@ -123,19 +146,10 @@ func TestServer(t *testing.T) {
 		GenerateUrl_TestHelper( t, u, pdfFilePath)
 		req, err3 := makeFormRequest(u, http.MethodPut, pdfFilePath, file)
 		assert.Nil(t, err3)
-        	// q.Add("name", pdfFilePath)
-		// req.URL.RawQuery = q.Encode()
-		//fmt.Println("Req", req)
 		resp, err4 := http.DefaultClient.Do(req)
 		assert.Nil(t, err4, fmt.Sprintf("failed to PUT: %v", err4))
 		defer resp.Body.Close()
-		assert.Equal(t, resp.StatusCode, http.StatusCreated)
-		assert.Equal(t, resp.Header.Get("Content-Type"), "application/json")
-		body, err5 := io.ReadAll(resp.Body)
-		assert.Nil(t, err5, fmt.Sprintf("failed to read response body: %v", err5))
-		var result SuccessFileInfosResult
-		err6 := json.Unmarshal(body, &result)
-		assert.Nil(t, err6, fmt.Sprintf("failed to decode response body: %v", err6))
+		result := CheckResponseSuccess_TestHelper( t, resp, http.StatusCreated
 		expected := SuccessFileInfosResult{ true, []FileInfo{{ pdfFilePath, sha},},}
 		assert.Equal(t, expected.OK, result.OK, fmt.Sprintf("result = %+v, want = %+v", result, expected))
 		assert.Equal(t, expected.Files, result.Files, fmt.Sprintf("result = %+v, want = %+v", result, expected))
@@ -151,13 +165,7 @@ func TestServer(t *testing.T) {
 		resp, err4 := http.Get(u.String())
 		assert.Nil(t, err4, fmt.Sprintf("failed to GET: %v", err4))
 		defer resp.Body.Close()
-		assert.Equal(t, resp.StatusCode, http.StatusOK)
-		assert.Equal(t, resp.Header.Get("Content-Type"), "application/json")
-		body, err5 := io.ReadAll(resp.Body)
-		assert.Nil(t, err5, fmt.Sprintf("failed to read response body: %v", err5))
-		var result SuccessFileInfosResult
-		err6 := json.Unmarshal(body, &result)
-		assert.Nil(t, err6, fmt.Sprintf("failed to decode response body: %v", err6))
+		result := CheckResponseSuccess_TestHelper( t, resp, http.StatusOK)
 		expected := SuccessFileInfosResult{ true, []FileInfo{{ pdfFilePath, lastPdfSha},},}
 		assert.Equal(t, expected.OK, result.OK, fmt.Sprintf("result = %+v, want = %+v", result, expected))
 		assert.Equal(t, expected.Files, result.Files, fmt.Sprintf("result = %+v, want = %+v", result, expected))
@@ -174,17 +182,11 @@ func TestServer(t *testing.T) {
 		GenerateUrl_TestHelper( t, u, pdfFilePath)
 		req, err3 := makeFormRequest(u, http.MethodPost, pdfFilePath, file)
 		assert.Nil(t, err3)
-		// q := req.URL.Query()
-        	// q.Add("name", pdfFilePath)
-		// req.URL.RawQuery = q.Encode()
 		defer file.Close()
 		resp, err4 := http.DefaultClient.Do(req)
 		assert.Nil(t, err4, fmt.Sprintf("failed to POST: %v", err4))
 		defer resp.Body.Close()
-		assert.Equal(t, resp.StatusCode, http.StatusMethodNotAllowed)
-		assert.Equal(t, resp.Header.Get("Content-Type"), "application/json")
-		body, err5 := io.ReadAll(resp.Body)
-		assert.Nil(t, err5, fmt.Sprintf("failed to read response body: %v", err5))
+		body := CheckResponse_TestHelper( t, resp, http.StatusMethodNotAllowed)
 		var result ErrorResult
 		err6 := json.Unmarshal(body, &result)
 		assert.Nil(t, err6, fmt.Sprintf("failed to decode response body: %v", err6))
@@ -245,29 +247,21 @@ func TestServer(t *testing.T) {
 		sha_hello := RecordFile_TestHelper( t, pdfFilePath, helloFile_db_dir, helloFile_db_path, 2, 1)
 		assert.Equal( t, shaOld, sha_hello)
 
-		u := base.JoinPath("/file")
-		q := u.Query()
-		q.Set("name", helloFile_db_path)
-		u.RawQuery = q.Encode()
-
 		newContent := "hello, new world"
 		CreatePdf_TestHelper( t, []string{ newContent,}, pdfFilePath)
 		shaNew, err2 := calcSha( pdfFilePath)
 		assert.NotEqual( t, sha_hello, shaNew)
 		assert.Nil(t, err2)
+
+		u := base.JoinPath("/file")
+		GenerateUrl_TestHelper( t, u, helloFile_db_path)
+
 		req, err3 := makeFormRequest(u, http.MethodPut, pdfFilePath, file)
 		assert.Nil(t, err3)
 		resp, err4 := http.DefaultClient.Do(req)
 		assert.Nil(t, err4, fmt.Sprintf("failed to PUT: %v", err4))
 		defer resp.Body.Close()
-		assert.Equal(t, resp.StatusCode, http.StatusCreated)
-		assert.Equal(t, resp.Header.Get("Content-Type"), "application/json")
-
-		body, err5 := io.ReadAll(resp.Body)
-		assert.Nil(t, err5, fmt.Sprintf("failed to read response body: %v", err5))
-		var result SuccessFileInfosResult
-		err6 := json.Unmarshal(body, &result)
-		assert.Nil(t, err6, fmt.Sprintf("failed to decode response body: %v", err6))
+		result := CheckResponseSuccess_TestHelper( t, resp, http.StatusCreated)
 		expected := SuccessFileInfosResult{ true, []FileInfo{{ helloFile_db_path, shaNew},},}
 		assert.Equal(t, expected.OK, result.OK, fmt.Sprintf("result = %+v, want = %+v", result, expected))
 		assert.Equal(t, expected.Files, result.Files, fmt.Sprintf("result = %+v, want = %+v", result, expected))
@@ -452,19 +446,11 @@ func TestServer(t *testing.T) {
 	t.Run("GET /file?name=hello.pdf", func(t *testing.T) {
 		u := base.JoinPath("/file")
 		pdfFilePath := "hello.pdf"
-		q := url.Values{}
-        	q.Add("name", pdfFilePath)
-		u.RawQuery = q.Encode()
-		resp, err4 := http.Get(u.String())
+		req := GenerateRequest_TestHelper( t, http.MethodGet, u, pdfFilePath)
+		resp, err4 := http.DefaultClient.Do(req)
 		assert.Nil(t, err4, fmt.Sprintf("failed to GET: %v", err4))
 		defer resp.Body.Close()
-		assert.Equal(t, resp.StatusCode, http.StatusOK)
-		assert.Equal(t, resp.Header.Get("Content-Type"), "application/json")
-		body, err5 := io.ReadAll(resp.Body)
-		assert.Nil(t, err5, fmt.Sprintf("failed to read response body: %v", err5))
-		var result SuccessFileInfosResult
-		err6 := json.Unmarshal(body, &result)
-		assert.Nil(t, err6, fmt.Sprintf("failed to decode response body: %v", err6))
+		result := CheckResponseSuccess_TestHelper( t, resp, http.StatusOK)
 		expected := SuccessFileInfosResult{ true, []FileInfo{{ pdfFilePath, lastPdfSha},},}
 		assert.Equal(t, expected.OK, result.OK, fmt.Sprintf("result = %+v, want = %+v", result, expected))
 		assert.Equal(t, expected.Files, result.Files, fmt.Sprintf("result = %+v, want = %+v", result, expected))
@@ -475,19 +461,11 @@ func TestServer(t *testing.T) {
 	t.Run("GET /files?name=foo/bar/baz.txt should fail (not found)", func(t *testing.T) {
 		u := base.JoinPath("/file")
 		pdfFilePath := "foo/bar/baz.txt"
-		q := url.Values{}
-        	q.Add("name", pdfFilePath)
-		u.RawQuery = q.Encode()
-		resp, err4 := http.Get(u.String())
+		req := GenerateRequest_TestHelper( t, http.MethodGet, u, pdfFilePath)
+		resp, err4 := http.DefaultClient.Do(req)
 		assert.Nil(t, err4, fmt.Sprintf("failed to GET: %v", err4))
 		defer resp.Body.Close()
-		assert.Equal(t, http.StatusNotFound, resp.StatusCode)
-		assert.Equal(t, "application/json", resp.Header.Get("Content-Type"))
-		body, err5 := io.ReadAll(resp.Body)
-		assert.Nil(t, err5, fmt.Sprintf("failed to read response body: %v", err5))
-		var result SuccessFileInfosResult
-		err6 := json.Unmarshal(body, &result)
-		assert.Nil(t, err6, fmt.Sprintf("failed to decode response body: %v", err6))
+		result := CheckResponseSuccess_TestHelper( t, resp, http.StatusNotFound)
 		expected := SuccessFileInfosResult{ false, nil,}
 		assert.Equal(t, expected.OK, result.OK, fmt.Sprintf("result = %+v, want = %+v", result, expected))
 		assert.Equal(t, expected.Files, result.Files, fmt.Sprintf("result = %+v, want = %+v", result, expected))
@@ -498,21 +476,11 @@ func TestServer(t *testing.T) {
 	t.Run("DELETE /file?name=hello.pdf", func(t *testing.T) {
 		u := base.JoinPath("/file")
 		pdfFilePath := "hello.pdf"
-		q := url.Values{}
-        	q.Add("name", pdfFilePath)
-		u.RawQuery = q.Encode()
-		req, err1 := http.NewRequest(http.MethodDelete, u.String(), nil)
-		assert.Nil(t, err1)
+		req := GenerateRequest_TestHelper( t, http.MethodDelete, u, pdfFilePath)
 		resp, err2 := http.DefaultClient.Do(req)
 		assert.Nil(t, err2, fmt.Sprintf("failed to DELETE: %v", err2))
 		defer resp.Body.Close()
-		assert.Equal(t, resp.StatusCode, http.StatusOK)
-		assert.Equal(t, resp.Header.Get("Content-Type"), "application/json")
-		body, err5 := io.ReadAll(resp.Body)
-		assert.Nil(t, err5, fmt.Sprintf("failed to read response body: %v", err5))
-		var result SuccessFileInfosResult
-		err6 := json.Unmarshal(body, &result)
-		assert.Nil(t, err6, fmt.Sprintf("failed to decode response body: %v", err6))
+		result := CheckResponseSuccess_TestHelper( t, resp, http.StatusOK)
 		expected := SuccessFileInfosResult{ true, []FileInfo{{ pdfFilePath, lastPdfSha},},}
 		assert.Equal(t, expected.OK, result.OK, fmt.Sprintf("result = %+v, want = %+v", result, expected))
 		assert.Equal(t, expected.Files, result.Files, fmt.Sprintf("result = %+v, want = %+v", result, expected))
@@ -523,19 +491,11 @@ func TestServer(t *testing.T) {
 	t.Run("GET /file?name=hello.pdf should fail now", func(t *testing.T) {
 		u := base.JoinPath("/file")
 		pdfFilePath := "hello.pdf"
-		q := url.Values{}
-        	q.Add("name", pdfFilePath)
-		u.RawQuery = q.Encode()
-		resp, err4 := http.Get(u.String())
+		req := GenerateRequest_TestHelper( t, http.MethodGet, u, pdfFilePath)
+		resp, err4 := http.DefaultClient.Do(req)
 		assert.Nil(t, err4, fmt.Sprintf("failed to GET: %v", err4))
 		defer resp.Body.Close()
-		assert.Equal(t, http.StatusNotFound, resp.StatusCode)
-		assert.Equal(t, resp.Header.Get("Content-Type"), "application/json")
-		body, err5 := io.ReadAll(resp.Body)
-		assert.Nil(t, err5, fmt.Sprintf("failed to read response body: %v", err5))
-		var result SuccessFileInfosResult
-		err6 := json.Unmarshal(body, &result)
-		assert.Nil(t, err6, fmt.Sprintf("failed to decode response body: %v", err6))
+		result := CheckResponseSuccess_TestHelper( t, resp, http.StatusNotFound)
 		expected := SuccessFileInfosResult{ false, nil,}
 		assert.Equal(t, expected.OK, result.OK, fmt.Sprintf("result = %+v, want = %+v", result, expected))
 		assert.Equal(t, expected.Files, result.Files, fmt.Sprintf("result = %+v, want = %+v", result, expected))
@@ -550,8 +510,7 @@ func TestServer(t *testing.T) {
 		resp, err2 := http.DefaultClient.Do(req)
 		assert.Nil(t, err2)
 		defer resp.Body.Close()
-		assert.Equal(t, resp.StatusCode, http.StatusNoContent)
-		assert.Equal(t, resp.Header.Get("Content-Type"), "application/json")
+		CheckResponseCode_TestHelper( t, resp, http.StatusNoContent)
 		acam := resp.Header.Get("Access-Control-Allow-Methods")
 		assert.NotEqual(t, acam, "")
 		allowedMethods := strings.Split(acam, ",")
@@ -570,8 +529,7 @@ func TestServer(t *testing.T) {
 		resp, err2 := http.DefaultClient.Do(req)
 		assert.Nil(t, err2)
 		defer resp.Body.Close()
-		assert.Equal(t, resp.StatusCode, http.StatusNoContent)
-		assert.Equal(t, resp.Header.Get("Content-Type"), "application/json")
+		CheckResponsebody := _TestHelper( t, resp, http.StatusNoContent)
 		acam := resp.Header.Get("Access-Control-Allow-Methods")
 		assert.NotEqual(t, acam, "")
 		allowedMethods := strings.Split(acam, ",")
