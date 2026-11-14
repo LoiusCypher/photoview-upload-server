@@ -19,6 +19,7 @@ import (
 	// // "strings"
 	"testing"
 
+	"github.com/jung-kurt/gofpdf"
 	"github.com/spf13/afero"
 )
 
@@ -92,7 +93,14 @@ func TestServer(t *testing.T) {
 */
 	t.Run("PUT /file", func(t *testing.T) {
 		u := base.JoinPath("/upload")
-		req, err := makeFormRequest(u, http.MethodPut, "hello.txt", bytes.NewBufferString("hello, world"))
+		CreatePdf_TestHelper( t, []string{ "hello, world",}, "hello.pdf")
+		file, err := os.Open("hello.txt")
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer file.Close()
+		//req, err := makeFormRequest(u, http.MethodPut, "hello.txt", bytes.NewBufferString("hello, world"))
+		req, err := makeFormRequest(u, http.MethodPut, "hello.pdf", file)
 		if err != nil {
 			t.Fatal(err)
 		}
