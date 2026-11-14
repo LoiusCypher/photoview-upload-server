@@ -79,7 +79,7 @@ func TestServer(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to parse base url: %v", err)
 	}
-/*
+
 	withPreservingOriginal := func(t *testing.T, path string, f func()) {
 		original, err := afero.ReadFile(fs, path)
 		if err != nil {
@@ -91,15 +91,15 @@ func TestServer(t *testing.T) {
 		}
 	}
 
-	t.Run("POST /upload", func(t *testing.T) {
+	t.Run("PUT /file", func(t *testing.T) {
 		u := base.JoinPath("/upload")
-		req, err := makeFormRequest(u, http.MethodPost, "hello.txt", bytes.NewBufferString("hello, world"))
+		req, err := makeFormRequest(u, http.MethodPut, "hello.txt", bytes.NewBufferString("hello, world"))
 		if err != nil {
 			t.Fatal(err)
 		}
 		resp, err := http.DefaultClient.Do(req)
 		if err != nil {
-			t.Fatalf("failed to POST: %v", err)
+			t.Fatalf("failed to PUT: %v", err)
 		}
 		defer resp.Body.Close()
 		if resp.StatusCode != http.StatusCreated {
@@ -122,7 +122,7 @@ func TestServer(t *testing.T) {
 		}
 		verifyLocalFile(t, fs, filepath.Join(docRoot, "hello.txt"), []byte("hello, world"))
 	})
-
+/*
 	t.Run("POST /files/foo.txt should fail due to an invalid method", func(t *testing.T) {
 		u := base.JoinPath("/files/foo.txt")
 		req, err := makeFormRequest(u, http.MethodPost, "foo.txt", bytes.NewBufferString("hello, world"))
