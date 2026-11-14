@@ -133,7 +133,7 @@ func TestServer(t *testing.T) {
 			t.Errorf("result = %+v, want = %+v", result, expected)
 		}
 		//verifyLocalFile(t, fs, filepath.Join(docRoot, "hello-01.jpg"), []byte("hello, world"))
-		assert.FileExist(t, filepath.Join(docRoot, "hello-01.jpg"))
+		assert.FileExists(t, filepath.Join(docRoot, "hello-01.jpg"))
 	})
 /*
 	t.Run("POST /files/foo.txt should fail due to an invalid method", func(t *testing.T) {
