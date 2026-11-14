@@ -453,8 +453,10 @@ func TestServer(t *testing.T) {
 		q := url.Values{}
         	q.Add("name", pdfFilePath)
 		u.RawQuery = q.Encode()
-		resp, err4 := http.Delete(u.String())
-		assert.Nil(t, err4, fmt.Sprintf("failed to GET: %v", err4))
+		req, err1 := http.NewRequest(http.MethodDelete, u.String(), nil)
+		assert.Nil(t, err1)
+		resp, err2 := http.DefaultClient.Do(req)
+		assert.Nil(t, err2, fmt.Sprintf("failed to DELETE: %v", err4))
 		defer resp.Body.Close()
 		assert.Equal(t, resp.StatusCode, http.StatusOK)
 		assert.Equal(t, resp.Header.Get("Content-Type"), "application/json")
