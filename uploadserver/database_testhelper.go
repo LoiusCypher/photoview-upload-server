@@ -33,10 +33,10 @@ func CreateDatabase_TestHelper(t *testing.T) {
 	defer db.Close()
 	tx, err3 := db.Begin()
 	assert.Nil( t, err3)
-	_, rr4 := tx.Exec("DELETE FROM shafiles")
+	_, err4 := tx.Exec("DELETE FROM shafiles")
 	assert.Nil( t, err4)
 	defer tx.Rollback()
-	err5 = tx.Commit()
+	err5 := tx.Commit()
 	assert.Nil( t, err5)
 	// =========================================Setup Database
 
