@@ -432,6 +432,9 @@ func TestServer(t *testing.T) {
 		err6 := json.Unmarshal(body, &result)
 		assert.Nil(t, err6, fmt.Sprintf("failed to decode response body: %v", err6))
 		expected := SuccessFileInfosResult{ false, []FileInfo{},}
+		assert.Equal(t, expected.OK, result.OK, fmt.Sprintf("result = %+v, want = %+v", result, expected))
+		assert.True(t, reflect.DeepEqual( expected.Files, result.Files), fmt.Sprintf("result = %+v, want = %+v", result, expected))
+		assert.True(t, slices.Equal( expected.Files, result.Files), fmt.Sprintf("result = %+v, want = %+v", result, expected))
 		assert.True(t, reflect.DeepEqual(result, expected), fmt.Sprintf("result = %+v, want = %+v", result, expected))
 	})
 
