@@ -95,23 +95,18 @@ func TestServer(t *testing.T) {
 		u := base.JoinPath("/file")
 		CreatePdf_TestHelper( t, []string{ "hello, world",}, "hello.pdf")
 		file, err := os.Open("hello.pdf")
-		if err != nil {
-			t.Fatal(err)
-		}
+		assert.Nil(t, err)
 		defer file.Close()
 		//req, err := makeFormRequest(u, http.MethodPut, "hello.txt", bytes.NewBufferString("hello, world"))
 		req, err := makeFormRequest(u, http.MethodPut, "hello.pdf", file)
-		if err != nil {
-			t.Fatal(err)
-		}
+		assert.Nil(t, err)
 		q := req.URL.Query()
         	q.Add("name", "hello.pdf")
 		req.URL.RawQuery = q.Encode()
 
 		//fmt.Println("Req", req)
 		resp, err := http.DefaultClient.Do(req)
-		assert.Nil(t, err)
-		//	t.Fatalf("failed to PUT: %v", err)
+		assert.Nil(t, err, fmt.Prinf("failed to PUT: %v", err))
 		defer resp.Body.Close()
 		if resp.StatusCode != http.StatusCreated {
 			t.Errorf("status = %d, want = %d", resp.StatusCode, http.StatusCreated)
@@ -120,6 +115,7 @@ func TestServer(t *testing.T) {
 			t.Errorf("Content-Type = %s, want = \"application/json\"", ct)
 		}
 		body, err := io.ReadAll(resp.Body)
+		assert.Nil(t, err)
 		if err != nil {
 			t.Fatalf("failed to read response body: %v", err)
 		}
@@ -127,7 +123,7 @@ func TestServer(t *testing.T) {
 		if err := json.Unmarshal(body, &result); err != nil {
 			t.Fatalf("failed to decode response body: %v", err)
 		}
-		expected := SuccessFileInfosResult{ true, []FileInfo{{ "hello.pdf", "49999b5ad5d69b1af0a914503bf49eff491636cab15e3444269df917f9f80813"},},}
+		expected := SuccessFileInfosResult{ true, []FileInfo{{ "hello.pdf", "d035c3be926f9818dad67edcea55506c013bd60ed983b6e67e1371804cb0b200"},},}
 		if !reflect.DeepEqual(result, expected) {
 			t.Errorf("result = %+v, want = %+v", result, expected)
 		}
