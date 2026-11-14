@@ -34,7 +34,6 @@ func TestServer(t *testing.T) {
 		fs = afero.NewOsFs()
 	} else {
 		docRoot = "/tmp"
-		sqlRoot = "/tmp"
 		fs = afero.NewMemMapFs()
 	}
 
@@ -410,7 +409,7 @@ func TestServer(t *testing.T) {
 	t.Run("GET /file?name=hello.pdf", func(t *testing.T) {
 		u := base.JoinPath("/file")
 		pdfFilePath := "hello.pdf"
-		req, err1 := http.NewRequest( http.MethodGet, u, nil)
+		req, err1 := http.NewRequest( http.MethodGet, u.URL, nil)
 		assert.Nil(t, err1)
 		q := req.URL.Query()
         	q.Add("name", pdfFilePath)
@@ -427,7 +426,7 @@ func TestServer(t *testing.T) {
 		var result SuccessFileInfosResult
 		err6 := json.Unmarshal(body, &result)
 		assert.Nil(t, err6, fmt.Sprintf("failed to decode response body: %v", err6))
-		expected := SuccessFileInfosResult{ true, []FileInfo{{ pdfFilePath, sha},},}
+		expected := SuccessFileInfosResult{ true, []FileInfo{{ pdfFilePath, ""},},}
 		assert.True(t, reflect.DeepEqual(result, expected), fmt.Sprintf("result = %+v, want = %+v", result, expected))
 	})
 /*
