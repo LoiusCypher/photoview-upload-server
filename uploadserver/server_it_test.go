@@ -103,6 +103,7 @@ func TestServer(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
+		fmt.Println("Req", req)
 		resp, err := http.DefaultClient.Do(req)
 		if err != nil {
 			t.Fatalf("failed to PUT: %v", err)
