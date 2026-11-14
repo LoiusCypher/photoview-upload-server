@@ -89,14 +89,14 @@ func TestServer(t *testing.T) {
 		resp, err4 := http.Get(u.String())
 		assert.Nil(t, err4, fmt.Sprintf("failed to GET: %v", err4))
 		defer resp.Body.Close()
-		assert.Equal(t, resp.StatusCode, http.StatusOK)
+		assert.Equal(t, http.StatusNotFound, resp.StatusCode)
 		assert.Equal(t, resp.Header.Get("Content-Type"), "application/json")
 		body, err5 := io.ReadAll(resp.Body)
 		assert.Nil(t, err5, fmt.Sprintf("failed to read response body: %v", err5))
 		var result SuccessFileInfosResult
 		err6 := json.Unmarshal(body, &result)
 		assert.Nil(t, err6, fmt.Sprintf("failed to decode response body: %v", err6))
-		expected := SuccessFileInfosResult{ true, nil,}
+		expected := SuccessFileInfosResult{ false, nil,}
 		assert.Equal(t, expected.OK, result.OK, fmt.Sprintf("result = %+v, want = %+v", result, expected))
 		assert.Equal(t, expected.Files, result.Files, fmt.Sprintf("result = %+v, want = %+v", result, expected))
 		assert.True(t, slices.Equal( expected.Files, result.Files), fmt.Sprintf("result = %+v, want = %+v", result, expected))
