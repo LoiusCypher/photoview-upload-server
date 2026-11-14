@@ -20,7 +20,7 @@ func CreateDatabase_TestHelper(t *testing.T) {
 	//fs := afero.NewMemMapFs()
 	fs := afero.NewOsFs()
 	sqlPath := "/opt/app/shafiles.db"
-	err0 := os.Remove(sqlPath)
+	err0 := fs.Remove(sqlPath)
 	assert.Nil( t, err0)
 	err1 := fs.MkdirAll( path.Dir(sqlPath), 0755)
 	assert.Nil( t, err1)

@@ -12,7 +12,6 @@ import (
 */
 	//"errors"
 	//"net/http/httptest"
-	//"os"
 	"path"
 	"testing"
 	"github.com/spf13/afero"
