@@ -200,7 +200,7 @@ func TestServer(t *testing.T) {
 
 		helloFile_db_dir := "arbitrary / file "
 		helloFile_db_path := helloFile_db_dir + "/" + " path"
-		sha_hello := RecordFile_TestHelper( t, pdfFilePath, helloFile_db_dir, helloFile_db_path, 1, 2)
+		sha_hello := RecordFile_TestHelper( t, pdfFilePath, helloFile_db_dir, helloFile_db_path, 2, 1)
 		assert.Equal( t, shaOld, sha_hello)
 
 		localPath := filepath.Join(docRoot, "test.txt")
@@ -430,7 +430,7 @@ func TestServer(t *testing.T) {
 		var result SuccessFileInfosResult
 		err6 := json.Unmarshal(body, &result)
 		assert.Nil(t, err6, fmt.Sprintf("failed to decode response body: %v", err6))
-		expected := SuccessFileInfosResult{ true, []FileInfo{{ pdfFilePath, ""},},}
+		expected := SuccessFileInfosResult{ true, []FileInfo{{ pdfFilePath, "b6f7b6ace760a07c54c4143e8e76a252d262b8e70eceaddf518b5f3a075e6960"},},}
 		assert.True(t, reflect.DeepEqual(result, expected), fmt.Sprintf("result = %+v, want = %+v", result, expected))
 	})
 /*
