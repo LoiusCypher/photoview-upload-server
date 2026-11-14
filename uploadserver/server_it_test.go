@@ -155,7 +155,6 @@ func TestServer(t *testing.T) {
 		assert.True(t, slices.Equal( expected.Files, result.Files), fmt.Sprintf("result = %+v, want = %+v", result, expected))
 		assert.True(t, reflect.DeepEqual(result, expected), fmt.Sprintf("result = %+v, want = %+v", result, expected))
 	})
-:w
 
 	t.Run("POST /file?name=foo.pdf should fail due to an invalid method", func(t *testing.T) {
 		u := base.JoinPath("/file")
