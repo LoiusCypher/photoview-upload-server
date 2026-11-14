@@ -82,6 +82,7 @@ func TestServer(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to parse base url: %v", err)
 	}
+	var lastPdfSha string
 
 	withPreservingOriginal := func(t *testing.T, path string, f func()) {
 		original, err := afero.ReadFile(fs, path)
@@ -122,6 +123,7 @@ func TestServer(t *testing.T) {
 		expected := SuccessFileInfosResult{ true, []FileInfo{{ pdfFilePath, sha},},}
 		assert.True(t, reflect.DeepEqual(result, expected), fmt.Sprintf("result = %+v, want = %+v", result, expected))
 		assert.FileExists(t, filepath.Join(docRoot, "hello-01.jpg"))
+		lastPdfSha = sha
 	})
 
 	t.Run("POST /file should fail due to an invalid method", func(t *testing.T) {
@@ -231,6 +233,7 @@ func TestServer(t *testing.T) {
 			expected := SuccessFileInfosResult{ true, []FileInfo{{ helloFile_db_path, shaNew},},}
 			assert.True(t, reflect.DeepEqual(result, expected), fmt.Sprintf("result = %+v, want = %+v", result, expected))
 			assert.FileExists(t, filepath.Join(docRoot, "hello-01.jpg"))
+			lastPdfSha = shaNew
 		})
 	})
 /*
@@ -413,11 +416,7 @@ func TestServer(t *testing.T) {
 		q := url.Values{}
         	q.Add("name", pdfFilePath)
 		u.RawQuery = q.Encode()
-		req, err1 := http.NewRequest( http.MethodGet, u.String(), nil)
-		assert.Nil(t, err1)
-		//fmt.Println("Req", req)
-		resp, err4 := http.DefaultClient.Do(req)
-		//resp, err := http.Get(u.String())
+		resp, err4 := http.Get(u.String())
 		assert.Nil(t, err4, fmt.Sprintf("failed to GET: %v", err4))
 		defer resp.Body.Close()
 		assert.Equal(t, resp.StatusCode, http.StatusOK)
@@ -427,7 +426,7 @@ func TestServer(t *testing.T) {
 		var result SuccessFileInfosResult
 		err6 := json.Unmarshal(body, &result)
 		assert.Nil(t, err6, fmt.Sprintf("failed to decode response body: %v", err6))
-		expected := SuccessFileInfosResult{ true, []FileInfo{{ pdfFilePath, "2ae8ce7236fba2ae9ed14d35616d3e2251ceeaf0e5f74dd32ce5ac57d126e490"},},}
+		expected := SuccessFileInfosResult{ true, []FileInfo{{ pdfFilePath, lastPdfSha},},}
 		assert.True(t, reflect.DeepEqual(result, expected), fmt.Sprintf("result = %+v, want = %+v", result, expected))
 	})
 
@@ -437,10 +436,6 @@ func TestServer(t *testing.T) {
 		q := url.Values{}
         	q.Add("name", pdfFilePath)
 		u.RawQuery = q.Encode()
-		//req, err1 := http.NewRequest( http.MethodGet, u.String(), nil)
-		//assert.Nil(t, err1)
-		////fmt.Println("Req", req)
-		//resp, err4 := http.DefaultClient.Do(req)
 		resp, err4 := http.Get(u.String())
 		assert.Nil(t, err4, fmt.Sprintf("failed to GET: %v", err4))
 		defer resp.Body.Close()
@@ -451,7 +446,7 @@ func TestServer(t *testing.T) {
 		var result SuccessFileInfosResult
 		err6 := json.Unmarshal(body, &result)
 		assert.Nil(t, err6, fmt.Sprintf("failed to decode response body: %v", err6))
-		expected := SuccessFileInfosResult{ true, []FileInfo{{ pdfFilePath, "2ae8ce7236fba2ae9ed14d35616d3e2251ceeaf0e5f74dd32ce5ac57d126e490"},},}
+		expected := SuccessFileInfosResult{ false, []FileInfo{},}
 		assert.True(t, reflect.DeepEqual(result, expected), fmt.Sprintf("result = %+v, want = %+v", result, expected))
 	})
 
