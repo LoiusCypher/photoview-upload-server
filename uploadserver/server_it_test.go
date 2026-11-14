@@ -409,10 +409,10 @@ func TestServer(t *testing.T) {
 	t.Run("GET /file?name=hello.pdf", func(t *testing.T) {
 		u := base.JoinPath("/file")
 		pdfFilePath := "hello.pdf"
-		q := u.Query
+		q := url.Values{}
         	q.Add("name", pdfFilePath)
 		u.RawQuery = q.Encode()
-		req, err1 := http.NewRequest( http.MethodGet, string(*u), nil)
+		req, err1 := http.NewRequest( http.MethodGet, u.String(), nil)
 		assert.Nil(t, err1)
 		//q := req.URL.Query()
         	//q.Add("name", pdfFilePath)
