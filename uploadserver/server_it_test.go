@@ -529,7 +529,7 @@ func TestServer(t *testing.T) {
 		resp, err2 := http.DefaultClient.Do(req)
 		assert.Nil(t, err2)
 		defer resp.Body.Close()
-		body := CheckResponse_TestHelper( t, resp, http.StatusNoContent)
+		CheckResponseCode_TestHelper( t, resp, http.StatusNoContent)
 		acam := resp.Header.Get("Access-Control-Allow-Methods")
 		assert.NotEqual(t, acam, "")
 		allowedMethods := strings.Split(acam, ",")
