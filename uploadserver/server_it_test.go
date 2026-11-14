@@ -110,7 +110,7 @@ func TestServer(t *testing.T) {
 		assert.Nil(t, err4, fmt.Sprintf("failed to PUT: %v", err4))
 		defer resp.Body.Close()
 		assert.Equal(t, resp.StatusCode, http.StatusCreated, fmt.Sprintf("status = %d, want = %d", resp.StatusCode, http.StatusCreated))
-		assert.Equal(t, resp.Header.Get("Content-Type"), "application/json", fmt.Sprintf("Content-Type = %s, want = \"application/json\"", ct))
+		assert.Equal(t, resp.Header.Get("Content-Type"), "application/json")
 		body, err5 := io.ReadAll(resp.Body)
 		assert.Nil(t, err5, fmt.Sprintf("failed to read response body: %v", err5))
 		var result SuccessFileInfosResult
