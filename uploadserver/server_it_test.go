@@ -33,7 +33,7 @@ func TestServer(t *testing.T) {
 		docRoot = v
 		fs = afero.NewOsFs()
 	} else {
-		docRoot = "/opt/app"
+		docRoot = "/tmp"
 		fs = afero.NewMemMapFs()
 	}
 
@@ -108,11 +108,10 @@ func TestServer(t *testing.T) {
         	q.Add("name", "hello.pdf")
 		req.URL.RawQuery = q.Encode()
 
-		fmt.Println("Req", req)
+		//fmt.Println("Req", req)
 		resp, err := http.DefaultClient.Do(req)
-		if err != nil {
-			t.Fatalf("failed to PUT: %v", err)
-		}
+		assert.Nil(t, err)
+		//	t.Fatalf("failed to PUT: %v", err)
 		defer resp.Body.Close()
 		if resp.StatusCode != http.StatusCreated {
 			t.Errorf("status = %d, want = %d", resp.StatusCode, http.StatusCreated)
