@@ -74,12 +74,11 @@ func TestServer(t *testing.T) {
 		<-ready
 	}
 
-	// base, err := url.Parse("http://" + target)
-	_, err := url.Parse("http://" + target)
+	base, err := url.Parse("http://" + target)
 	if err != nil {
 		t.Fatalf("failed to parse base url: %v", err)
 	}
-
+/*
 	withPreservingOriginal := func(t *testing.T, path string, f func()) {
 		original, err := afero.ReadFile(fs, path)
 		if err != nil {
@@ -90,7 +89,7 @@ func TestServer(t *testing.T) {
 			t.Fatalf("failed to restore original content: %v", err)
 		}
 	}
-
+*/
 	t.Run("PUT /file", func(t *testing.T) {
 		u := base.JoinPath("/upload")
 		req, err := makeFormRequest(u, http.MethodPut, "hello.txt", bytes.NewBufferString("hello, world"))
@@ -1141,7 +1140,7 @@ func TestServerWithAuth(t *testing.T) {
 		}
 	})
 }
-
+*/
 func verifyLocalFile(t *testing.T, fs afero.Fs, path string, content []byte) {
 	got, err := afero.ReadFile(fs, path)
 	if err != nil {
@@ -1151,7 +1150,7 @@ func verifyLocalFile(t *testing.T, fs afero.Fs, path string, content []byte) {
 		t.Errorf("local file content = %s, want = %s", got, content)
 	}
 }
-
+/*
 // containsAll reports whether a contains all elements of b.
 func containsAll[T comparable](a, b []T) bool {
 	for _, x := range b {
