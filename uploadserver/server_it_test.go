@@ -51,7 +51,7 @@ func TestServer(t *testing.T) {
 	}
 
 	CreateDatabase_TestHelper( t)
-	shaRecs := 0
+	// shaRecs := 0
 
 	var target string
 	if addr, ok := os.LookupEnv("TEST_TARGET_ADDR"); ok && addr != "" {
