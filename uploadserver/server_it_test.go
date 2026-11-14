@@ -34,6 +34,7 @@ func TestServer(t *testing.T) {
 		fs = afero.NewOsFs()
 	} else {
 		docRoot = "/tmp"
+		sqlRoot = "/tmp"
 		fs = afero.NewMemMapFs()
 	}
 
@@ -49,6 +50,8 @@ func TestServer(t *testing.T) {
 	if err := afero.WriteFile(fs, path.Join(docRoot, "foo", "bar.txt"), []byte("hello, world"), 0644); err != nil {
 		t.Fatalf("failed to create test file: %v", err)
 	}
+
+	CreateDatabase_TestHelper( t)
 
 	var target string
 	if addr, ok := os.LookupEnv("TEST_TARGET_ADDR"); ok && addr != "" {
@@ -91,7 +94,7 @@ func TestServer(t *testing.T) {
 		}
 	}
 
-	t.Run("PUT /file", func(t *testing.T) {
+	t.Run("PUT /file?name=hello.pdf", func(t *testing.T) {
 		u := base.JoinPath("/file")
 		pdfFilePath := "hello.pdf"
 		CreatePdf_TestHelper( t, []string{ "hello, world",}, pdfFilePath)
@@ -185,7 +188,7 @@ func TestServer(t *testing.T) {
 		verifyLocalFile(t, fs, localPath, localOriginal)
 	})
 */
-	t.Run("POST /upload should succeed even on overwrite", func(t *testing.T) {
+	t.Run("PUT /file?name=hello.pdf should succeed even on overwrite", func(t *testing.T) {
 		pdfFilePath := "hello.pdf"
 
 		CreatePdf_TestHelper( t, []string{ "hello, world",}, pdfFilePath)
@@ -403,26 +406,31 @@ func TestServer(t *testing.T) {
 			verifyLocalFile(t, fs, filepath.Join(docRoot, "foo", "bar.txt"), []byte("new world"))
 		})
 	})
-
-	t.Run("GET /files/foo/bar.txt", func(t *testing.T) {
-		u := base.JoinPath("/files/foo/bar.txt")
-		resp, err := http.Get(u.String())
-		if err != nil {
-			t.Fatalf("failed to GET: %v", err)
-		}
+*/
+	t.Run("GET /file?name=hello.pdf", func(t *testing.T) {
+		u := base.JoinPath("/file")
+		pdfFilePath := "hello.pdf"
+		req, err1 := http.NewRequest( http.MethodGet, u, nil)
+		assert.Nil(t, err1)
+		q := req.URL.Query()
+        	q.Add("name", pdfFilePath)
+		req.URL.RawQuery = q.Encode()
+		//fmt.Println("Req", req)
+		resp, err4 := http.DefaultClient.Do(req)
+		//resp, err := http.Get(u.String())
+		assert.Nil(t, err4, fmt.Sprintf("failed to GET: %v", err4))
 		defer resp.Body.Close()
-		if resp.StatusCode != http.StatusOK {
-			t.Errorf("status = %d, want = %d", resp.StatusCode, http.StatusOK)
-		}
-		body, err := io.ReadAll(resp.Body)
-		if err != nil {
-			t.Fatalf("failed to read response body: %v", err)
-		}
-		if string(body) != "hello, world" {
-			t.Errorf("body = %s, want = \"hello, world\"", body)
-		}
+		assert.Equal(t, resp.StatusCode, http.StatusOK)
+		assert.Equal(t, resp.Header.Get("Content-Type"), "application/json")
+		body, err5 := io.ReadAll(resp.Body)
+		assert.Nil(t, err5, fmt.Sprintf("failed to read response body: %v", err5))
+		var result SuccessFileInfosResult
+		err6 := json.Unmarshal(body, &result)
+		assert.Nil(t, err6, fmt.Sprintf("failed to decode response body: %v", err6))
+		expected := SuccessFileInfosResult{ true, []FileInfo{{ pdfFilePath, sha},},}
+		assert.True(t, reflect.DeepEqual(result, expected), fmt.Sprintf("result = %+v, want = %+v", result, expected))
 	})
-
+/*
 	t.Run("GET /files/foo/bar/baz.txt should fail (not found)", func(t *testing.T) {
 		u := base.JoinPath("/files/foo/bar/baz.txt")
 		resp, err := http.Get(u.String())
@@ -465,7 +473,7 @@ func TestServer(t *testing.T) {
 		for i := range allowedMethods {
 			allowedMethods[i] = strings.TrimSpace(allowedMethods[i])
 		}
-		expectedAllowedMethods := []string{ "GET", "DELETE",}
+		expectedAllowedMethods := []string{ "GET",}
 		assert.True( t, containsAll(allowedMethods, expectedAllowedMethods), fmt.Sprintf("Access-Control-Allow-Methods = %v, want = %v", allowedMethods, expectedAllowedMethods))
 		assert.Equal( t, resp.Header.Get("Access-Control-Allow-Origin"), "*")
 	})

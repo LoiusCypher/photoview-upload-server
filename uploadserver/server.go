@@ -376,6 +376,7 @@ func (s *Server) handleOptions(w http.ResponseWriter, r *http.Request) (int, any
 	if s.EnableCORS {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 	}
+	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Methods", strings.Join(allowedMethods, ", "))
 	return http.StatusNoContent, nil
 }
