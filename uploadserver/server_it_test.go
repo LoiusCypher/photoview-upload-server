@@ -1,14 +1,14 @@
 package uploadserver
 
 import (
-	// // "bytes"
+	"bytes"
 	"context"
-	// "encoding/json"
+	"encoding/json/v2"
 	// // "fmt"
-	// // "io"
+	"io"
 	// // "mime/multipart"
 	"net"
-	// // "net/http"
+	"net/http"
 	"net/url"
 	"os"
 	"path"
@@ -112,11 +112,11 @@ func TestServer(t *testing.T) {
 		if err != nil {
 			t.Fatalf("failed to read response body: %v", err)
 		}
-		var result SuccessfullyUploadedResult
+		var result SuccessFileInfosResult
 		if err := json.Unmarshal(body, &result); err != nil {
 			t.Fatalf("failed to decode response body: %v", err)
 		}
-		expected := SuccessfullyUploadedResult{true, "/files/hello.txt"}
+		expected := SuccessFileInfosResult{ true, []FileInfo{"", "/files/hello.txt"}}
 		if !reflect.DeepEqual(result, expected) {
 			t.Errorf("result = %+v, want = %+v", result, expected)
 		}
@@ -1161,7 +1161,7 @@ func containsAll[T comparable](a, b []T) bool {
 	}
 	return true
 }
-
+*/
 // makeFormRequest creates a new http.Request with multipart/form-data.
 func makeFormRequest(url *url.URL, method, filename string, content io.Reader) (*http.Request, error) {
 	b := new(bytes.Buffer)
@@ -1186,7 +1186,7 @@ func makeFormRequest(url *url.URL, method, filename string, content io.Reader) (
 	req.Header.Set("Content-Type", w.FormDataContentType())
 	return req, nil
 }
-*/
+
 // getAvailablePort returns an available port number randomly.
 func getAvailablePort() (int, error) {
 	addr, err := net.ResolveTCPAddr("tcp", "127.0.0.1:0")
