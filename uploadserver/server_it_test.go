@@ -98,7 +98,7 @@ func TestServer(t *testing.T) {
 		file, err := os.Open( pdfFilePath)
 		assert.Nil(t, err)
 		defer file.Close()
-		sha, err2 :calcSha( pdfFilePath)
+		sha, err2 := calcSha( pdfFilePath)
 		assert.Nil(t, err2)
 		req, err := makeFormRequest(u, http.MethodPut, pdfFilePath, file)
 		assert.Nil(t, err)
@@ -114,7 +114,7 @@ func TestServer(t *testing.T) {
 		body, err := io.ReadAll(resp.Body)
 		assert.Nil(t, err, fmt.Printf("failed to read response body: %v", err))
 		var result SuccessFileInfosResult
-		err9 := json.Unmarshal(body, &result); err != nil {
+		err9 := json.Unmarshal(body, &result)
 		assert.Nil(t, err9, fmt.Printf("failed to decode response body: %v", err9))
 		expected := SuccessFileInfosResult{ true, []FileInfo{{ pdfFilePath, sha},},}
 		assert.True(t, reflect.DeepEqual(result, expected), fmt.Printf("result = %+v, want = %+v", result, expected))
