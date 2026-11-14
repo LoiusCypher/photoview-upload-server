@@ -410,7 +410,7 @@ func TestServer(t *testing.T) {
 		u := base.JoinPath("/file")
 		pdfFilePath := "hello.pdf"
 		q := u.Query
-        	q.Set("name", pdfFilePath)
+        	q.Add("name", pdfFilePath)
 		u.RawQuery = q.Encode()
 		req, err1 := http.NewRequest( http.MethodGet, string(*u), nil)
 		assert.Nil(t, err1)
