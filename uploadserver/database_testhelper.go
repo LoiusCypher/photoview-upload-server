@@ -9,7 +9,6 @@ import (
 )
 
 // CreateDatabase_TestHelper for testing.
-//func CreateDatabase_TestHelper(t *testing.T) *sql.DB {
 func CreateDatabase_TestHelper(t *testing.T) {
 	t.Helper()
 
@@ -17,18 +16,17 @@ func CreateDatabase_TestHelper(t *testing.T) {
 
 	// =========================================Setup Database
 	// sqlPath := "/sqlroot/shafiles.db"
-	//fs := afero.NewMemMapFs()
-	fs := afero.NewOsFs()
 	sqlPath := "/opt/app/shafiles.db"
-	err0 := fs.Remove(sqlPath)
-	assert.Nil( t, err0)
-	err1 := fs.MkdirAll( path.Dir(sqlPath), 0755)
+	err0 := os.Remove(sqlPath)
+	if err0 != nil {
+		assert.Equal( t, err0, os.ErrNotExist)
+	}
+	err1 := os.MkdirAll( path.Dir(sqlPath), 0755)
 	assert.Nil( t, err1)
 	dbPath := *SetDbPath(sqlPath)
 	assert.Equal( t, dbPath, sqlPath)
-	found, err2 := afero.Exists(fs, sqlPath)
+	_, err2 := os.Stat( sqlPath)
 	assert.Nil( t, err2)
-	assert.True( t, found)
 	db := openDb()
 	assert.NotNil( t, db)
 	defer db.Close()
