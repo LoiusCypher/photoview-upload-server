@@ -24,7 +24,7 @@ import (
 )
 
 
-func GenerateUrl_TestHelper(t *testing.T, u *http.URL, filePath string) string {
+func GenerateUrl_TestHelper(t *testing.T, u *url.URL, filePath string) {
 	q := url.Values{}
         q.Add("name", filePath)
 	u.RawQuery = q.Encode()
