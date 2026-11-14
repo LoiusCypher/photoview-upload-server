@@ -19,7 +19,6 @@ import (
 	// // "strings"
 	"testing"
 
-	"github.com/jung-kurt/gofpdf"
 	"github.com/spf13/afero"
 )
 
