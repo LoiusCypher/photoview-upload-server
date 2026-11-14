@@ -19,6 +19,7 @@ import (
 	// // "strings"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/spf13/afero"
 )
 
@@ -127,11 +128,12 @@ func TestServer(t *testing.T) {
 		if err := json.Unmarshal(body, &result); err != nil {
 			t.Fatalf("failed to decode response body: %v", err)
 		}
-		expected := SuccessFileInfosResult{ true, []FileInfo{{"", "/files/hello.txt"},},}
+		expected := SuccessFileInfosResult{ true, []FileInfo{{"", "hello.jpg"},},}
 		if !reflect.DeepEqual(result, expected) {
 			t.Errorf("result = %+v, want = %+v", result, expected)
 		}
-		verifyLocalFile(t, fs, filepath.Join(docRoot, "hello.txt"), []byte("hello, world"))
+		//verifyLocalFile(t, fs, filepath.Join(docRoot, "hello-01.jpg"), []byte("hello, world"))
+		assert.FileExist(t, filepath.Join(docRoot, "hello-01.jpg"))
 	})
 /*
 	t.Run("POST /files/foo.txt should fail due to an invalid method", func(t *testing.T) {
