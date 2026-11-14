@@ -121,8 +121,8 @@ func TestServer(t *testing.T) {
 		assert.FileExists(t, filepath.Join(docRoot, "hello-01.jpg"))
 	})
 
-	t.Run("POST /files should fail due to an invalid method", func(t *testing.T) {
-		u := base.JoinPath("/files")
+	t.Run("POST /file should fail due to an invalid method", func(t *testing.T) {
+		u := base.JoinPath("/file")
 		pdfFilePath := "foo.pdf"
 		CreatePdf_TestHelper( t, []string{ "hello, world",}, pdfFilePath)
 		file, err1 := os.Open( pdfFilePath)
@@ -143,7 +143,7 @@ func TestServer(t *testing.T) {
 		var result ErrorResult
 		err6 := json.Unmarshal(body, &result)
 		assert.Nil(t, err6, fmt.Sprintf("failed to decode response body: %v", err6))
-		expected := ErrorResult{false, "POST is not allowed on /files"}
+		expected := ErrorResult{false, "POST is not allowed on /file"}
 		assert.True(t, reflect.DeepEqual(result, expected), fmt.Sprintf("result = %+v, want = %+v", result, expected))
 	})
 /*
@@ -184,48 +184,54 @@ func TestServer(t *testing.T) {
 		}
 		verifyLocalFile(t, fs, localPath, localOriginal)
 	})
+*/
+	t.Run("POST /upload should succeed even on overwrite", func(t *testing.T) {
+		u := base.JoinPath("/file")
+		pdfFilePath := "hello.pdf"
 
-	t.Run("POST /upload should succeed with overwrite option", func(t *testing.T) {
+		CreatePdf_TestHelper( t, []string{ "hello, world",}, pdfFilePath)
+		file, err1 := os.Open( pdfFilePath)
+		assert.Nil(t, err1)
+		defer file.Close()
+		shaOld, err2 := calcSha( pdfFilePath)
+		assert.Nil(t, err2)
+
+		helloFile_db_dir := "arbitrary / file "
+		helloFile_db_path := emptyFile_db_dir + "/" + " path"
+		sha_hello := RecordFile_TestHelper( t, pdfFilePath, helloFile_db_dir, helloFile_db_path, 1, 1)
+		assert.Equal( t, sha, sha_hello)
+
 		localPath := filepath.Join(docRoot, "test.txt")
 		withPreservingOriginal(t, localPath, func() {
-			u := base.JoinPath("/upload")
+			u := base.JoinPath("/file")
 			q := u.Query()
-			q.Set("overwrite", "true")
+			q.Set("name", helloFile_db_path)
 			u.RawQuery = q.Encode()
 
 			newContent := "hello, new world"
-			b := bytes.NewBufferString(newContent)
-			req, err := makeFormRequest(u, http.MethodPost, "test.txt", b)
-			if err != nil {
-				t.Fatal(err)
-			}
-			resp, err := http.DefaultClient.Do(req)
-			if err != nil {
-				t.Fatalf("failed to POST: %v", err)
-			}
+			CreatePdf_TestHelper( t, []string{ newContent,}, pdfFilePath)
+			shaNew, err2 := calcSha( pdfFilePath)
+			assert.NotEqual( t, sha_hello, shaNew)
+			assert.Nil(t, err2)
+			req, err3 := makeFormRequest(u, http.MethodPut, pdfFilePath, file)
+			assert.Nil(t, err3)
+			resp, err4 := http.DefaultClient.Do(req)
+			assert.Nil(t, err4, fmt.Sprintf("failed to PUT: %v", err4))
 			defer resp.Body.Close()
-			if resp.StatusCode != http.StatusCreated {
-				t.Errorf("status = %d, want = %d", resp.StatusCode, http.StatusCreated)
-			}
-			if resp.Header.Get("Content-Type") != "application/json" {
-				t.Errorf("Content-Type = %s, want = \"application/json\"", resp.Header.Get("Content-Type"))
-			}
-			body, err := io.ReadAll(resp.Body)
-			if err != nil {
-				t.Fatalf("failed to read response body: %v", err)
-			}
-			var result SuccessfullyUploadedResult
-			if err := json.Unmarshal(body, &result); err != nil {
-				t.Fatalf("failed to decode response body: %v", err)
-			}
-			expected := SuccessfullyUploadedResult{true, "/files/test.txt"}
-			if !reflect.DeepEqual(result, expected) {
-				t.Errorf("result = %+v, want = %+v", result, expected)
-			}
-			verifyLocalFile(t, fs, localPath, []byte(newContent))
+			assert.Equal(t, resp.StatusCode, http.StatusCreated)
+			assert.Equal(t, resp.Header.Get("Content-Type"), "application/json")
+
+			body, err5 := io.ReadAll(resp.Body)
+			assert.Nil(t, err5, fmt.Sprintf("failed to read response body: %v", err5))
+			var result SuccessFileInfosResult
+			err6 := json.Unmarshal(body, &result)
+			assert.Nil(t, err6, fmt.Sprintf("failed to decode response body: %v", err6))
+			expected := SuccessFileInfosResult{ true, []FileInfo{{ pdfFilePath, shaNew},},}
+			assert.True(t, reflect.DeepEqual(result, expected), fmt.Sprintf("result = %+v, want = %+v", result, expected))
+			assert.FileExists(t, filepath.Join(docRoot, "hello-01.jpg"))
 		})
 	})
-*/ /*
+/*
 	t.Run("PUT /files/hello_put.txt", func(t *testing.T) {
 		u := base.JoinPath("/files/hello_put.txt")
 		content := bytes.NewBufferString("hello, world")
