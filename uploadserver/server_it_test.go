@@ -127,7 +127,7 @@ func TestServer(t *testing.T) {
 		if err := json.Unmarshal(body, &result); err != nil {
 			t.Fatalf("failed to decode response body: %v", err)
 		}
-		expected := SuccessFileInfosResult{ true, []FileInfo{{"", "hello.jpg"},},}
+		expected := SuccessFileInfosResult{ true, []FileInfo{{ "hello.pdf", "49999b5ad5d69b1af0a914503bf49eff491636cab15e3444269df917f9f80813"},},}
 		if !reflect.DeepEqual(result, expected) {
 			t.Errorf("result = %+v, want = %+v", result, expected)
 		}

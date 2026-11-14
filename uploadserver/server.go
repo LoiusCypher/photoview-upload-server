@@ -251,7 +251,7 @@ func (s *Server) handleFilePut(w http.ResponseWriter, r *http.Request) (int, any
 	if s.EnableCORS {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 	}
-	return http.StatusCreated, SuccessFileInfosResult{ true, []FileInfo{ FileInfo{ r.URL.Path, sha,},},}
+	return http.StatusCreated, SuccessFileInfosResult{ true, []FileInfo{ FileInfo{ requestPath, sha,},},}
 }
 
 func (s *Server) handleFileGet(w http.ResponseWriter, r *http.Request) (int, any) {
@@ -267,7 +267,7 @@ func (s *Server) handleFileGet(w http.ResponseWriter, r *http.Request) (int, any
 	if sha == "" {
 		return http.StatusNotFound, fmt.Errorf("not Found")
 	}
-	return http.StatusOK, SuccessFileInfosResult{ true, []FileInfo{ FileInfo{ r.URL.Path, sha,},},}
+	return http.StatusOK, SuccessFileInfosResult{ true, []FileInfo{ FileInfo{ requestPath, sha,},},}
 }
 
 func (s *Server) handleFileDelete( w http.ResponseWriter, r *http.Request) (int, any) {
@@ -285,7 +285,7 @@ func (s *Server) handleFileDelete( w http.ResponseWriter, r *http.Request) (int,
 	if sha == "" {
 		return http.StatusNotFound, fmt.Errorf("not Found")
 	}
-	return http.StatusOK, SuccessFileInfosResult{ true, []FileInfo{ FileInfo{ r.URL.Path, sha,},},}
+	return http.StatusOK, SuccessFileInfosResult{ true, []FileInfo{ FileInfo{ requestPath, sha,},},}
 }
 
 func (s *Server) authenticationMiddleware(next http.Handler) http.Handler {
