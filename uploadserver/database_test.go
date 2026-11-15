@@ -12,7 +12,7 @@ const abcde_sha_std string = "248d6a61d20638b8e5c026930c3e6039a33ce45964ff2167f6
 
 func TestDatabase(t *testing.T) {
 	// sqlite database has to be on real file system or in memory
-	var sqlRoot := os.MkdirTemp("", "")
+	sqlRoot := os.MkdirTemp("", "")
 	defer os.RemoveAll( sqlRoot)
 	CreateEmptyDatabase_TestHelper( t, path.Join( sqlRoot, "shafiles.db"))
 

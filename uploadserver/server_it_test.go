@@ -75,7 +75,7 @@ func TestServer(t *testing.T) {
 	pdfPath_hello := CreatePdfFile_TestHelper( t, []string{ "hello, world",}, pdfRoot)
 
 	// sqlite database has to be on real file system or in memory
-	var sqlRoot := os.MkdirTemp("", "")
+	sqlRoot := os.MkdirTemp("", "")
 	defer os.RemoveAll( sqlRoot)
 	CreateEmptyDatabase_TestHelper( t, path.Join( sqlRoot, "shafiles.db"))
 
