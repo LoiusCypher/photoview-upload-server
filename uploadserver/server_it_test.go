@@ -65,12 +65,13 @@ func TestServer(t *testing.T) {
 
 	// ghostscript output has to be on real file system
 	jpgRoot, err1 := os.MkdirTemp( "", "")
-	require.Nil(t, err1, fmt.Sprintf("failed to GET: %v", err4))
+	require.Nil(t, err1))
 	defer os.RemoveAll( jpgRoot)
 
-	pdfRoot := os.MkdirTemp("", "")
+	pdfRoot, err2 := os.MkdirTemp("", "")
+	require.Nil(t, err2))
 	defer os.RemoveAll( pdfRoot)
-	_ := CreatePdfFile_TestHelper( t, []string{ "lorem ipsum",}, pdfRoot)
+	_ = CreatePdfFile_TestHelper( t, []string{ "lorem ipsum",}, pdfRoot)
 	pdfPath_hello := CreatePdfFile_TestHelper( t, []string{ "hello, world",}, pdfRoot)
 
 	// sqlite database has to be on real file system or in memory
@@ -79,8 +80,8 @@ func TestServer(t *testing.T) {
 	// CreateEmptyDatabase_TestHelper( t, path.Join( sqlRoot, "shafiles.db"))
 	CreateEmptyDatabase_TestHelper( t, SqliteDbInMemory)
 
-	helloFile_db_dir := "arbitrary / file path / hello,pdf"
-	sha_hello := RecordPdf_TestHelper( t, pdfPath_hello, helloFile_db_dir, helloFile_db_path)
+	helloFile_db_path := "arbitrary / file path / hello,pdf"
+	sha_hello := RecordPdf_TestHelper( t, pdfPath_hello, helloFile_db_path)
 
 	var target string
 	if addr, ok := os.LookupEnv("TEST_TARGET_ADDR"); ok && addr != "" {
@@ -139,7 +140,7 @@ func TestServer(t *testing.T) {
 		assert.Equal(t, expected.Files, result.Files, fmt.Sprintf("result = %+v, want = %+v", result, expected))
 		assert.True(t, slices.Equal( expected.Files, result.Files), fmt.Sprintf("result = %+v, want = %+v", result, expected))
 		assert.True(t, reflect.DeepEqual(result, expected), fmt.Sprintf("result = %+v, want = %+v", result, expected))
-		assert.FileExists(t, filepath.Join(docRoot, "hello-01.jpg"))
+		assert.FileExists(t, filepath.Join( jpgRoot, "hello-01.jpg"))
 		lastPdfSha = sha
 	})
 
@@ -161,7 +162,7 @@ func TestServer(t *testing.T) {
 		u := base.JoinPath("/file")
 		pdfFilePath := "foo.pdf"
 		GenerateUrl_TestHelper( t, u, pdfFilePath)
-		req, sha := makeFormRequest( t, u, http.MethodPut, []string{ "hello, world",}, pdfRoot)
+		req, _ := makeFormRequest( t, u, http.MethodPut, []string{ "hello, world",}, pdfRoot)
 		resp, err4 := http.DefaultClient.Do(req)
 		assert.Nil(t, err4, fmt.Sprintf("failed to POST: %v", err4))
 		defer resp.Body.Close()
@@ -238,7 +239,7 @@ func TestServer(t *testing.T) {
 		assert.Equal(t, expected.Files, result.Files, fmt.Sprintf("result = %+v, want = %+v", result, expected))
 		assert.True(t, slices.Equal( expected.Files, result.Files), fmt.Sprintf("result = %+v, want = %+v", result, expected))
 		assert.True(t, reflect.DeepEqual(result, expected), fmt.Sprintf("result = %+v, want = %+v", result, expected))
-		assert.FileExists(t, filepath.Join(docRoot, "hello-01.jpg"))
+		assert.FileExists(t, filepath.Join(jpgRoot, "hello-01.jpg"))
 	})
 /*
 	t.Run("PUT /files/hello_put.txt", func(t *testing.T) {
