@@ -81,7 +81,7 @@ func TestServer(t *testing.T) {
 	CreateEmptyDatabase_TestHelper( t, SqliteDbInMemory)
 
 	helloFile_db_path := "arbitrary / file path / hello,pdf"
-	_ := RecordPdf_TestHelper( t, pdfPath_hello, helloFile_db_path)
+	_ = RecordPdf_TestHelper( t, pdfPath_hello, helloFile_db_path)
 
 	var target string
 	if addr, ok := os.LookupEnv("TEST_TARGET_ADDR"); ok && addr != "" {
