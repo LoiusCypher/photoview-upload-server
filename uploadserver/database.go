@@ -114,7 +114,7 @@ func initDb( sqlPath string) error {
 func openDb() *sql.DB {
 	log.Print("openDb: entry ")
 	sqlPath := getDbPath()
-	log.Printf("openDb: getDbPath %s", sqlPath)
+	log.Printf("openDb: getDbPath %s", *sqlPath)
 	if dbPath == ""{
 		log.Println( fmt.Errorf("could not init db"))
 		return nil
