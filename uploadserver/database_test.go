@@ -1,6 +1,7 @@
 package uploadserver
 
 import (
+	"path/filepath"
 	"testing"
 	"github.com/spf13/afero"
 	"github.com/stretchr/testify/assert"
@@ -10,7 +11,7 @@ const empty_sha_std string = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca4
 const abcde_sha_std string = "248d6a61d20638b8e5c026930c3e6039a33ce45964ff2167f6ecedd419db06c1"
 
 func TestDatabase(t *testing.T) {
-	CreateDatabase_TestHelper( t, SqliteDbInMemory)
+	CreateEmptyDatabase_TestHelper( t, SqliteDbInMemory)
 	// =========================================Setup Database
 	// sqlPath := "/sqlroot/shafiles.db"
 	//fs := afero.NewMemMapFs()
@@ -21,7 +22,7 @@ func TestDatabase(t *testing.T) {
 	assert.Equal( t, len(fileInfos), 0)
 	// =========================================Add a file
 	tmpPath := "/tmp"
-	err = fs.MkdirAll( path.Dir(tmpPath), 0755)
+	err = fs.MkdirAll( filepath.Dir(tmpPath), 0755)
 	assert.Nil( t, err)
 	// =========================================Add a file
 	tmpFilePath_empty := CreateFile_TestHelper( t, fs, tmpPath, "*.pdf", "")

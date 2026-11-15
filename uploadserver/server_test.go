@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
-	"path"
 	"path/filepath"
 	"reflect"
 	"strings"
@@ -86,7 +85,7 @@ func TestGetHandler(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			pdfRoot := "/tnp"
-			pdfFile_hello := CreatePdfFile_TestHelper( t, []string{ "hello, world",}, pdfRoot)
+			// _ := CreatePdfFile_TestHelper( t, []string{ "hello, world",}, pdfRoot)
 			config := ServerConfig{
 				PictureRoot:  "/opt/app",
 				EnableCORS:   true,

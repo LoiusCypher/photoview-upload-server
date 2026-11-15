@@ -35,14 +35,14 @@ func TestPdfFiles(t *testing.T) {
 	err = os.MkdirAll( jpgRoot, 0755)
 	assert.Nil( t, err)
 	// =========================================convert a file
-	pdfPath_Empty := CreatePdf_TestHelper( t, []string{ "",}, pdfRoot)
+	pdfPath_Empty := CreatePdfFile_TestHelper( t, []string{ "",}, pdfRoot)
 	jpgPath_Empty := "path/subdir/" + "Empty.pdf"
 	err1 := convertPdfToJpg( pdfPath_Empty, jpgRoot, jpgPath_Empty)
 	assert.Nil( t, err1)
 	assert.FileExists( t, jpgRoot + "/" + strings.TrimSuffix( jpgPath_Empty, ".pdf") + "-01.jpg")
 	assert.NoFileExists( t, jpgRoot + "/" + strings.TrimSuffix( jpgPath_Empty, ".pdf") + "-02.jpg")
 	// =========================================
-	pdfPath_Multi := CreatePdf_TestHelper( t, []string{ "Multi 1", "Multi 2", "Multi 3", "Multi 4", "Multi 5",}, pdfRoot)
+	pdfPath_Multi := CreatePdfFile_TestHelper( t, []string{ "Multi 1", "Multi 2", "Multi 3", "Multi 4", "Multi 5",}, pdfRoot)
 	jpgPath_Multi := "path/subdir/" + "Multi.pdf"
 	err2 := convertPdfToJpg( pdfPath_Multi, jpgRoot, jpgPath_Multi)
 	assert.Nil( t, err2)
