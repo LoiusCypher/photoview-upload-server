@@ -64,20 +64,20 @@ func TestServer(t *testing.T) {
 	defer cancel()
 
 	// ghostscript output has to be on real file system
-	jpgRoot. err1 := os.MkdirTemp( "", "")
+	jpgRoot, err1 := os.MkdirTemp( "", "")
 	require.Nil(t, err1, fmt.Sprintf("failed to GET: %v", err4))
 	defer os.RemoveAll( jpgRoot)
 
 	pdfRoot := os.MkdirTemp("", "")
 	defer os.RemoveAll( pdfRoot)
-	pdfPath_test := CreatePdfFile_TestHelper( t, []string{ "lorem ipsum",}, pdfRoot)
+	_ := CreatePdfFile_TestHelper( t, []string{ "lorem ipsum",}, pdfRoot)
 	pdfPath_hello := CreatePdfFile_TestHelper( t, []string{ "hello, world",}, pdfRoot)
 
 	// sqlite database has to be on real file system or in memory
 	// var sqlRoot := os.MkdirTemp("", "")
 	// defer os.RemoveAll( sqlRoot)
-	// CreateDatabase_TestHelper( t, path.Join( sqlRoot, "shafiles.db"))
-	CreateDatabase_TestHelper( t, SqliteDbInMemory)
+	// CreateEmptyDatabase_TestHelper( t, path.Join( sqlRoot, "shafiles.db"))
+	CreateEmptyDatabase_TestHelper( t, SqliteDbInMemory)
 
 	helloFile_db_dir := "arbitrary / file path / hello,pdf"
 	sha_hello := RecordPdf_TestHelper( t, pdfPath_hello, helloFile_db_dir, helloFile_db_path)
@@ -244,7 +244,7 @@ func TestServer(t *testing.T) {
 	t.Run("PUT /files/hello_put.txt", func(t *testing.T) {
 		u := base.JoinPath("/files/hello_put.txt")
 		content := bytes.NewBufferString("hello, world")
-		req, err := makeFormRequest(u, http.MethodPut, "hello.txt", content)
+		req, err := makeFormRequest( t, u, http.MethodPut, "hello.txt", content)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -1114,7 +1114,7 @@ func containsAll[T comparable](a, b []T) bool {
 }
 
 // makeFormRequest creates a new http.Request with multipart/form-data.
-func makeFormRequest( t *testing.T, url *url.URL, method, contentPages []string, pdfRoot string) (*http.Request, string) {
+func makeFormRequest( t *testing.T, url *url.URL, method string, contentPages []string, pdfRoot string) (*http.Request, string) {
 	filename := CreatePdfFile_TestHelper( t, contentPages, pdfRoot)
 	sha, err0 := calcSha( filename)
 	require.Nil(t, err0)
