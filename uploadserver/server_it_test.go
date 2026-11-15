@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"path"
 	"path/filepath"
 	"reflect"
 	"slices"
@@ -75,7 +76,8 @@ func TestServer(t *testing.T) {
 	pdfPath_hello := CreatePdfFile_TestHelper( t, []string{ "hello, world",}, pdfRoot)
 
 	// sqlite database has to be on real file system or in memory
-	sqlRoot := os.MkdirTemp("", "")
+	sqlRoot, err3 := os.MkdirTemp("", "")
+	require.Nil(t, err3)
 	defer os.RemoveAll( sqlRoot)
 	CreateEmptyDatabase_TestHelper( t, path.Join( sqlRoot, "shafiles.db"))
 

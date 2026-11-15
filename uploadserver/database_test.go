@@ -1,6 +1,8 @@
 package uploadserver
 
 import (
+	"os"
+	"path"
 	"path/filepath"
 	"testing"
 	"github.com/spf13/afero"
