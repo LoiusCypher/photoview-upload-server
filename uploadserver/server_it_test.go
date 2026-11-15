@@ -65,11 +65,11 @@ func TestServer(t *testing.T) {
 
 	// ghostscript output has to be on real file system
 	jpgRoot, err1 := os.MkdirTemp( "", "")
-	require.Nil(t, err1))
+	require.Nil(t, err1)
 	defer os.RemoveAll( jpgRoot)
 
 	pdfRoot, err2 := os.MkdirTemp("", "")
-	require.Nil(t, err2))
+	require.Nil(t, err2)
 	defer os.RemoveAll( pdfRoot)
 	_ = CreatePdfFile_TestHelper( t, []string{ "lorem ipsum",}, pdfRoot)
 	pdfPath_hello := CreatePdfFile_TestHelper( t, []string{ "hello, world",}, pdfRoot)
