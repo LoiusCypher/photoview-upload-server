@@ -7,8 +7,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-const SqliteDbInMemory = ":memory:"
-
 // CreateDatabase_TestHelper for testing.
 func CreateEmptyDatabase_TestHelper(t *testing.T, sqlPath string) {
 	t.Helper()
@@ -18,9 +16,7 @@ func CreateEmptyDatabase_TestHelper(t *testing.T, sqlPath string) {
 	// =========================================Setup Database
 	dbPath := *SetDbPath(sqlPath)
 	require.Equal( t, dbPath, sqlPath)
-	if dbPath != SqliteDbInMemory {
-		require.FileExists( t, dbPath)
-	}
+	require.FileExists( t, dbPath)
 	db := openDb()
 	require.NotNil( t, db)
 	defer db.Close()
@@ -36,7 +32,6 @@ func CreateEmptyDatabase_TestHelper(t *testing.T, sqlPath string) {
 	// if err := db.MigrateUp(context.Background()); err != nil {
 		// t.Fatal(err)
 	// }
-
 	//return db
 }
 

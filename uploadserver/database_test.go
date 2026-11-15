@@ -11,9 +11,12 @@ const empty_sha_std string = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca4
 const abcde_sha_std string = "248d6a61d20638b8e5c026930c3e6039a33ce45964ff2167f6ecedd419db06c1"
 
 func TestDatabase(t *testing.T) {
-	CreateEmptyDatabase_TestHelper( t, SqliteDbInMemory)
+	// sqlite database has to be on real file system or in memory
+	var sqlRoot := os.MkdirTemp("", "")
+	defer os.RemoveAll( sqlRoot)
+	CreateEmptyDatabase_TestHelper( t, path.Join( sqlRoot, "shafiles.db"))
+
 	// =========================================Setup Database
-	// sqlPath := "/sqlroot/shafiles.db"
 	//fs := afero.NewMemMapFs()
 	fs := afero.NewOsFs()
 	//var fileInfos []FileInfo

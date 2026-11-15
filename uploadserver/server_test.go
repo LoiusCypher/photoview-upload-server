@@ -16,10 +16,11 @@ import (
 )
 
 func TestGetHandler(t *testing.T) {
-	sqlroot := "/sqlroot"
-	if err := os.MkdirAll(sqlroot, 0755); err != nil {
-		t.Fatalf("failed to create sql root: %v", err)
-	}
+	// sqlite database has to be on real file system or in memory
+	var sqlRoot := os.MkdirTemp("", "")
+	defer os.RemoveAll( sqlRoot)
+	CreateEmptyDatabase_TestHelper( t, path.Join( sqlRoot, "shafiles.db"))
+
 	type args struct {
 		Method string
 		Url    string
@@ -115,6 +116,11 @@ func TestGetHandler(t *testing.T) {
 }
 
 func TestServer_PutHandler(t *testing.T) {
+	// sqlite database has to be on real file system or in memory
+	var sqlRoot := os.MkdirTemp("", "")
+	defer os.RemoveAll( sqlRoot)
+	CreateEmptyDatabase_TestHelper( t, path.Join( sqlRoot, "shafiles.db"))
+
 	jpgRoot := "/opt/app"
 	type args struct {
 		Method  string

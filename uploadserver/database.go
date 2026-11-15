@@ -60,9 +60,7 @@ func getDbPath() *string {
 }
 
 func SetDbPath( sqlPath string) *string {
-	log.Printf("SetDbPath: entry %s\n", sqlPath)
 	setPathOnce.Do(func() error {
-		log.Printf("SetDbPath: inside Do %s\n", sqlPath)
 		err := initDb( sqlPath)
 		if err == nil {
 			dbPath = sqlPath
@@ -72,13 +70,10 @@ func SetDbPath( sqlPath string) *string {
 		}
 		return err
 	})
-	log.Printf("SetDbPath: leaving %s\n", dbPath)
 	return &dbPath
 }
 
 func initDb( sqlPath string) error {
-	log.Printf("initDb: entry %s", sqlPath)
-	// os.Remove(sqlPath)
 	if err := os.MkdirAll(filepath.Dir(sqlPath), os.ModePerm); err != nil {
 		log.Printf("making sqlPath dir: %v\n", err)
 		return fmt.Errorf("making sqlPath dir: %v", err)
@@ -107,12 +102,10 @@ func initDb( sqlPath string) error {
 		log.Printf("%q: %s\n", err, sqlStmt)
 		return err
 	}
-	log.Printf("initDb: leaving %s", sqlPath)
 	return nil
 }
 
 func openDb() *sql.DB {
-	log.Print("openDb: entry ")
 	sqlPath := getDbPath()
 	log.Printf("openDb: getDbPath %s", *sqlPath)
 	if dbPath == ""{
@@ -136,7 +129,6 @@ func openDb() *sql.DB {
 		log.Println( fmt.Errorf("count rows: %v", err))
 		return nil
 	}
-	log.Print("openDb: leaving ")
 	return db
 }
 
