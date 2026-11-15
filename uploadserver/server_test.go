@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"path"
 	"path/filepath"
 	"reflect"
 	"strings"
@@ -20,7 +21,7 @@ import (
 func TestGetHandler(t *testing.T) {
 	// sqlite database has to be on real file system or in memory
 	sqlRoot, err1 := os.MkdirTemp("", "")
-	require.Nil( err1)
+	require.Nil( t, err1)
 	defer os.RemoveAll( sqlRoot)
 	CreateEmptyDatabase_TestHelper( t, path.Join( sqlRoot, "shafiles.db"))
 
@@ -95,9 +96,7 @@ func TestGetHandler(t *testing.T) {
 			}
 			server := Server{config, }
 			req, err := http.NewRequest(tt.args.Method, tt.args.Url, nil)
-			if err != nil {
-				t.Fatal(err)
-			}
+			assert.Nil( t, err)
 
 			rr := httptest.NewRecorder()
 			handler := http.HandlerFunc(server.handle(server.handleFileGet))

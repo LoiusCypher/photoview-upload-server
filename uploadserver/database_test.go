@@ -7,6 +7,7 @@ import (
 	"testing"
 	"github.com/spf13/afero"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 const empty_sha_std string = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
@@ -14,7 +15,8 @@ const abcde_sha_std string = "248d6a61d20638b8e5c026930c3e6039a33ce45964ff2167f6
 
 func TestDatabase(t *testing.T) {
 	// sqlite database has to be on real file system or in memory
-	sqlRoot := os.MkdirTemp("", "")
+	sqlRoot, err1 := os.MkdirTemp("", "")
+	require.Nil( err1)
 	defer os.RemoveAll( sqlRoot)
 	CreateEmptyDatabase_TestHelper( t, path.Join( sqlRoot, "shafiles.db"))
 
