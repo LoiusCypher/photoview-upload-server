@@ -114,7 +114,7 @@ type ServerConfig struct {
 	Addr string `json:"addr"`
 	// Path to the picture root.
 	PictureRoot string `json:"picture_root"`
-	// Ghostscript conversiob flags.
+	// Ghostscript conversion flags.
 	ConvFlags string `json:"conv_flags"`
 	// Determines whether to enable CORS header.
 	EnableCORS *bool `json:"enable_cors"`
@@ -186,7 +186,7 @@ func NewApp(name string) *app {
 	fs := flag.NewFlagSet(name, flag.ExitOnError)
 	fs.StringVar(&a.configFilePath, "config", "", "path to config file")
 	fs.StringVar(&a.pictureRoot, "picture_root", "", "path to picture root directory")
-	fs.StringVar(&a.convFlags, "conv_flags", "-r300", "ghostscript conversion flags")
+	fs.StringVar(&a.convFlags, "conv_flags", "", "ghostscript conversion flags")
 	fs.StringVar(&a.addr, "addr", "", "address to listen")
 	fs.Var(&a.enableCORS, "enable_cors", "enable CORS header")
 	fs.Int64Var(&a.maxUploadSize, "max_upload_size", 0, "max upload size in bytes")

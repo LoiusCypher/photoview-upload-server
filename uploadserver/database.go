@@ -60,7 +60,9 @@ func getDbPath() *string {
 }
 
 func SetDbPath( sqlPath string) *string {
+	log.Printf("SetDbPath: entry %s\n", sqlPath)
 	setPathOnce.Do(func() error {
+		log.Printf("SetDbPath: inside Do %s\n", sqlPath)
 		err := initDb( sqlPath)
 		if err == nil {
 			dbPath = sqlPath
@@ -70,11 +72,12 @@ func SetDbPath( sqlPath string) *string {
 		}
 		return err
 	})
+	log.Printf("SetDbPath: leaving %s\n", dbPath)
 	return &dbPath
 }
 
 func initDb( sqlPath string) error {
-	// log.Printf("initDb: %s", sqlPath)
+	log.Printf("initDb: entry %s", sqlPath)
 	// os.Remove(sqlPath)
 	if err := os.MkdirAll(filepath.Dir(sqlPath), os.ModePerm); err != nil {
 		log.Printf("making sqlPath dir: %v\n", err)
@@ -90,6 +93,7 @@ func initDb( sqlPath string) error {
 	err = db.QueryRow("SELECT SQLITE_VERSION()").Scan(&version)
 	if err != nil {
 		log.Fatal(err)
+		return err
 	}
 	log.Println("Sqlite", version)
 	sqlStmt := `CREATE TABLE IF NOT EXISTS shafiles (id INTEGER PRIMARY KEY AUTOINCREMENT, sha CHARACTER(64) NOT NULL, path TEXT UNIQUE NOT NULL);`
@@ -103,12 +107,14 @@ func initDb( sqlPath string) error {
 		log.Printf("%q: %s\n", err, sqlStmt)
 		return err
 	}
+	log.Printf("initDb: leaving %s", sqlPath)
 	return nil
 }
 
 func openDb() *sql.DB {
-	// log.Printf("openDb: %s", sqlPath)
+	log.Print("openDb: entry ")
 	sqlPath := getDbPath()
+	log.Printf("openDb: getDbPath %s", sqlPath)
 	if dbPath == ""{
 		log.Println( fmt.Errorf("could not init db"))
 		return nil
@@ -130,6 +136,7 @@ func openDb() *sql.DB {
 		log.Println( fmt.Errorf("count rows: %v", err))
 		return nil
 	}
+	log.Print("openDb: leaving ")
 	return db
 }
 
