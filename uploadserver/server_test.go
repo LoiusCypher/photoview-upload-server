@@ -18,9 +18,7 @@ import (
 
 func TestGetHandler(t *testing.T) {
 	var sqlroot string
-	var fs afero.Fs
 	sqlroot = "/sqlroot"
-	//fs = afero.NewMemMapFs()
 	if err := os.MkdirAll(sqlroot, 0755); err != nil {
 		t.Fatalf("failed to create sql root: %v", err)
 	}
@@ -87,19 +85,13 @@ func TestGetHandler(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			jpgRoot := "/opt/app"
-			fs := afero.NewMemMapFs()
-			if err := fs.MkdirAll(path.Join(jpgRoot, "foo"), 0755); err != nil {
-				t.Fatal(err)
-			}
-			if err := afero.WriteFile(fs, path.Join(jpgRoot, "foo", "bar.txt"), []byte("hello, world"), 0644); err != nil {
-				t.Fatal(err)
-			}
+			pdfRoot := "/tnp"
+			pdfFile_hello := CreatePdfFile_TestHelper( t, []string{ "hello, world",}, pdfRoot)
 			config := ServerConfig{
 				PictureRoot:  "/opt/app",
 				EnableCORS:   true,
 			}
-			server := Server{config, afero.NewBasePathFs(fs, jpgRoot)}
+			server := Server{config, }
 			req, err := http.NewRequest(tt.args.Method, tt.args.Url, nil)
 			if err != nil {
 				t.Fatal(err)
@@ -209,8 +201,7 @@ func TestServer_PutHandler(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			fs := afero.NewMemMapFs()
-			if err := fs.MkdirAll(jpgRoot, 0755); err != nil {
+			if err := os.MkdirAll(jpgRoot, 0755); err != nil {
 				t.Fatal(err)
 			}
 			config := ServerConfig{
@@ -218,7 +209,7 @@ func TestServer_PutHandler(t *testing.T) {
 				EnableCORS:    true,
 				MaxUploadSize: 16,
 			}
-			server := Server{config, afero.NewBasePathFs(fs, jpgRoot)}
+			server := Server{config, }
 
 			b := new(bytes.Buffer)
 			w := multipart.NewWriter(b)
@@ -262,7 +253,7 @@ func TestServer_PutHandler(t *testing.T) {
 				localPath := strings.TrimPrefix(resp.Path, "/files/")
 				localFullPath := filepath.Join(jpgRoot, localPath)
 				t.Logf("opening %s to verify", localFullPath)
-				f, err := fs.Open(localFullPath)
+				f, err := os.Open(localFullPath)
 				if err != nil {
 					t.Errorf("failed to verify local file. cannot open %s: %v", localFullPath, err)
 					return

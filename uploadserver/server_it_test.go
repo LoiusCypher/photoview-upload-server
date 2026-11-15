@@ -1114,7 +1114,7 @@ func containsAll[T comparable](a, b []T) bool {
 }
 
 // makeFormRequest creates a new http.Request with multipart/form-data.
-func makeFormRequest( t *testing.T, url *url.URL, method, contentPages []string, pdfRoot string) (*http.Request, error) {
+func makeFormRequest( t *testing.T, url *url.URL, method, contentPages []string, pdfRoot string) (*http.Request, string) {
 	filename := CreatePdfFile_TestHelper( t, contentPages, pdfRoot)
 	sha, err0 := calcSha( filename)
 	require.Nil(t, err0)
