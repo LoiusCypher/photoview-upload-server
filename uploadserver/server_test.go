@@ -120,7 +120,7 @@ func TestGetHandler(t *testing.T) {
 func TestServer_PutHandler(t *testing.T) {
 	// sqlite database has to be on real file system or in memory
 	sqlRoot, err1 := os.MkdirTemp("", "")
-	require.Nil( err1)
+	require.Nil( t, err1)
 	defer os.RemoveAll( sqlRoot)
 	CreateEmptyDatabase_TestHelper( t, path.Join( sqlRoot, "shafiles.db"))
 
