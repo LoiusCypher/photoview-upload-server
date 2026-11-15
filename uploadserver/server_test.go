@@ -16,8 +16,7 @@ import (
 )
 
 func TestGetHandler(t *testing.T) {
-	var sqlroot string
-	sqlroot = "/sqlroot"
+	sqlroot := "/sqlroot"
 	if err := os.MkdirAll(sqlroot, 0755); err != nil {
 		t.Fatalf("failed to create sql root: %v", err)
 	}
