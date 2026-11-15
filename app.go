@@ -115,7 +115,7 @@ type ServerConfig struct {
 	// Path to the picture root.
 	PictureRoot string `json:"picture_root"`
 	// Ghostscript conversiob flags.
-	ConvFlags string `json:"convFlags"`
+	ConvFlags string `json:"conv_flags"`
 	// Determines whether to enable CORS header.
 	EnableCORS *bool `json:"enable_cors"`
 	// Maximum upload size in bytes.

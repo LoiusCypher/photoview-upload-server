@@ -49,7 +49,7 @@ func Test_parseConfig(t *testing.T) {
 		want := &uploadserver.ServerConfig{
 			Addr:               ":8123",
 			PictureRoot:        "/opt/app",
-			ConvFlags:         "-r150",
+			ConvFlags:          "-r150",
 			EnableCORS:         true,
 			MaxUploadSize:      1234567,
 			FileNamingStrategy: "uuid",
