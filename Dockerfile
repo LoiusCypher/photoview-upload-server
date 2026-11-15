@@ -14,8 +14,7 @@ RUN go clean -modcache
 #RUN go get ./photoviewuploadserver
 RUN go get github.com/suyuan32/gofpdf-next && cat go.mod go.sum
 RUN go mod download
-RUN go mod tidy
-RUN cat go.mod go.sum
+RUN go mod tidy && cat go.mod go.sum
 
 # copy other sources & build
 COPY . /go/src/app

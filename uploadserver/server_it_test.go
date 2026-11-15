@@ -11,7 +11,6 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"path"
 	"path/filepath"
 	"reflect"
 	"slices"
@@ -65,7 +64,8 @@ func TestServer(t *testing.T) {
 	defer cancel()
 
 	// ghostscript output has to be on real file system
-	jpgRoot := os.MkdirTemp("", "")
+	jpgRoot. err1 := os.MkdirTemp( "", "")
+	require.Nil(t, err1, fmt.Sprintf("failed to GET: %v", err4))
 	defer os.RemoveAll( jpgRoot)
 
 	pdfRoot := os.MkdirTemp("", "")
