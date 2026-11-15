@@ -16,7 +16,8 @@ func CreatePdfFile_TestHelper(t *testing.T, contentPages []string, pdfRoot strin
 	assert.Nil( t, err1, fmt.Sprintf( "failed to create pdf dir: %v", err1))
 	defer f.Close()
 	pdfFilePath := f.Name()
-	pdf := gofpdf.New("P", "mm", "A4", "")
+	// pdf := gofpdf.New("P", "mm", "A4", "")
+	pdf := fpdf.New("P", "mm", "A4", "")
 	for _, text := range contentPages {
 		pdf.AddPage()
 		pdf.SetFont("Arial", "B", 16)
