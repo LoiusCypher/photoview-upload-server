@@ -15,12 +15,10 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
-	"github.com/spf13/afero"
 )
 
 type Server struct {
 	ServerConfig
-	fs afero.Fs
 }
 
 var (
@@ -39,8 +37,10 @@ var (
 type ServerConfig struct {
 	// Address where the server listens on.
 	Addr string `json:"addr"`
-	// Path to the document root.
-	DocumentRoot string `json:"document_root"`
+	// Path to the picture root.
+	PictureRoot string `json:"picture_root"`
+	// Ghostscript conversiob flags.
+	ConvFlags string `json:"conv_flags"`
 	// Determines whether to enable CORS header.
 	EnableCORS bool `json:"enable_cors"`
 	// Maximum upload size in bytes.
@@ -65,7 +65,6 @@ type ServerConfig struct {
 func NewServer(config ServerConfig) *Server {
 	return &Server{
 		config,
-		afero.NewBasePathFs(afero.NewOsFs(), config.DocumentRoot),
 	}
 }
 
@@ -213,7 +212,7 @@ func (s *Server) processUpload(w http.ResponseWriter, r *http.Request, path stri
 		return http.StatusInternalServerError, "", fmt.Errorf("failed to write the content")
 	}
 	log.Printf("uploaded by PUT to %s (%d bytes)", dstFile.Name(), written)
-	err = convertPdfToJpg( dstFile.Name(), s.DocumentRoot, path)
+	err = convertPdfToJpg( dstFile.Name(), s.PictureRoot, path)
 	if err != nil {
 		return http.StatusInternalServerError, "", err
 	}
@@ -272,7 +271,7 @@ func (s *Server) handleFileGet(w http.ResponseWriter, r *http.Request) (int, any
 
 func (s *Server) handleFileDelete( w http.ResponseWriter, r *http.Request) (int, any) {
 	requestPath := r.URL.Query().Get("name")
-	if err := deleteJpgs( s.DocumentRoot, requestPath);err != nil {
+	if err := deleteJpgs( s.PictureRoot, requestPath);err != nil {
 		return http.StatusInternalServerError, err
 	}
 	sha, err := deleteSha( requestPath)

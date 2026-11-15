@@ -22,8 +22,8 @@ Simple HTTP server to save artifacts
         address to listen
   -config string
         path to config file
-  -document_root string
-        path to document root directory
+  -picture_root string
+        path to picture root directory
   -enable_auth
         enable authentication
   -enable_cors
@@ -79,11 +79,11 @@ $ go test ./...
 This includes end-to-end tests. By default, the server with on-memory FileSystem is created and it starts listening on
 the port chosen randomly. You can control this behavior by setting the environment variables.
 
-If `TEST_WITH_REAL_FS=${PATH_TO_DOCUMENT_ROOT}` is set, the test server uses the real filesystem. Make sure the document
+`TEST_WITH_REAL_FS=${PATH_TO_PICTURE_ROOT}` has to be set, because the test server needs a real filesystem. Make sure the picture
 root directory contains no files; otherwise, some tests might be failed. The directory will not be cleaned after testing.
 
 If `TEST_TARGET_ADDR-${HOST}:${PORT}` is set, the test program doesn't start a local test server and sends requests to
-`http://${HOST}:${PORT}`. Note that the target server's document root should be cleared prior to testing.
+`http://${HOST}:${PORT}`. Note that the target server's picture root should be cleared prior to testing.
 
 This repository has `docker-compose.e2e.yml` to run the E2E test. To run tests using this:
 

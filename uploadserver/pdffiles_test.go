@@ -1,23 +1,29 @@
 package uploadserver
 
 import (
+	"path"
 	"strings"
 	"testing"
 	"github.com/spf13/afero"
 	"github.com/stretchr/testify/assert"
-	"github.com/jung-kurt/gofpdf"
+	"github.com/suyuan32/gofpdf-next"
 )
 
-func CreatePdf_TestHelper(t *testing.T, content []string, pdfFilePath string) {
+func CreatePdfFile_TestHelper(t *testing.T, contentPages []string, pdfRoot string) string {
         t.Helper()
 
+	f, err1 := os.CreateTemp( pdfRoot, 0755)
+	asser.Nil( t, err1, fmt.Sprintf( "failed to create pdf dir: %v", err1)
+	defer f.Close()
+	pdfFilePath := f.Name()
 	pdf := gofpdf.New("P", "mm", "A4", "")
-	for _, text := range content {
+	for _, text := range contentPages {
 		pdf.AddPage()
 		pdf.SetFont("Arial", "B", 16)
 		pdf.Cell(40, 10, text)
 	}
 	pdf.OutputFileAndClose( pdfFilePath)
+	return pdfFilePath
 }
 
 func TestPdfFiles(t *testing.T) {

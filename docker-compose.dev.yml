@@ -11,4 +11,4 @@ services:
       - .:/go/src/app
       - ./_container_data/jpgroot:/jpgroot
       - ./_container_data/sqlroot:/sqlroot
-    command: -document_root=/jpgroot -addr=:8080 -max_upload_size 10485760
+    command: -picture_root=/jpgroot -addr=:8080 -max_upload_size 10485760

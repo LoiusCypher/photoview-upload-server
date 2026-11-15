@@ -1,43 +1,36 @@
 package uploadserver
 
 import (
-	//"database/sql"
-	"os"
-	"path"
 	"testing"
 	"github.com/spf13/afero"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
+const SqliteDbInMemory = ":memory:"
+
 // CreateDatabase_TestHelper for testing.
-func CreateDatabase_TestHelper(t *testing.T) {
+func CreateEmptyDatabase_TestHelper(t *testing.T, sqlPath string) {
 	t.Helper()
 
 	// _ = env.Load("../.env-test")
 
 	// =========================================Setup Database
-	// sqlPath := "/sqlroot/shafiles.db"
-	// sqlPath := "/opt/app/shafiles.db"
-	sqlMemo := ":memory:"
-	sqlPath := "/tmp/shafiles.db"
-	err1 := os.MkdirAll( path.Dir(sqlPath), 0755)
-	assert.Nil( t, err1)
 	dbPath := *SetDbPath(sqlPath)
-	assert.Equal( t, dbPath, sqlPath)
-	if dbPath != sqlMemo {
+	require.Equal( t, dbPath, sqlPath)
+	if dbPath != SqliteDbInMemory {
 		require.FileExists( t, dbPath)
 	}
 	db := openDb()
-	assert.NotNil( t, db)
+	require.NotNil( t, db)
 	defer db.Close()
 	tx, err3 := db.Begin()
-	assert.Nil( t, err3)
+	require.Nil( t, err3)
 	_, err4 := tx.Exec("DELETE FROM shafiles")
-	assert.Nil( t, err4)
+	require.Nil( t, err4)
 	defer tx.Rollback()
 	err5 := tx.Commit()
-	assert.Nil( t, err5)
+	require.Nil( t, err5)
 	// =========================================Setup Database
 
 	// if err := db.MigrateUp(context.Background()); err != nil {
@@ -58,24 +51,29 @@ func CreateFile_TestHelper(t *testing.T, fs afero.Fs, tmpPath string, fileName s
 	return tmpFilePath
 }
 
-func RecordFile_TestHelper(t *testing.T, tmpFilePath string, dir_db_path string, record_db_path string, db_entries_expected int, dir_entries_expected int) string {
-	shaCalc, err1 := calcSha( tmpFilePath)
+func RecordPdf_TestHelper(t *testing.T, pdfFilePath string, record_db_path string) string {
+	shaCalc, err1 := calcSha( pdfFilePath)
 	assert.Nil( t, err1)
-	shaRec, err2 := recordSha( tmpFilePath, record_db_path)
+	shaRec, err2 := recordSha( pdfFilePath, record_db_path)
 	assert.Nil( t, err2)
-	assert.Equal( t, shaCalc, shaRec)
+	require.Equal( t, shaCalc, shaRec)
+	return shaRec
+}
+
+func RecordFile_TestHelper(t *testing.T, tmpFilePath string, dir_db_path string, record_db_path string, db_entries_expected int, dir_entries_expected int) string {
+	shaRec := RecordPdf_TestHelper( t, tmpFilePath, record_db_path)
 	shaGet, err3 := getPathSha( record_db_path)
 	assert.Nil( t, err3)
-	assert.Equal( t, shaCalc, shaGet)
+	assert.Equal( t, shaRec, shaGet)
 	listInfos, err4 := listShas( "")
 	assert.Nil( t, err4)
 	assert.Equal( t, db_entries_expected, len(listInfos))
 	dirInfos, err5 := listShas( dir_db_path)
 	assert.Nil( t, err5)
 	assert.Equal( t, dir_entries_expected, len(dirInfos))
-	assert.Equal( t, shaCalc, dirInfos[0].Sha)
+	assert.Equal( t, shaRec, dirInfos[0].Sha)
 	assert.Equal( t, record_db_path, dirInfos[0].Path)
-	return shaCalc
+	return shaRec
 }
 
 func DeleteFile_TestHelper(t *testing.T, dir_db_path string, record_db_path string, sha string, db_entries_expected int, dir_entries_expected int)  {

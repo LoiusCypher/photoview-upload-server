@@ -11,8 +11,8 @@ require (
 )
 
 require (
-      github.com/jung-kurt/gofpdf v1.16.2 // indirect
       github.com/stretchr/testify v1.12.1 // indirect
+      github.com/suyuan32/gofpdf-next v1.0.0 // indirect
       go.yaml.in/yaml/v3 v3.0.5 // indirect
       golang.org/x/text v0.37.0 // indirect
 )

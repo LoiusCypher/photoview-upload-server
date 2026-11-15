@@ -19,7 +19,7 @@ func Test_parseConfig(t *testing.T) {
 		defer f.Close()
 		if _, err := f.WriteString(`{
 			"addr": ":8123",
-			"document_root": "/opt/app",
+			"picture_root": "/opt/app",
 			"enable_cors": true,
 			"max_upload_size": 1234567,
 			"file_naming_strategy": "uuid",
@@ -47,7 +47,7 @@ func Test_parseConfig(t *testing.T) {
 		}
 		want := &uploadserver.ServerConfig{
 			Addr:               ":8123",
-			DocumentRoot:       "/opt/app",
+			PictureRoot:        "/opt/app",
 			EnableCORS:         true,
 			MaxUploadSize:      1234567,
 			FileNamingStrategy: "uuid",
@@ -67,7 +67,7 @@ func Test_parseConfig(t *testing.T) {
 		app := NewApp(os.Args[0])
 		args := []string{
 			"-addr", ":8987",
-			"-document_root", "/tmp/sus",
+			"-picture_root", "/tmp/sus",
 			"-enable_cors=false",
 			"-max_upload_size", "987654",
 			"-file_naming_strategy", "uuid",
@@ -85,7 +85,7 @@ func Test_parseConfig(t *testing.T) {
 		}
 		want := &uploadserver.ServerConfig{
 			Addr:               ":8987",
-			DocumentRoot:       "/tmp/sus",
+			PictureRoot:        "/tmp/sus",
 			EnableCORS:         false,
 			MaxUploadSize:      987654,
 			FileNamingStrategy: "uuid",
@@ -105,7 +105,7 @@ func Test_parseConfig(t *testing.T) {
 		app := NewApp(os.Args[0])
 		args := []string{
 			"-addr", ":8987",
-			"-document_root", "/tmp/sus",
+			"-picture_root", "/tmp/sus",
 			"-enable_cors=true",
 			"-max_upload_size", "987654",
 			"-file_naming_strategy", "uuid",
@@ -121,7 +121,7 @@ func Test_parseConfig(t *testing.T) {
 		defer f.Close()
 		if _, err := f.WriteString(`{
 			"addr": ":8123",
-			"document_root": "/opt/app",
+			"picture_root": "/opt/app",
 			"enable_cors": true,
 			"max_upload_size": 1234567,
 			"file_naming_strategy": "uuid",
@@ -149,7 +149,7 @@ func Test_parseConfig(t *testing.T) {
 		}
 		want := &uploadserver.ServerConfig{
 			Addr:               ":8987",
-			DocumentRoot:       "/tmp/sus",
+			PictureRoot:        "/tmp/sus",
 			EnableCORS:         true,
 			MaxUploadSize:      987654,
 			FileNamingStrategy: "uuid",

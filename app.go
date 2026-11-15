@@ -19,7 +19,8 @@ import (
 )
 
 var DefaultConfig = ServerConfig{
-	DocumentRoot:       ".",
+	PictureRoot:        ".",
+	ConvFlags:          "-r300",
 	Addr:               uploadserver.DefaultAddr,
 	EnableCORS:         nil,
 	MaxUploadSize:      1024 * 1024,
@@ -111,8 +112,10 @@ func (d *Duration) UnmarshalJSON(data []byte) error {
 type ServerConfig struct {
 	// Address where the server listens on.
 	Addr string `json:"addr"`
-	// Path to the document root.
-	DocumentRoot string `json:"document_root"`
+	// Path to the picture root.
+	PictureRoot string `json:"picture_root"`
+	// Ghostscript conversiob flags.
+	ConvFlags string `json:"convFlags"`
 	// Determines whether to enable CORS header.
 	EnableCORS *bool `json:"enable_cors"`
 	// Maximum upload size in bytes.
@@ -143,7 +146,8 @@ func (c *ServerConfig) AsConfig() uploadserver.ServerConfig {
 
 	return uploadserver.ServerConfig{
 		Addr:               c.Addr,
-		DocumentRoot:       c.DocumentRoot,
+		PictureRoot:        c.PictureRoot,
+		ConvFlags:          c.ConvFlags,
 		EnableCORS:         *c.EnableCORS,
 		MaxUploadSize:      c.MaxUploadSize,
 		FileNamingStrategy: c.FileNamingStrategy,
@@ -163,7 +167,8 @@ func main() {
 type app struct {
 	flagSet            *flag.FlagSet
 	configFilePath     string
-	documentRoot       string
+	pictureRoot        string
+	convFlags          string
 	addr               string
 	enableCORS         boolOptFlag
 	maxUploadSize      int64
@@ -180,7 +185,8 @@ func NewApp(name string) *app {
 	a := &app{}
 	fs := flag.NewFlagSet(name, flag.ExitOnError)
 	fs.StringVar(&a.configFilePath, "config", "", "path to config file")
-	fs.StringVar(&a.documentRoot, "document_root", "", "path to document root directory")
+	fs.StringVar(&a.pictureRoot, "picture_root", "", "path to picture root directory")
+	fs.StringVar(&a.convFlags, "conv_flags", "-r300", "ghostscript conversion flags")
 	fs.StringVar(&a.addr, "addr", "", "address to listen")
 	fs.Var(&a.enableCORS, "enable_cors", "enable CORS header")
 	fs.Int64Var(&a.maxUploadSize, "max_upload_size", 0, "max upload size in bytes")
@@ -262,7 +268,8 @@ func (a *app) ParseConfig(args []string) (*uploadserver.ServerConfig, error) {
 	}
 
 	configFromFlags := ServerConfig{
-		DocumentRoot:       a.documentRoot,
+		PictureRoot:        a.pictureRoot,
+		ConvFlags:          a.convFlags,
 		Addr:               a.addr,
 		MaxUploadSize:      a.maxUploadSize,
 		FileNamingStrategy: a.fileNamingStrategy,

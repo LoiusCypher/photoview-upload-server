@@ -20,7 +20,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/spf13/afero"
+	"github.com/stretchr/testify/require"
 )
 
 
@@ -64,31 +64,23 @@ func TestServer(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	var docRoot string
-	var fs afero.Fs
-	if v, ok := os.LookupEnv("TEST_WITH_REAL_FS"); ok && v != "" {
-		docRoot = v
-		fs = afero.NewOsFs()
-	} else {
-		docRoot = "/tmp"
-		fs = afero.NewMemMapFs()
-	}
+	// ghostscript output has to be on real file system
+	var jpgRoot := os.MkdirTemp("", "")
+	defer os.RemoveAll( jpgRoot)
 
-	if err := fs.MkdirAll(docRoot, 0755); err != nil {
-		t.Fatalf("failed to create document root: %v", err)
-	}
-	if err := afero.WriteFile(fs, path.Join(docRoot, "test.txt"), []byte("lorem ipsum"), 0644); err != nil {
-		t.Fatalf("failed to create test file: %v", err)
-	}
-	if err := fs.Mkdir(path.Join(docRoot, "foo"), 0755); err != nil && !os.IsExist(err) {
-		t.Fatalf("failed to create directory: %v", err)
-	}
-	if err := afero.WriteFile(fs, path.Join(docRoot, "foo", "bar.txt"), []byte("hello, world"), 0644); err != nil {
-		t.Fatalf("failed to create test file: %v", err)
-	}
+	var pdfRoot := os.MkdirTemp("", "")
+	defer os.RemoveAll( pdfRoot)
+	pdfPath_test := CreatePdfFile_TestHelper( t, []string{ "lorem ipsum",}, pdfRoot)
+	pdfPath_hello := CreatePdfFile_TestHelper( t, []string{ "hello, world",}, pdfRoot)
 
-	CreateDatabase_TestHelper( t)
-	// shaRecs := 0
+	// sqlite database has to be on real file system or in memory
+	// var sqlRoot := os.MkdirTemp("", "")
+	// defer os.RemoveAll( sqlRoot)
+	// CreateDatabase_TestHelper( t, path.Join( sqlRoot, "shafiles.db"))
+	CreateDatabase_TestHelper( t, SqliteDbInMemory))
+
+	helloFile_db_dir := "arbitrary / file path / hello,pdf"
+	sha_hello := RecordPdf_TestHelper( t, pdfPath_hello, helloFile_db_dir, helloFile_db_path)
 
 	var target string
 	if addr, ok := os.LookupEnv("TEST_TARGET_ADDR"); ok && addr != "" {
@@ -101,13 +93,13 @@ func TestServer(t *testing.T) {
 		target = net.JoinHostPort("127.0.0.1", strconv.Itoa(port))
 		config := ServerConfig{
 			Addr:            target,
-			DocumentRoot:    docRoot,
+			PictureRoot:     jpgRoot,
 			EnableCORS:      true,
 			MaxUploadSize:   10240,
 			ShutdownTimeout: 5000,
 		}
 		ready := make(chan struct{})
-		server := Server{config, afero.NewBasePathFs(fs, docRoot)}
+		server := Server{config,}
 		go func() {
 			t.Logf("starting server at %s", target)
 			server.Start(ctx, ready) // nolint:errcheck
@@ -116,9 +108,8 @@ func TestServer(t *testing.T) {
 	}
 
 	base, err := url.Parse("http://" + target)
-	if err != nil {
-		t.Fatalf("failed to parse base url: %v", err)
-	}
+	require.Nil( t, err, fmt.Sprintf( "failed to parse base url: %v", err))
+
 	var lastPdfSha string
 
 	t.Run("GET /list", func(t *testing.T) {
@@ -137,15 +128,8 @@ func TestServer(t *testing.T) {
 	t.Run("PUT /file?name=hello.pdf", func(t *testing.T) {
 		u := base.JoinPath("/file")
 		pdfFilePath := "hello.pdf"
-		CreatePdf_TestHelper( t, []string{ "hello, world",}, pdfFilePath)
-		file, err1 := os.Open( pdfFilePath)
-		assert.Nil(t, err1)
-		defer file.Close()
-		sha, err2 := calcSha( pdfFilePath)
-		assert.Nil(t, err2)
 		GenerateUrl_TestHelper( t, u, pdfFilePath)
-		req, err3 := makeFormRequest(u, http.MethodPut, pdfFilePath, file)
-		assert.Nil(t, err3)
+		req, sha := makeFormRequest( t, u, http.MethodPut, []string{ "lorem ipsum",}, pdfRoot)
 		resp, err4 := http.DefaultClient.Do(req)
 		assert.Nil(t, err4, fmt.Sprintf("failed to PUT: %v", err4))
 		defer resp.Body.Close()
@@ -176,13 +160,8 @@ func TestServer(t *testing.T) {
 	t.Run("POST /file?name=foo.pdf should fail due to an invalid method", func(t *testing.T) {
 		u := base.JoinPath("/file")
 		pdfFilePath := "foo.pdf"
-		CreatePdf_TestHelper( t, []string{ "hello, world",}, pdfFilePath)
-		file, err1 := os.Open( pdfFilePath)
-		assert.Nil(t, err1)
 		GenerateUrl_TestHelper( t, u, pdfFilePath)
-		req, err3 := makeFormRequest(u, http.MethodPost, pdfFilePath, file)
-		assert.Nil(t, err3)
-		defer file.Close()
+		req, sha := makeFormRequest( t, u, http.MethodPut, []string{ "hello, world",}, pdfRoot)
 		resp, err4 := http.DefaultClient.Do(req)
 		assert.Nil(t, err4, fmt.Sprintf("failed to POST: %v", err4))
 		defer resp.Body.Close()
@@ -196,13 +175,13 @@ func TestServer(t *testing.T) {
 /*
 	t.Run("POST /upload should fail due to duplication", func(t *testing.T) {
 		localPath := filepath.Join(docRoot, "test.txt")
-		localOriginal, err := afero.ReadFile(fs, localPath)
+		localOriginal, err := os.ReadFile( localPath)
 		if err != nil {
 			t.Fatalf("failed to read local file: %v", err)
 		}
 
 		u := base.JoinPath("/upload")
-		req, err := makeFormRequest(u, http.MethodPost, "test.txt", bytes.NewBufferString("hello, new world"))
+		req, sha := makeFormRequest( t, u, http.MethodPut, []string{ "hello, new world",}, pdfRoot)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -229,13 +208,13 @@ func TestServer(t *testing.T) {
 		if !reflect.DeepEqual(result, expected) {
 			t.Errorf("result = %+v, want = %+v", result, expected)
 		}
-		verifyLocalFile(t, fs, localPath, localOriginal)
+		verifyLocalFile(t, localPath, localOriginal)
 	})
 */
 	t.Run("PUT /file?name=arbitrary / file / path/hello.pdf should succeed even on overwrite", func(t *testing.T) {
 		pdfFilePath := "hello.pdf"
 
-		CreatePdf_TestHelper( t, []string{ "hello, world",}, pdfFilePath)
+		CreatePdfFile_TestHelper( t, []string{ "hello, world",}, pdfFilePath)
 		file, err1 := os.Open( pdfFilePath)
 		assert.Nil(t, err1)
 		defer file.Close()
@@ -247,17 +226,9 @@ func TestServer(t *testing.T) {
 		sha_hello := RecordFile_TestHelper( t, pdfFilePath, helloFile_db_dir, helloFile_db_path, 2, 1)
 		assert.Equal( t, shaOld, sha_hello)
 
-		newContent := "hello, new world"
-		CreatePdf_TestHelper( t, []string{ newContent,}, pdfFilePath)
-		shaNew, err2 := calcSha( pdfFilePath)
-		assert.NotEqual( t, sha_hello, shaNew)
-		assert.Nil(t, err2)
-
 		u := base.JoinPath("/file")
 		GenerateUrl_TestHelper( t, u, helloFile_db_path)
-
-		req, err3 := makeFormRequest(u, http.MethodPut, pdfFilePath, file)
-		assert.Nil(t, err3)
+		req, shaNew := makeFormRequest( t, u, http.MethodPut, []string{ "hello, new world", "with second side"}, pdfRoot)
 		resp, err4 := http.DefaultClient.Do(req)
 		assert.Nil(t, err4, fmt.Sprintf("failed to PUT: %v", err4))
 		defer resp.Body.Close()
@@ -300,7 +271,7 @@ func TestServer(t *testing.T) {
 		if !reflect.DeepEqual(result, expected) {
 			t.Errorf("result = %+v, want = %+v", result, expected)
 		}
-		verifyLocalFile(t, fs, filepath.Join(docRoot, "hello_put.txt"), []byte("hello, world"))
+		verifyLocalFile(t, filepath.Join(docRoot, "hello_put.txt"), []byte("hello, world"))
 	})
 */ /*
 	t.Run("PUT /files/hello/world.txt", func(t *testing.T) {
@@ -334,12 +305,14 @@ func TestServer(t *testing.T) {
 		if result.Path != "/files/hello/world.txt" {
 			t.Errorf("path = %s, want = \"/files/hello/world.txt\"", result.Path)
 		}
-		if exists, err := afero.DirExists(fs, filepath.Join(docRoot, "hello")); err != nil {
+		info, err := os.Stat(filepath.Join(docRoot, "hello"))
+		exists := !os.IsNotExist(err) && info.IsDir()
+		if  err != nil {
 			t.Fatalf("failed to check if directory exists: %v", err)
 		} else if !exists {
 			t.Errorf("directory /hello does not exist")
 		}
-		verifyLocalFile(t, fs, filepath.Join(docRoot, "hello", "world.txt"), []byte("hello, world"))
+		verifyLocalFile(t, filepath.Join(docRoot, "hello", "world.txt"), []byte("hello, world"))
 	})
 */ /*
 	t.Run("PUT /upload should fail", func(t *testing.T) {
@@ -439,7 +412,7 @@ func TestServer(t *testing.T) {
 			if !reflect.DeepEqual(result, expected) {
 				t.Errorf("result = %+v, want = %+v", result, expected)
 			}
-			verifyLocalFile(t, fs, filepath.Join(docRoot, "foo", "bar.txt"), []byte("new world"))
+			verifyLocalFile(t, filepath.Join(docRoot, "foo", "bar.txt"), []byte("new world"))
 		})
 	})
 */
@@ -545,16 +518,12 @@ func TestServer(t *testing.T) {
 func TestServerWithAuth(t *testing.T) {
 	docRoot := "/opt/app"
 
-	fs := afero.NewMemMapFs()
-	if err := fs.MkdirAll(docRoot, 0755); err != nil {
+	if err := os.MkdirAll(pdfRoot, 0755); err != nil {
 		t.Fatalf("failed to create document root: %v", err)
 	}
-	if err := afero.WriteFile(fs, path.Join(docRoot, "test.txt"), []byte("lorem ipsum"), 0644); err != nil {
-		t.Fatalf("failed to create test file: %v", err)
-	}
-	if err := afero.WriteFile(fs, path.Join(docRoot, "foo", "bar.txt"), []byte("hello, world"), 0644); err != nil {
-		t.Fatalf("failed to create test file: %v", err)
-	}
+	_ := CreatePdfFile_TestHelper( t, []string{ "lorem ipsum",}, path.Join(pdfRoot, "test.pdf"))
+	_ := CreatePdfFile_TestHelper( t, []string{ "hello, world",}, path.Join(pdfRoot, "foo", "bar.pdf"))
+
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	port, err := getAvailablePort()
@@ -576,7 +545,7 @@ func TestServerWithAuth(t *testing.T) {
 		ReadWriteTokens: []string{rwToken},
 	}
 	ready := make(chan struct{})
-	server := Server{config, afero.NewBasePathFs(fs, docRoot)}
+	server := Server{config,}
 	go func() {
 		t.Logf("starting server at %s", addr)
 		server.Start(ctx, ready) // nolint:errcheck
@@ -617,7 +586,7 @@ func TestServerWithAuth(t *testing.T) {
 		if !reflect.DeepEqual(result, expected) {
 			t.Errorf("result = %+v, want = %+v", result, expected)
 		}
-		verifyLocalFile(t, fs, filepath.Join(docRoot, "hello.txt"), []byte("hello, world"))
+		verifyLocalFile(t, filepath.Join(docRoot, "hello.txt"), []byte("hello, world"))
 	})
 
 	t.Run("POST /upload token via query", func(t *testing.T) {
@@ -653,7 +622,7 @@ func TestServerWithAuth(t *testing.T) {
 		if !reflect.DeepEqual(result, expected) {
 			t.Errorf("result = %+v, want = %+v", result, expected)
 		}
-		verifyLocalFile(t, fs, filepath.Join(docRoot, "hello_query.txt"), []byte("hello, world"))
+		verifyLocalFile(t, filepath.Join(docRoot, "hello_query.txt"), []byte("hello, world"))
 	})
 
 	t.Run("POST /upload with read-only token", func(t *testing.T) {
@@ -750,7 +719,7 @@ func TestServerWithAuth(t *testing.T) {
 		if !reflect.DeepEqual(result, expected) {
 			t.Errorf("result = %+v, want = %+v", result, expected)
 		}
-		verifyLocalFile(t, fs, filepath.Join(docRoot, "hello_put.txt"), []byte("hello, world"))
+		verifyLocalFile(t, filepath.Join(docRoot, "hello_put.txt"), []byte("hello, world"))
 	})
 
 	t.Run("PUT /files/hello_put.txt with read-only token", func(t *testing.T) {
@@ -1124,8 +1093,8 @@ func TestServerWithAuth(t *testing.T) {
 	})
 }
 */ /*
-func verifyLocalFile(t *testing.T, fs afero.Fs, path string, content []byte) {
-	got, err := afero.ReadFile(fs, path)
+func verifyLocalFile(t *testing.T, path string, content []byte) {
+	got, err := os.ReadFile( path)
 	if err != nil {
 		t.Fatalf("failed to read local file: %v", err)
 	}
@@ -1145,28 +1114,27 @@ func containsAll[T comparable](a, b []T) bool {
 }
 
 // makeFormRequest creates a new http.Request with multipart/form-data.
-func makeFormRequest(url *url.URL, method, filename string, content io.Reader) (*http.Request, error) {
+func makeFormRequest( t *testing.T, url *url.URL, method, contentPages []string, pdfRoot string) (*http.Request, error) {
+	filename := CreatePdfFile_TestHelper( t, contentPages, pdfRoot)
+	sha, err0 := calcSha( filename)
+	require.Nil(t, err0)
+	file, err1 := os.Open( filename)
+	require.Nil(t, err1)
+	defer file.Close()
 	b := new(bytes.Buffer)
 	w := multipart.NewWriter(b)
-	fw, err := w.CreateFormFile("file", filename)
-	if err != nil {
-		return nil, err
-	}
-	written, err := io.Copy(fw, content)
-	if err != nil {
-		return nil, err
-	}
-	if written == 0 {
-		return nil, fmt.Errorf("no bytes written")
-	}
+	defer w.Close()
+	fw, err2 := w.CreateFormFile("file", filename)
+	require.Nil(t, err2)
+	defer fw.Close()
+	written, err3 := io.Copy(fw, file)
+	assert.Nil(t, err3)
+	assert.NotEqual(t, 0, written, fmt.Sprintf("no bytes written"))
 	w.Close()
-
-	req, err := http.NewRequest(method, url.String(), b)
-	if err != nil {
-		return nil, err
-	}
+	req, err4 := http.NewRequest( method, url.String(), b)
+	require.Nil(t, err4)
 	req.Header.Set("Content-Type", w.FormDataContentType())
-	return req, nil
+	return req, sha
 }
 
 // getAvailablePort returns an available port number randomly.

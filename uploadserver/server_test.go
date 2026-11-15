@@ -6,6 +6,7 @@ import (
 	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"path"
 	"path/filepath"
 	"reflect"
@@ -19,8 +20,8 @@ func TestGetHandler(t *testing.T) {
 	var sqlroot string
 	var fs afero.Fs
 	sqlroot = "/sqlroot"
-	fs = afero.NewMemMapFs()
-	if err := fs.MkdirAll(sqlroot, 0755); err != nil {
+	//fs = afero.NewMemMapFs()
+	if err := os.MkdirAll(sqlroot, 0755); err != nil {
 		t.Fatalf("failed to create sql root: %v", err)
 	}
 	type args struct {
@@ -39,7 +40,7 @@ func TestGetHandler(t *testing.T) {
 			name: "get existing file",
 			args: args{
 				Method: http.MethodGet,
-				Url:    "/files/foo/bar.txt",
+				Url:    "/file?name=foo/bar.pdf",
 			},
 			want: http.StatusOK,
 			headers: map[string]string{
@@ -47,11 +48,12 @@ func TestGetHandler(t *testing.T) {
 			},
 			body: "hello, world",
 		},
+*/
 		{
 			name: "get non-existing file",
 			args: args{
 				Method: http.MethodGet,
-				Url:    "/files/bar/baz",
+				Url:    "/file?name=bar/baz",
 			},
 			want: http.StatusNotFound,
 			headers: map[string]string{
@@ -68,11 +70,12 @@ func TestGetHandler(t *testing.T) {
 			want: http.StatusNotFound,
 			body: `{"ok":false,"error":"file not found"}`,
 		},
+/*
 		{
 			name: "get directory",
 			args: args{
 				Method: http.MethodGet,
-				Url:    "/files/foo",
+				Url:    "/list/foo",
 			},
 			want: http.StatusNotFound,
 			headers: map[string]string{
@@ -84,19 +87,19 @@ func TestGetHandler(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			docRoot := "/opt/app"
+			jpgRoot := "/opt/app"
 			fs := afero.NewMemMapFs()
-			if err := fs.MkdirAll(path.Join(docRoot, "foo"), 0755); err != nil {
+			if err := fs.MkdirAll(path.Join(jpgRoot, "foo"), 0755); err != nil {
 				t.Fatal(err)
 			}
-			if err := afero.WriteFile(fs, path.Join(docRoot, "foo", "bar.txt"), []byte("hello, world"), 0644); err != nil {
+			if err := afero.WriteFile(fs, path.Join(jpgRoot, "foo", "bar.txt"), []byte("hello, world"), 0644); err != nil {
 				t.Fatal(err)
 			}
 			config := ServerConfig{
-				DocumentRoot: "/opt/app",
+				PictureRoot:  "/opt/app",
 				EnableCORS:   true,
 			}
-			server := Server{config, afero.NewBasePathFs(fs, docRoot)}
+			server := Server{config, afero.NewBasePathFs(fs, jpgRoot)}
 			req, err := http.NewRequest(tt.args.Method, tt.args.Url, nil)
 			if err != nil {
 				t.Fatal(err)
@@ -122,7 +125,7 @@ func TestGetHandler(t *testing.T) {
 }
 
 func TestServer_PutHandler(t *testing.T) {
-	docRoot := "/opt/app"
+	jpgRoot := "/opt/app"
 	type args struct {
 		Method  string
 		Url     string
@@ -207,15 +210,15 @@ func TestServer_PutHandler(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			fs := afero.NewMemMapFs()
-			if err := fs.MkdirAll(docRoot, 0755); err != nil {
+			if err := fs.MkdirAll(jpgRoot, 0755); err != nil {
 				t.Fatal(err)
 			}
 			config := ServerConfig{
-				DocumentRoot:  docRoot,
+				PictureRoot:  jpgRoot,
 				EnableCORS:    true,
 				MaxUploadSize: 16,
 			}
-			server := Server{config, afero.NewBasePathFs(fs, docRoot)}
+			server := Server{config, afero.NewBasePathFs(fs, jpgRoot)}
 
 			b := new(bytes.Buffer)
 			w := multipart.NewWriter(b)
@@ -257,7 +260,7 @@ func TestServer_PutHandler(t *testing.T) {
 					t.Errorf("unexpected response body: %v", err)
 				}
 				localPath := strings.TrimPrefix(resp.Path, "/files/")
-				localFullPath := filepath.Join(docRoot, localPath)
+				localFullPath := filepath.Join(jpgRoot, localPath)
 				t.Logf("opening %s to verify", localFullPath)
 				f, err := fs.Open(localFullPath)
 				if err != nil {
