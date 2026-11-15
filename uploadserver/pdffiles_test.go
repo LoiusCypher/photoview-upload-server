@@ -3,10 +3,8 @@ package uploadserver
 import (
 	"fmt"
 	"os"
-	"path"
 	"strings"
 	"testing"
-	"github.com/spf13/afero"
 	"github.com/stretchr/testify/assert"
 	"github.com/suyuan32/gofpdf-next"
 )
@@ -14,7 +12,7 @@ import (
 func CreatePdfFile_TestHelper(t *testing.T, contentPages []string, pdfRoot string) string {
         t.Helper()
 
-	f, err1 := os.CreateTemp( pdfRoot, 0755)
+	f, err1 := os.CreateTemp( pdfRoot, "*.pdf")
 	assert.Nil( t, err1, fmt.Sprintf( "failed to create pdf dir: %v", err1))
 	defer f.Close()
 	pdfFilePath := f.Name()
@@ -29,27 +27,22 @@ func CreatePdfFile_TestHelper(t *testing.T, contentPages []string, pdfRoot strin
 }
 
 func TestPdfFiles(t *testing.T) {
-	// =========================================Setup Database
-	//fs := afero.NewMemMapFs()
-	fs := afero.NewOsFs()
 	// =========================================Add a file
 	pdfRoot := "/tmp/app/pdfs"
-	err := fs.MkdirAll( pdfRoot, 0755)
+	err := os.MkdirAll( pdfRoot, 0755)
 	assert.Nil( t, err)
 	jpgRoot := "/tmp/app/jpgs"
-	err = fs.MkdirAll( jpgRoot, 0755)
+	err = os.MkdirAll( jpgRoot, 0755)
 	assert.Nil( t, err)
 	// =========================================convert a file
-	pdfPath_Empty := pdfRoot + "/" + "uploadedEmpty.tmp"
-	CreatePdf_TestHelper( t, []string{ "",}, pdfPath_Empty)
+	pdfPath_Empty := CreatePdf_TestHelper( t, []string{ "",}, pdfRoot)
 	jpgPath_Empty := "path/subdir/" + "Empty.pdf"
 	err1 := convertPdfToJpg( pdfPath_Empty, jpgRoot, jpgPath_Empty)
 	assert.Nil( t, err1)
 	assert.FileExists( t, jpgRoot + "/" + strings.TrimSuffix( jpgPath_Empty, ".pdf") + "-01.jpg")
 	assert.NoFileExists( t, jpgRoot + "/" + strings.TrimSuffix( jpgPath_Empty, ".pdf") + "-02.jpg")
 	// =========================================
-	pdfPath_Multi := pdfRoot + "/" + "uploadedMulti.tmp"
-	CreatePdf_TestHelper( t, []string{ "Multi 1", "Multi 2", "Multi 3", "Multi 4", "Multi 5",}, pdfPath_Multi)
+	pdfPath_Multi := CreatePdf_TestHelper( t, []string{ "Multi 1", "Multi 2", "Multi 3", "Multi 4", "Multi 5",}, pdfRoot)
 	jpgPath_Multi := "path/subdir/" + "Multi.pdf"
 	err2 := convertPdfToJpg( pdfPath_Multi, jpgRoot, jpgPath_Multi)
 	assert.Nil( t, err2)
