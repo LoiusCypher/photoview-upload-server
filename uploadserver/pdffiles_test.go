@@ -13,7 +13,7 @@ func CreatePdfFile_TestHelper(t *testing.T, contentPages []string, pdfRoot strin
         t.Helper()
 
 	f, err1 := os.CreateTemp( pdfRoot, 0755)
-	asser.Nil( t, err1, fmt.Sprintf( "failed to create pdf dir: %v", err1)
+	assert.Nil( t, err1, fmt.Sprintf( "failed to create pdf dir: %v", err1))
 	defer f.Close()
 	pdfFilePath := f.Name()
 	pdf := gofpdf.New("P", "mm", "A4", "")
