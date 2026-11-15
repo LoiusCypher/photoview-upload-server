@@ -3,6 +3,7 @@ package uploadserver
 import (
 	"bytes"
 	"encoding/json"
+	"io"
 	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
@@ -12,7 +13,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/spf13/afero"
 )
 
 func TestGetHandler(t *testing.T) {
@@ -258,7 +258,7 @@ func TestServer_PutHandler(t *testing.T) {
 					return
 				}
 				defer f.Close()
-				uploaded, err := afero.ReadAll(f)
+				uploaded, err := io.ReadAll(f)
 				if err != nil {
 					t.Errorf("failed to verify local file. cannot read %s: %v", localFullPath, err)
 					return

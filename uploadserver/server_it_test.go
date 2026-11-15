@@ -81,7 +81,7 @@ func TestServer(t *testing.T) {
 	CreateEmptyDatabase_TestHelper( t, SqliteDbInMemory)
 
 	helloFile_db_path := "arbitrary / file path / hello,pdf"
-	sha_hello := RecordPdf_TestHelper( t, pdfPath_hello, helloFile_db_path)
+	_ := RecordPdf_TestHelper( t, pdfPath_hello, helloFile_db_path)
 
 	var target string
 	if addr, ok := os.LookupEnv("TEST_TARGET_ADDR"); ok && addr != "" {
@@ -1127,7 +1127,7 @@ func makeFormRequest( t *testing.T, url *url.URL, method string, contentPages []
 	defer w.Close()
 	fw, err2 := w.CreateFormFile("file", filename)
 	require.Nil(t, err2)
-	defer fw.Close()
+	// defer fw.Close()
 	written, err3 := io.Copy(fw, file)
 	assert.Nil(t, err3)
 	assert.NotEqual(t, 0, written, fmt.Sprintf("no bytes written"))

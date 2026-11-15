@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 	"github.com/stretchr/testify/assert"
-	"github.com/suyuan32/gofpdf-next"
+	"github.com/suyuan32/gofpdf-next/fpdf"
 )
 
 func CreatePdfFile_TestHelper(t *testing.T, contentPages []string, pdfRoot string) string {
