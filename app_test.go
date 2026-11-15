@@ -70,7 +70,7 @@ func Test_parseConfig(t *testing.T) {
 		args := []string{
 			"-addr", ":8987",
 			"-picture_root", "/tmp/sus",
-			"-conv_flags": "-r200",
+			"-conv_flags", "-r200",
 			"-enable_cors=false",
 			"-max_upload_size", "987654",
 			"-file_naming_strategy", "uuid",
@@ -110,7 +110,7 @@ func Test_parseConfig(t *testing.T) {
 		args := []string{
 			"-addr", ":8987",
 			"-picture_root", "/tmp/sus",
-			"-conv_flags": "-r200",
+			"-conv_flags", "-r200",
 			"-enable_cors=true",
 			"-max_upload_size", "987654",
 			"-file_naming_strategy", "uuid",
