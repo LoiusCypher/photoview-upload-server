@@ -65,10 +65,10 @@ func TestServer(t *testing.T) {
 	defer cancel()
 
 	// ghostscript output has to be on real file system
-	var jpgRoot := os.MkdirTemp("", "")
+	jpgRoot := os.MkdirTemp("", "")
 	defer os.RemoveAll( jpgRoot)
 
-	var pdfRoot := os.MkdirTemp("", "")
+	pdfRoot := os.MkdirTemp("", "")
 	defer os.RemoveAll( pdfRoot)
 	pdfPath_test := CreatePdfFile_TestHelper( t, []string{ "lorem ipsum",}, pdfRoot)
 	pdfPath_hello := CreatePdfFile_TestHelper( t, []string{ "hello, world",}, pdfRoot)
@@ -77,7 +77,7 @@ func TestServer(t *testing.T) {
 	// var sqlRoot := os.MkdirTemp("", "")
 	// defer os.RemoveAll( sqlRoot)
 	// CreateDatabase_TestHelper( t, path.Join( sqlRoot, "shafiles.db"))
-	CreateDatabase_TestHelper( t, SqliteDbInMemory))
+	CreateDatabase_TestHelper( t, SqliteDbInMemory)
 
 	helloFile_db_dir := "arbitrary / file path / hello,pdf"
 	sha_hello := RecordPdf_TestHelper( t, pdfPath_hello, helloFile_db_dir, helloFile_db_path)
