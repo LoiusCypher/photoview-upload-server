@@ -245,7 +245,7 @@ func TestServer_PutHandler(t *testing.T) {
 
 			status := rr.Code
 			assert.Equal( t, tt.want, status, fmt.Sprintf("status = %d, want = %d", status, tt.want))
-			sha_body := fmt.Sprintf( tt.body, sha)
+			sha_body := strings.Replace( tt.body, "%s", sha, 1)
 			if body := rr.Body.String(); body != sha_body {
 				t.Errorf("body = \"%s\", want = \"%s\"", body, sha_body)
 			}
