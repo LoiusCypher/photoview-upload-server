@@ -235,7 +235,7 @@ func (s *Server) handleListGet(w http.ResponseWriter, r *http.Request) (int, any
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 	}
 	if len(fileInfos) <= 0 {
-		return http.StatusNotFound, fmt.Errorf("not Found")
+		return http.StatusNotFound, fmt.Errorf("not found")
 	}
 	return http.StatusOK, SuccessFileInfosResult{ true, fileInfos}
 }
@@ -264,7 +264,7 @@ func (s *Server) handleFileGet(w http.ResponseWriter, r *http.Request) (int, any
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 	}
 	if sha == "" {
-		return http.StatusNotFound, fmt.Errorf("not Found")
+		return http.StatusNotFound, fmt.Errorf("not found")
 	}
 	return http.StatusOK, SuccessFileInfosResult{ true, []FileInfo{ FileInfo{ requestPath, sha,},},}
 }
@@ -282,7 +282,7 @@ func (s *Server) handleFileDelete( w http.ResponseWriter, r *http.Request) (int,
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 	}
 	if sha == "" {
-		return http.StatusNotFound, fmt.Errorf("not Found")
+		return http.StatusNotFound, fmt.Errorf("not found")
 	}
 	return http.StatusOK, SuccessFileInfosResult{ true, []FileInfo{ FileInfo{ requestPath, sha,},},}
 }
