@@ -76,7 +76,7 @@ func (s *Server) Start(ctx context.Context, ready chan struct{}) error {
 	r.Path("/list/").Methods(http.MethodGet).HandlerFunc(s.handle(s.handleListGet))
 	r.Path("/list/").Methods(http.MethodOptions).HandlerFunc(s.handle(s.handleOptions))
 	r.Path("/file/").Methods(http.MethodGet).HandlerFunc(s.handle(s.handleFileGet))
-	r.PathPrefix("/file").Path("/file/").Methods(http.MethodPut).Queries("name","").HandlerFunc(s.handle(s.handleFilePut))		// PUT makes no sense without (file) name
+	r.Path("/file/").Methods(http.MethodPut).Queries("name","").HandlerFunc(s.handle(s.handleFilePut))		// PUT makes no sense without (file) name
 	r.Path("/file/").Methods(http.MethodDelete).Queries("name","").HandlerFunc(s.handle(s.handleFileDelete))	// DELETE makes no sense without (file) name
 	r.Path("/file/").Methods(http.MethodOptions).HandlerFunc(s.handle(s.handleOptions))
 	r.Path("/").Methods(http.MethodPut).HandlerFunc(handleNotFound)
@@ -88,9 +88,13 @@ func (s *Server) Start(ctx context.Context, ready chan struct{}) error {
 	r.Use(logAccess)
 
 	r = nil
-	http.HandleFunc( "DELETE /file", s.handle(s.handleFileDelete))	// DELETE makes no sense without (file) name
-	http.HandleFunc( "PUT /file",	 s.handle(s.handleFilePut))	// PUT makes no sense without (file) name
-	http.HandleFunc( "PUT /", handleNotFound)
+	http.HandleFunc( "GET /list", 		s.handle(s.handleListGet))
+	http.HandleFunc( "OPTIONS /list", 	s.handle(s.handleOptions))
+	http.HandleFunc( "GET /file", 		s.handle(s.handleFileGet))
+	http.HandleFunc( "PUT /file",		s.handle(s.handleFilePut))	// PUT makes no sense without (file) name
+	http.HandleFunc( "DELETE /file", 	s.handle(s.handleFileDelete))	// DELETE makes no sense without (file) name
+	http.HandleFunc( "OPTIONS /file", 	s.handle(s.handleOptions))
+	http.HandleFunc( "/", 			handleNotFound)
 
 	addr := s.Addr
 	if addr == "" {
