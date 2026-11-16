@@ -186,7 +186,7 @@ func TestServer_PutHandler(t *testing.T) {
 			name: "PUT /files should fail",
 			args: args{
 				Method:  http.MethodPut,
-				Url:     "/files",
+				Url:     "/filesan/x",
 				Content: []string{ "hello",},
 			},
 			want: http.StatusMethodNotAllowed,
