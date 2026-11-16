@@ -192,11 +192,11 @@ func getPathSha( reqPath string) ( string, error) {
 }
 
 func recordFile( filePath string, registerPath string) ( string, error) {
+	fileSha, err := calcSha(filePath)
 	if err != nil {
 		log.Printf("making calcSha: %v\n", err)
 		return "", err
 	}
-	fileSha, err := calcSha(filePath)
 	return recordFileSha( fileSha, registerPath)
 }
 
