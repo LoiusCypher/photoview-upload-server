@@ -75,7 +75,7 @@ func (s *Server) Start(ctx context.Context, ready chan struct{}) error {
 	r.Path("/list/").Methods(http.MethodGet).HandlerFunc(s.handle(s.handleListGet))
 	r.Path("/list/").Methods(http.MethodOptions).HandlerFunc(s.handle(s.handleOptions))
 	r.Path("/file/").Methods(http.MethodGet).HandlerFunc(s.handle(s.handleFileGet))
-	r.Path("/file/").Methods(http.MethodPut).Queries("name","").HandlerFunc(s.handle(s.handleFilePut))		// PUT makes no sense without (file) name
+	r.PathPrefix("/file").Path("/file/").Methods(http.MethodPut).Queries("name","").HandlerFunc(s.handle(s.handleFilePut))		// PUT makes no sense without (file) name
 	r.Path("/file/").Methods(http.MethodDelete).Queries("name","").HandlerFunc(s.handle(s.handleFileDelete))	// DELETE makes no sense without (file) name
 	r.Path("/file/").Methods(http.MethodOptions).HandlerFunc(s.handle(s.handleOptions))
 	r.Path("/").Methods(http.MethodPut).HandlerFunc(handleNotFound)
