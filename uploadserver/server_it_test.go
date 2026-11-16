@@ -164,7 +164,7 @@ func TestServer(t *testing.T) {
 		u := base.JoinPath("/file")
 		pdfFilePath := "foo.pdf"
 		GenerateUrl_TestHelper( t, u, pdfFilePath)
-		req, _ := makeFormRequest( t, u, http.MethodPut, []string{ "hello, world",}, pdfRoot)
+		req, _ := makeFormRequest( t, u, http.MethodPost, []string{ "hello, world",}, pdfRoot)
 		resp, err4 := http.DefaultClient.Do(req)
 		assert.Nil(t, err4, fmt.Sprintf("failed to POST: %v", err4))
 		defer resp.Body.Close()
@@ -217,7 +217,7 @@ func TestServer(t *testing.T) {
 	t.Run("PUT /file?name=arbitrary / file / path/hello.pdf should succeed even on overwrite", func(t *testing.T) {
 		pdfFilePath := "hello.pdf"
 
-		CreatePdfFile_TestHelper( t, []string{ "hello, world",}, pdfFilePath)
+		_ = CreatePdfFile_TestHelper( t, []string{ "hello, world",}, pdfRoot)
 		file, err1 := os.Open( pdfFilePath)
 		assert.Nil(t, err1)
 		defer file.Close()
