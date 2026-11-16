@@ -154,7 +154,7 @@ func TestServer_PutHandler(t *testing.T) {
 			headers: map[string]string{
 				"Access-Control-Allow-Origin": "*",
 			},
-			body: `{"ok":true,"Files":[{"path":"hello.txt","sha":""}]}`,
+			body: `{"ok":true,"Files":[{"path":"hello.txt","sha":"%s"}]}`,
 		},
 		{
 			name: "PUT /files/empty with an empty content",
@@ -167,7 +167,7 @@ func TestServer_PutHandler(t *testing.T) {
 			headers: map[string]string{
 				"Access-Control-Allow-Origin": "*",
 			},
-			body: `"ok":true,"Files":[{"path":"empty.pdf","sha":""}]}`,
+			body: `"ok":true,"Files":[{"path":"empty.pdf","sha":"%s"}]}`,
 		},
 		{
 			name: "PUT /files/hello/world.pdf will create directory and file",
@@ -180,7 +180,7 @@ func TestServer_PutHandler(t *testing.T) {
 			headers: map[string]string{
 				"Access-Control-Allow-Origin": "*",
 			},
-			body: `{"ok":true,"Files":[{"path":"hello/world.pdf","sha":""}]}`,
+			body: `{"ok":true,"Files":[{"path":"hello/world.pdf","sha":"%s"}]}`,
 		},
 		{
 			name: "PUT /files should fail",
@@ -245,8 +245,9 @@ func TestServer_PutHandler(t *testing.T) {
 
 			status := rr.Code
 			assert.Equal( t, tt.want, status, fmt.Sprintf("status = %d, want = %d", status, tt.want))
-			if body := rr.Body.String(); body != tt.body {
-				t.Errorf("body = \"%s\", want = \"%s\"", body, tt.body)
+			sha_body := fmt.Sprintf( tt.body, sha)
+			if body := rr.Body.String(); body != sha_body {
+				t.Errorf("body = \"%s\", want = \"%s\"", body, sha_body)
 			}
 			if rr.Code == http.StatusCreated || rr.Code == http.StatusOK {
 				var resp SuccessFileInfosResult
