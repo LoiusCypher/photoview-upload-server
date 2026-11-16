@@ -160,7 +160,7 @@ func TestServer_PutHandler(t *testing.T) {
 			args: args{
 				Method:  http.MethodPut,
 				Url:     "/file?name=empty.pdf",
-				Content: []byte{},
+				Content: []string{},
 			},
 			want: http.StatusCreated,
 			headers: map[string]string{
@@ -168,13 +168,12 @@ func TestServer_PutHandler(t *testing.T) {
 			},
 			body: `{"ok":true,"path":"/files/empty"}`,
 		},
-/*
 		{
 			name: "PUT /files/hello/world.txt will create directory and file",
 			args: args{
 				Method:  http.MethodPut,
 				Url:     "/file?name=hello/world.pdf",
-				Content: []byte("hello, world"),
+				Content: []string("hello, world"),
 			},
 			want: http.StatusCreated,
 			headers: map[string]string{
@@ -187,7 +186,7 @@ func TestServer_PutHandler(t *testing.T) {
 			args: args{
 				Method:  http.MethodPut,
 				Url:     "/file",
-				Content: []byte("hello"),
+				Content: []string("hello"),
 			},
 			want: http.StatusMethodNotAllowed,
 			body: `{"ok":false,"error":"PUT is accepted on /files/:name"}`,
@@ -197,12 +196,13 @@ func TestServer_PutHandler(t *testing.T) {
 			args: args{
 				Method:  http.MethodPut,
 				Url:     "/file?=toolarge.pdf",
-				Content: []byte("ABCDEFGHIJKLMNOPQRSTUVWXYZ"),
+				Content: []string( "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "Second Page", "Last Page"),
 			},
 			want: http.StatusRequestEntityTooLarge,
 			body: `{"ok":false,"error":"file size limit exceeded"}`,
 		},
 		// TODO: add text without name
+/*
 */
 	}
 	for _, tt := range tests {
