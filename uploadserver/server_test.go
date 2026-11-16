@@ -220,7 +220,7 @@ func TestServer_PutHandler(t *testing.T) {
 
 			pdfFilePath := CreatePdfFile_TestHelper( t, tt.args.Content, pdfRoot)
 			sha, err0 := calcSha( pdfFilePath)
-			// require.Nil(t, err0)
+			require.Nil(t, err0)
 			file, err1 := os.Open( pdfFilePath)
 			assert.Nil(t, err1)
 			defer file.Close()
