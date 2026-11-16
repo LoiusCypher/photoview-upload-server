@@ -215,19 +215,17 @@ func TestServer(t *testing.T) {
 	})
 */
 	t.Run("PUT /file?name=arbitrary / file / path/hello.pdf should succeed even on overwrite", func(t *testing.T) {
-		pdfFilePath := "hello.pdf"
-
-		_ = CreatePdfFile_TestHelper( t, []string{ "hello, world",}, pdfRoot)
-		file, err1 := os.Open( pdfFilePath)
-		assert.Nil(t, err1)
-		defer file.Close()
-		shaOld, err2 := calcSha( pdfFilePath)
+		pdfFilePath := CreatePdfFile_TestHelper( t, []string{ "hello, world",}, pdfRoot)
+		//file, err1 := os.Open( pdfFilePath)
+		//assert.Nil(t, err1)
+		//defer file.Close()
+		sha_file, err2 := calcSha( pdfFilePath)
 		assert.Nil(t, err2)
 
 		helloFile_db_dir := "arbitrary / file "
 		helloFile_db_path := helloFile_db_dir + "/" + "hello,pdf"
-		sha_hello := RecordFile_TestHelper( t, pdfFilePath, helloFile_db_dir, helloFile_db_path, 2, 1)
-		assert.Equal( t, shaOld, sha_hello)
+		sha_hello := RecordPdf_TestHelper( t, pdfFilePath, helloFile_db_path)
+		assert.Equal( t, sha_file, sha_hello)
 
 		u := base.JoinPath("/file")
 		GenerateUrl_TestHelper( t, u, helloFile_db_path)
