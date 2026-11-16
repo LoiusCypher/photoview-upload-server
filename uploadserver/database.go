@@ -197,7 +197,7 @@ func recordFile( filePath string, registerPath string) ( string, error) {
 		return "", err
 	}
 	fileSha, err := calcSha(filePath)
-	return recordFileSha( fileSha string, registerPath string)
+	return recordFileSha( fileSha, registerPath)
 }
 
 func recordFileSha( fileSha string, registerPath string) ( string, error) {
