@@ -11,7 +11,6 @@ import (
 	"os"
 	"path"
 	"path/filepath"
-	"reflect"
 	"strings"
 	"testing"
 
@@ -250,14 +249,11 @@ func TestServer_PutHandler(t *testing.T) {
 				t.Errorf("body = \"%s\", want = \"%s\"", body, tt.body)
 			}
 			if rr.Code == http.StatusCreated || rr.Code == http.StatusOK {
-				var resp struct {
-					OK   bool   `json:"ok"`
-					Path string `json:"path"`
-				}
+				var resp SuccessFileInfosResult
 				if err := json.NewDecoder(rr.Body).Decode(&resp); err != nil {
 					t.Errorf("unexpected response body: %v", err)
 				}
-				localPath := strings.Trimsuffix(resp.Files[0].Path, ".pdf") + "-01.jpg"
+				localPath := strings.TrimSuffix(resp.Files[0].Path, ".pdf") + "-01.jpg"
 				localFullPath := filepath.Join(jpgRoot, localPath)
 				assert.FileExist( t, localFullPath)
 				t.Logf("opening %s to verify", localFullPath)
