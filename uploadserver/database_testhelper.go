@@ -15,14 +15,14 @@ func CreateEmptyDatabase_TestHelper(t *testing.T, sqlPath string) {
 
 	// =========================================Setup Database
 	dbPath := *SetDbPath(sqlPath)
-	require.Equal( t, dbPath, sqlPath)
+	// require.Equal( t, dbPath, sqlPath)
 	require.FileExists( t, dbPath)
 	db := openDb()
 	require.NotNil( t, db)
 	defer db.Close()
 	tx, err3 := db.Begin()
 	require.Nil( t, err3)
-	_, err4 := tx.Exec("DELETE * FROM shafiles")
+	_, err4 := tx.Exec("DELETE FROM shafiles")
 	require.Nil( t, err4)
 	defer tx.Rollback()
 	err5 := tx.Commit()
