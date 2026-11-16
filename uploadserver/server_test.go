@@ -125,9 +125,9 @@ func TestServer_PutHandler(t *testing.T) {
 	defer os.RemoveAll( sqlRoot)
 	CreateEmptyDatabase_TestHelper( t, path.Join( sqlRoot, "shafiles.db"))
 
-	sqlRoot, err1 := os.MkdirTemp("", "")
-	require.Nil( t, err1)
-	defer os.RemoveAll( sqlRoot)
+	pdfRoot, err2 := os.MkdirTemp("", "")
+	require.Nil(t, err2)
+	defer os.RemoveAll( pdfRoot)
 
 	jpgRoot := "/opt/app"
 	type args struct {
@@ -217,8 +217,8 @@ func TestServer_PutHandler(t *testing.T) {
 			}
 			server := Server{config, }
 
-			pdfFilePath := CreatePdfFile_TestHelper( t, Content, pdfRoot)
-			// sha, err0 := calcSha( filename)
+			pdfFilePath := CreatePdfFile_TestHelper( t, tt.args.Content, pdfRoot)
+			// sha, err0 := calcSha( pdfFilePath)
 			// require.Nil(t, err0)
 			file, err1 := os.Open( pdfFilePath)
 			assert.Nil(t, err1)
@@ -242,6 +242,7 @@ func TestServer_PutHandler(t *testing.T) {
 			handler := http.HandlerFunc(server.handle(server.handleFilePut))
 			handler.ServeHTTP(rr, req)
 
+			status := rr.Code
 			assert.Equal( t, tt.want, status, fmt.Sprintf("status = %d, want = %d", status, tt.want))
 			if body := rr.Body.String(); body != tt.body {
 				t.Errorf("body = \"%s\", want = \"%s\"", body, tt.body)
