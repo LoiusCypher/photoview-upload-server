@@ -48,7 +48,7 @@ func RecordFile_TestHelper( t *testing.T, pdfFilePath string, record_db_path str
 }
 
 func RecordPdfSha_TestHelper( t *testing.T, pdfFileSha string, record_db_path string) string {
-	shaRec, err2 := recordSha( pdfFileSha, record_db_path)
+	shaRec, err2 := recordFileSha( pdfFileSha, record_db_path)
 	assert.Nil( t, err2)
 	require.Equal( t, pdfFileSha, shaRec)
 	return shaRec

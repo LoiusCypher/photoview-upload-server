@@ -83,7 +83,7 @@ func TestServer(t *testing.T) {
 
 	helloFile_db_path := "arbitrary / file path / hello,pdf"
 	helloSha := RecordFile_TestHelper( t, pdfPath_hello, helloFile_db_path)
-	log.Println("SHA 1", helloSha)
+	fmt.Println("SHA 1", helloSha)
 
 	var target string
 	if addr, ok := os.LookupEnv("TEST_TARGET_ADDR"); ok && addr != "" {
@@ -222,7 +222,7 @@ func TestServer(t *testing.T) {
 		//defer file.Close()
 		sha_file, err2 := calcSha( pdfFilePath)
 		assert.Nil(t, err2)
-		log.Println("SHA 2", sha_file)
+		fmt.Println("SHA 2", sha_file)
 
 		helloFile_db_dir := "arbitrary / file "
 		helloFile_db_path := helloFile_db_dir + "/" + "hello,pdf"
