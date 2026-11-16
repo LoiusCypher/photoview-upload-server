@@ -196,7 +196,7 @@ func TestServer_PutHandler(t *testing.T) {
 			args: args{
 				Method:  http.MethodPut,
 				Url:     "/file?=toolarge.pdf",
-				Content: []string( "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "Second Page", "Last Page"),
+				Content: []string{ "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "Second Page", "Last Page"),
 			},
 			want: http.StatusRequestEntityTooLarge,
 			body: `{"ok":false,"error":"file size limit exceeded"}`,
