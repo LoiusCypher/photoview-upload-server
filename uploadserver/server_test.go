@@ -65,7 +65,7 @@ func TestGetHandler(t *testing.T) {
 			body: `{"ok":false,"error":"not found"}`,
 		},
 		{
-			name: "get without endpoint",
+			name: "get without endpoint should fail
 			args: args{
 				Method: http.MethodGet,
 				Url:    "/abc",
@@ -74,7 +74,16 @@ func TestGetHandler(t *testing.T) {
 			body: `{"ok":false,"error":"not found"}`,
 		},
 		{
-			name: "get directory",
+			name: "get /files should fail
+			args: args{
+				Method: http.MethodGet,
+				Url:    "/files",
+			},
+			want: http.StatusNotFound,
+			body: `{"ok":false,"error":"not found"}`,
+		},
+		{
+			name: "get /list?name=foo directory",
 			args: args{
 				Method: http.MethodGet,
 				Url:    "/list?name=foo",
@@ -83,6 +92,15 @@ func TestGetHandler(t *testing.T) {
 			headers: map[string]string{
 				"Access-Control-Allow-Origin": "*",
 			},
+			body: `{"ok":false,"error":"not found"}`,
+		},
+		{
+			name: "get /lists should fail
+			args: args{
+				Method: http.MethodGet,
+				Url:    "/list",
+			},
+			want: http.StatusNotFound,
 			body: `{"ok":false,"error":"not found"}`,
 		},
 	}
@@ -157,7 +175,7 @@ func TestServer_PutHandler(t *testing.T) {
 			body: `{"ok":true,"Files":[{"path":"hello.pdf","sha":"%s"}]}`,
 		},
 		{
-			name: "PUT /files/empty with an empty content",
+			name: "PUT /file?name=empty.pdf with an empty content",
 			args: args{
 				Method:  http.MethodPut,
 				Url:     "/file?name=empty.pdf",
@@ -170,7 +188,7 @@ func TestServer_PutHandler(t *testing.T) {
 			body: `{"ok":true,"Files":[{"path":"empty.pdf","sha":"%s"}]}`,
 		},
 		{
-			name: "PUT /files/hello/world.pdf will create directory and file",
+			name: "PUT /file?name=hello/world.pdf will create directory and file",
 			args: args{
 				Method:  http.MethodPut,
 				Url:     "/file?name=hello/world.pdf",
@@ -183,10 +201,20 @@ func TestServer_PutHandler(t *testing.T) {
 			body: `{"ok":true,"Files":[{"path":"hello/world.pdf","sha":"%s"}]}`,
 		},
 		{
+			name: "PUT /foobar should fail",
+			args: args{
+				Method:  http.MethodPut,
+				Url:     "/files",
+				Content: []string{ "hello",},
+			},
+			want: http.StatusMethodNotAllowed,
+			body: `{"ok":false,"error":"not found"}`,
+		},
+		{
 			name: "PUT /files should fail",
 			args: args{
 				Method:  http.MethodPut,
-				Url:     "/filesan/x",
+				Url:     "/files",
 				Content: []string{ "hello",},
 			},
 			want: http.StatusMethodNotAllowed,
