@@ -72,7 +72,6 @@ func NewServer(config ServerConfig) *Server {
 // Optionally you can pass a channel to `ready` to be notified when the server is ready to accept connections. You can pass nil if you don't need it.
 func (s *Server) Start(ctx context.Context, ready chan struct{}) error {
 
-
 	r := mux.NewRouter()
 	r.Path("/list/").Methods(http.MethodGet).HandlerFunc(s.handle(s.handleListGet))
 	r.Path("/list/").Methods(http.MethodOptions).HandlerFunc(s.handle(s.handleOptions))
@@ -80,7 +79,7 @@ func (s *Server) Start(ctx context.Context, ready chan struct{}) error {
 	r.Path("/file/").Methods(http.MethodPut).Queries("name","").HandlerFunc(s.handle(s.handleFilePut))		// PUT makes no sense without (file) name
 	r.Path("/file/").Methods(http.MethodDelete).Queries("name","").HandlerFunc(s.handle(s.handleFileDelete))	// DELETE makes no sense without (file) name
 	r.Path("/file/").Methods(http.MethodOptions).HandlerFunc(s.handle(s.handleOptions))
-	r.Path("/").Methods(http.MethodPut).HandlerFunc(handleNotFound)
+	// r.Path("/").Methods(http.MethodPut).HandlerFunc(handleNotFound)
 	r.NotFoundHandler = http.HandlerFunc(handleNotFound)
 	r.MethodNotAllowedHandler = http.HandlerFunc(handleMethodNotAllowed)
 	if s.EnableAuth {
@@ -249,6 +248,9 @@ func (s *Server) processUpload(w http.ResponseWriter, r *http.Request, path stri
 }
 
 func (s *Server) handleListGet(w http.ResponseWriter, r *http.Request) (int, any) {
+	if r.URL.Path != "/list" {
+		return handleNotFound( w, r)
+	}
 	requestPath := r.URL.Query().Get("name")
 	log.Printf("GET %s -> %s", r.URL.Path, requestPath)
 	fileInfos, err := listShas( requestPath)
@@ -265,6 +267,9 @@ func (s *Server) handleListGet(w http.ResponseWriter, r *http.Request) (int, any
 }
 
 func (s *Server) handleFilePut(w http.ResponseWriter, r *http.Request) (int, any) {
+	if r.URL.Path != "/file" {
+		return handleNotFound( w, r)
+	}
 	requestPath := r.URL.Query().Get("name")
 	log.Printf("PUT %s -> %s", r.URL.Path, requestPath)
 	status, sha, err := s.processUpload(w, r, requestPath)
@@ -278,6 +283,9 @@ func (s *Server) handleFilePut(w http.ResponseWriter, r *http.Request) (int, any
 }
 
 func (s *Server) handleFileGet(w http.ResponseWriter, r *http.Request) (int, any) {
+	if r.URL.Path != "/file" {
+		return handleNotFound( w, r)
+	}
 	requestPath := r.URL.Query().Get("name")
 	log.Printf("GET %s -> %s", r.URL.Path, requestPath)
 	sha, err := getPathSha( requestPath)
@@ -294,6 +302,9 @@ func (s *Server) handleFileGet(w http.ResponseWriter, r *http.Request) (int, any
 }
 
 func (s *Server) handleFileDelete( w http.ResponseWriter, r *http.Request) (int, any) {
+	if r.URL.Path != "/file" {
+		return handleNotFound( w, r)
+	}
 	requestPath := r.URL.Query().Get("name")
 	if err := deleteJpgs( s.PictureRoot, requestPath);err != nil {
 		return http.StatusInternalServerError, err
