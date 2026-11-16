@@ -28,7 +28,7 @@ func TestGetHandler(t *testing.T) {
 
 	fooBar_db_path := "foo/bar,pdf"
 	fooBar_db_sha := "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-	_ := RecordFileSha_TestHelper( t, fooBar_db_sha, fooBar_db_path)
+	_ = RecordPdfSha_TestHelper( t, fooBar_db_sha, fooBar_db_path)
 
 	type args struct {
 		Method string
@@ -52,8 +52,7 @@ func TestGetHandler(t *testing.T) {
 				"Access-Control-Allow-Origin": "*",
 			},
 			body: `{"ok":true,"Infos":""}`,
-		// []FileInfo{{ helloFile_db_path, helloSha},},}
-			body: "hello, world",
+			// []FileInfo{{ helloFile_db_path, helloSha},},}
 		},
 		{
 			name: "get non-existing file",
@@ -140,13 +139,13 @@ func TestServer_PutHandler(t *testing.T) {
 		body    string
 		headers map[string]string
 	}{
-/*
 		{
-			name: "PUT /files/hello.txt with text",
+			name: "PUT /file?name=hello.pdf with text",
 			args: args{
 				Method:  http.MethodPut,
-				Url:     "/files/hello.txt",
+				Url:     "/file?name=hello.txt",
 				Content: []byte("hello, world"),
+		pdfFilePath := CreatePdfFile_TestHelper( t, []string{ "hello, world",}, pdfRoot)
 				Name:    "hello.txt",
 			},
 			want: http.StatusCreated,
@@ -155,6 +154,7 @@ func TestServer_PutHandler(t *testing.T) {
 			},
 			body: `{"ok":true,"path":"/files/hello.txt"}`,
 		},
+/*
 		{
 			name: "PUT /files/empty with an empty content",
 			args: args{
@@ -220,34 +220,32 @@ func TestServer_PutHandler(t *testing.T) {
 			}
 			server := Server{config, }
 
+			pdfFilePath := CreatePdfFile_TestHelper( t, Content, pdfRoot)
+			// sha, err0 := calcSha( filename)
+			// require.Nil(t, err0)
+			file, err1 := os.Open( pdfFilePath)
+			assert.Nil(t, err1)
+			defer file.Close()
 			b := new(bytes.Buffer)
 			w := multipart.NewWriter(b)
-			fw, err := w.CreateFormFile("file", tt.args.Name)
-			if err != nil {
-				t.Fatal(err)
-			}
-			written, err := fw.Write(tt.args.Content)
-			if err != nil {
-				t.Fatal(err)
-			}
-			if written == 0 && len(tt.args.Content) > 0 {
-				t.Fatalf("content has %d bytes but no bytes written", len(tt.args.Content))
-			}
+			defer w.Close()
+			fw, err2 := w.CreateFormFile("file", pdfFilePath)
+			require.Nil(t, err2)
+			// defer fw.Close()
+			written, err3 := io.Copy(fw, file)
+			assert.Nil(t, err3)
+			// assert.NotEqual(t, 0, written, fmt.Sprintf("no bytes written"))
+			assert.NotEqual(t, 0, written, "no bytes written")
 			w.Close()
-
-			req, err := http.NewRequest(tt.args.Method, tt.args.Url, b)
-			if err != nil {
-				t.Fatal(err)
-			}
+			req, err4 := http.NewRequest(tt.args.Method, tt.args.Url, b)
+			assert.Nil(t, err4)
 			req.Header.Set("Content-Type", w.FormDataContentType())
 
 			rr := httptest.NewRecorder()
 			handler := http.HandlerFunc(server.handle(server.handleFilePut))
 			handler.ServeHTTP(rr, req)
 
-			if status := rr.Code; status != tt.want {
-				t.Errorf("status = %d, want = %d", status, tt.want)
-			}
+			assert.Equal( t, tt.want, status, fmt.Sprintf("status = %d, want = %d", status, tt.want))
 			if body := rr.Body.String(); body != tt.body {
 				t.Errorf("body = \"%s\", want = \"%s\"", body, tt.body)
 			}
