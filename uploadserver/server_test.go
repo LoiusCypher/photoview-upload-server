@@ -173,7 +173,7 @@ func TestServer_PutHandler(t *testing.T) {
 			args: args{
 				Method:  http.MethodPut,
 				Url:     "/file?name=hello/world.pdf",
-				Content: []string("hello, world"),
+				Content: []string{ "hello, world",},
 			},
 			want: http.StatusCreated,
 			headers: map[string]string{
@@ -186,7 +186,7 @@ func TestServer_PutHandler(t *testing.T) {
 			args: args{
 				Method:  http.MethodPut,
 				Url:     "/file",
-				Content: []string("hello"),
+				Content: []string{ "hello",},
 			},
 			want: http.StatusMethodNotAllowed,
 			body: `{"ok":false,"error":"PUT is accepted on /files/:name"}`,
