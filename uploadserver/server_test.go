@@ -103,7 +103,7 @@ func TestGetHandler(t *testing.T) {
 			handler.ServeHTTP(rr, req)
 
 			status := rr.Code
-			assert.Equal( t, tt.want, status, fmt.Sprintf("status = %d, want = %d", status, tt.want)
+			assert.Equal( t, tt.want, status, fmt.Sprintf("status = %d, want = %d", status, tt.want))
 			if body := rr.Body.String(); body != tt.body {
 				t.Errorf("body = \"%s\", want = \"%s\"", body, tt.body)
 			}
