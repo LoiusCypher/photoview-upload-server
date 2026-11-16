@@ -217,7 +217,7 @@ func (s *Server) processUpload(w http.ResponseWriter, r *http.Request, path stri
 		return http.StatusInternalServerError, "", err
 	}
 	var sha string
-	sha, err = recordSha( dstFile.Name(), path)
+	sha, err = recordFile( dstFile.Name(), path)
 	if err != nil {
 		return http.StatusInternalServerError, "", err
 	}
