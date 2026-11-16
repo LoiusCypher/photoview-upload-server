@@ -137,7 +137,7 @@ func TestServer(t *testing.T) {
 		assert.Nil(t, err4, fmt.Sprintf("failed to PUT: %v", err4))
 		defer resp.Body.Close()
 		result := CheckResponseSuccess_TestHelper( t, resp, http.StatusCreated)
-		expected := SuccessFileInfosResult{ true, []FileInfo{{ helloFile_db_path, helloSha}, { pdfFilePath, sha},},}
+		expected := SuccessFileInfosResult{ true, []FileInfo{ { pdfFilePath, sha},},}
 		assert.Equal(t, expected.OK, result.OK, fmt.Sprintf("result = %+v, want = %+v", result, expected))
 		assert.Equal(t, expected.Files, result.Files, fmt.Sprintf("result = %+v, want = %+v", result, expected))
 		assert.True(t, slices.Equal( expected.Files, result.Files), fmt.Sprintf("result = %+v, want = %+v", result, expected))
@@ -153,7 +153,7 @@ func TestServer(t *testing.T) {
 		assert.Nil(t, err4, fmt.Sprintf("failed to GET: %v", err4))
 		defer resp.Body.Close()
 		result := CheckResponseSuccess_TestHelper( t, resp, http.StatusOK)
-		expected := SuccessFileInfosResult{ true, []FileInfo{{ pdfFilePath, lastPdfSha},},}
+		expected := SuccessFileInfosResult{ true, []FileInfo{ { helloFile_db_path, helloSha}, { pdfFilePath, lastPdfSha},},}
 		assert.Equal(t, expected.OK, result.OK, fmt.Sprintf("result = %+v, want = %+v", result, expected))
 		assert.Equal(t, expected.Files, result.Files, fmt.Sprintf("result = %+v, want = %+v", result, expected))
 		assert.True(t, slices.Equal( expected.Files, result.Files), fmt.Sprintf("result = %+v, want = %+v", result, expected))
