@@ -82,7 +82,8 @@ func TestServer(t *testing.T) {
 	CreateEmptyDatabase_TestHelper( t, path.Join( sqlRoot, "shafiles.db"))
 
 	helloFile_db_path := "arbitrary / file path / hello,pdf"
-	helloSha := RecordPdf_TestHelper( t, pdfPath_hello, helloFile_db_path)
+	helloSha := RecordFile_TestHelper( t, pdfPath_hello, helloFile_db_path)
+	log.Println("SHA 1", helloSha)
 
 	var target string
 	if addr, ok := os.LookupEnv("TEST_TARGET_ADDR"); ok && addr != "" {
@@ -221,10 +222,11 @@ func TestServer(t *testing.T) {
 		//defer file.Close()
 		sha_file, err2 := calcSha( pdfFilePath)
 		assert.Nil(t, err2)
+		log.Println("SHA 2", sha_file)
 
 		helloFile_db_dir := "arbitrary / file "
 		helloFile_db_path := helloFile_db_dir + "/" + "hello,pdf"
-		sha_hello := RecordPdf_TestHelper( t, pdfFilePath, helloFile_db_path)
+		sha_hello := RecordPdfSha_TestHelper( t, sha_file, helloFile_db_path)
 		assert.Equal( t, sha_file, sha_hello)
 
 		u := base.JoinPath("/file")

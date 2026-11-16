@@ -191,13 +191,17 @@ func getPathSha( reqPath string) ( string, error) {
 	return sha, nil
 }
 
-func recordSha(filePath string, registerPath string) ( string, error) {
-	fileSha, err := calcSha(filePath)
+func recordFile( filePath string, registerPath string) ( string, error) {
 	if err != nil {
 		log.Printf("making calcSha: %v\n", err)
 		return "", err
 	}
-	// log.Println("file hash", filePath, ": ", fileSha)
+	fileSha, err := calcSha(filePath)
+	return recordFileSha( fileSha string, registerPath string)
+}
+
+func recordFileSha( fileSha string, registerPath string) ( string, error) {
+	// log.Println("recordFileSha", filePath, ": ", fileSha)
 	shaDb := openDb()
 	if shaDb == nil {
 		return "", fmt.Errorf("openDb failed")

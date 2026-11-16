@@ -60,7 +60,7 @@ func TestGetHandler(t *testing.T) {
 			headers: map[string]string{
 				"Access-Control-Allow-Origin": "*",
 			},
-			body: `{"ok":false,"error":"file not found"}`,
+			body: `{"ok":false,"error":"not found"}`,
 		},
 		{
 			name: "get without endpoint",
@@ -69,7 +69,7 @@ func TestGetHandler(t *testing.T) {
 				Url:    "/abc",
 			},
 			want: http.StatusNotFound,
-			body: `{"ok":false,"error":"file not found"}`,
+			body: `{"ok":false,"error":"not found"}`,
 		},
 /*
 		{
@@ -102,9 +102,8 @@ func TestGetHandler(t *testing.T) {
 			handler := http.HandlerFunc(server.handle(server.handleFileGet))
 			handler.ServeHTTP(rr, req)
 
-			if status := rr.Code; status != tt.want {
-				t.Errorf("status = %d, want = %d", status, tt.want)
-			}
+			status := rr.Code
+			assert.Equal( t, tt.want, status, fmt.Sprintf("status = %d, want = %d", status, tt.want)
 			if body := rr.Body.String(); body != tt.body {
 				t.Errorf("body = \"%s\", want = \"%s\"", body, tt.body)
 			}
