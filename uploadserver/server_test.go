@@ -154,7 +154,7 @@ func TestServer_PutHandler(t *testing.T) {
 			headers: map[string]string{
 				"Access-Control-Allow-Origin": "*",
 			},
-			body: `{"ok":true,"path":"/files/hello.txt"}`,
+			body: `{"ok":true,"Files":[{"path":"hello.txt","sha":"ebad5e68de8d0b112fcad7511f79aa3d66a16231caa95fbebc6aed54dbc00b6c"}]}`,
 		},
 		{
 			name: "PUT /files/empty with an empty content",
@@ -167,7 +167,7 @@ func TestServer_PutHandler(t *testing.T) {
 			headers: map[string]string{
 				"Access-Control-Allow-Origin": "*",
 			},
-			body: `{"ok":true,"path":"/files/empty"}`,
+			body: `"ok":true,"Files":[{"path":"empty.pdf","sha":"57d20af256113953067a09070dd51fc2cc487c8b7fc11759d5340b69876a2098"}]}`,
 		},
 		{
 			name: "PUT /files/hello/world.txt will create directory and file",
@@ -180,13 +180,13 @@ func TestServer_PutHandler(t *testing.T) {
 			headers: map[string]string{
 				"Access-Control-Allow-Origin": "*",
 			},
-			body: `{"ok":true,"path":"/files/hello/world.txt"}`,
+			body: `{"ok":true,"Files":[{"path":"hello/world.pdf","sha":"ebad5e68de8d0b112fcad7511f79aa3d66a16231caa95fbebc6aed54dbc00b6c"}]}`,
 		},
 		{
-			name: "PUT /files/ should fail",
+			name: "PUT /files should fail",
 			args: args{
 				Method:  http.MethodPut,
-				Url:     "/file",
+				Url:     "/files",
 				Content: []string{ "hello",},
 			},
 			want: http.StatusMethodNotAllowed,
@@ -214,7 +214,7 @@ func TestServer_PutHandler(t *testing.T) {
 			config := ServerConfig{
 				PictureRoot:   jpgRoot,
 				EnableCORS:    true,
-				MaxUploadSize: 3000,
+				MaxUploadSize: 2000,
 			}
 			server := Server{config, }
 
