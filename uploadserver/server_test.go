@@ -204,7 +204,7 @@ func TestServer_PutHandler(t *testing.T) {
 			name: "PUT /foobar should fail",
 			args: args{
 				Method:  http.MethodPut,
-				Url:     "/files",
+				Url:     "/foobar",
 				Content: []string{ "hello",},
 			},
 			want: http.StatusMethodNotAllowed,
@@ -221,10 +221,10 @@ func TestServer_PutHandler(t *testing.T) {
 			body: `{"ok":false,"error":"not found"}`,
 		},
 		{
-			name: "PUT large file should fail",
+			name: "PUT /file?name=toolarge.pdf large file should fail",
 			args: args{
 				Method:  http.MethodPut,
-				Url:     "/file?=toolarge.pdf",
+				Url:     "/file?name=toolarge.pdf",
 				Content: []string{ "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "Second Page", "Last Page",},
 			},
 			want: http.StatusRequestEntityTooLarge,
