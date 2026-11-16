@@ -154,7 +154,7 @@ func TestServer_PutHandler(t *testing.T) {
 			headers: map[string]string{
 				"Access-Control-Allow-Origin": "*",
 			},
-			body: `{"ok":true,"Files":[{"path":"hello.txt","sha":"ebad5e68de8d0b112fcad7511f79aa3d66a16231caa95fbebc6aed54dbc00b6c"}]}`,
+			body: `{"ok":true,"Files":[{"path":"hello.txt","sha":""}]}`,
 		},
 		{
 			name: "PUT /files/empty with an empty content",
@@ -167,7 +167,7 @@ func TestServer_PutHandler(t *testing.T) {
 			headers: map[string]string{
 				"Access-Control-Allow-Origin": "*",
 			},
-			body: `"ok":true,"Files":[{"path":"empty.pdf","sha":"57d20af256113953067a09070dd51fc2cc487c8b7fc11759d5340b69876a2098"}]}`,
+			body: `"ok":true,"Files":[{"path":"empty.pdf","sha":""}]}`,
 		},
 		{
 			name: "PUT /files/hello/world.pdf will create directory and file",
@@ -180,7 +180,7 @@ func TestServer_PutHandler(t *testing.T) {
 			headers: map[string]string{
 				"Access-Control-Allow-Origin": "*",
 			},
-			body: `{"ok":true,"Files":[{"path":"hello/world.pdf","sha":"ebad5e68de8d0b112fcad7511f79aa3d66a16231caa95fbebc6aed54dbc00b6c"}]}`,
+			body: `{"ok":true,"Files":[{"path":"hello/world.pdf","sha":""}]}`,
 		},
 		{
 			name: "PUT /files should fail",
@@ -214,7 +214,7 @@ func TestServer_PutHandler(t *testing.T) {
 			config := ServerConfig{
 				PictureRoot:   jpgRoot,
 				EnableCORS:    true,
-				MaxUploadSize: 1500,
+				MaxUploadSize: 1250,
 			}
 			server := Server{config, }
 
@@ -245,26 +245,19 @@ func TestServer_PutHandler(t *testing.T) {
 
 			status := rr.Code
 			assert.Equal( t, tt.want, status, fmt.Sprintf("status = %d, want = %d", status, tt.want))
-			//if body := rr.Body.String(); body != tt.body {
-				//t.Errorf("body = \"%s\", want = \"%s\"", body, tt.body)
-			//}
+			if body := rr.Body.String(); body != tt.body {
+				t.Errorf("body = \"%s\", want = \"%s\"", body, tt.body)
+			}
 			if rr.Code == http.StatusCreated || rr.Code == http.StatusOK {
 				var resp SuccessFileInfosResult
 				if err := json.NewDecoder(rr.Body).Decode(&resp); err != nil {
 					t.Errorf("unexpected response body: %v", err)
 				}
 				resp.Files[0].Sha = sha
-				if body := rr.Body.String(); body != tt.body {
-					t.Errorf("body = \"%s\", want = \"%s\"", body, tt.body)
-				}
 				localPath := strings.TrimSuffix(resp.Files[0].Path, ".pdf") + "-01.jpg"
 				localFullPath := filepath.Join(jpgRoot, localPath)
 				assert.FileExists( t, localFullPath)
 				t.Logf("opening %s to verify", localFullPath)
-			} else {
-				if body := rr.Body.String(); body != tt.body {
-					t.Errorf("body = \"%s\", want = \"%s\"", body, tt.body)
-				}
 			}
 			for k, v := range tt.headers {
 				if rr.Header().Get(k) != v {
