@@ -26,7 +26,7 @@ func TestGetHandler(t *testing.T) {
 	defer os.RemoveAll( sqlRoot)
 	CreateEmptyDatabase_TestHelper( t, path.Join( sqlRoot, "shafiles.db"))
 
-	fooBar_db_path := "foo/bar,pdf"
+	fooBar_db_path := "foo/bar.pdf"
 	fooBar_db_sha := "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
 	_ = RecordPdfSha_TestHelper( t, fooBar_db_sha, fooBar_db_path)
 
@@ -155,12 +155,11 @@ func TestServer_PutHandler(t *testing.T) {
 			},
 			body: `{"ok":true,"path":"/files/hello.txt"}`,
 		},
-/*
 		{
 			name: "PUT /files/empty with an empty content",
 			args: args{
 				Method:  http.MethodPut,
-				Url:     "/files/empty",
+				Url:     "/file?name=empty.pdf",
 				Content: []byte{},
 			},
 			want: http.StatusCreated,
@@ -169,11 +168,12 @@ func TestServer_PutHandler(t *testing.T) {
 			},
 			body: `{"ok":true,"path":"/files/empty"}`,
 		},
+/*
 		{
 			name: "PUT /files/hello/world.txt will create directory and file",
 			args: args{
 				Method:  http.MethodPut,
-				Url:     "/files/hello/world.txt",
+				Url:     "/file?name=hello/world.pdf",
 				Content: []byte("hello, world"),
 			},
 			want: http.StatusCreated,
@@ -186,7 +186,7 @@ func TestServer_PutHandler(t *testing.T) {
 			name: "PUT /files/ should fail",
 			args: args{
 				Method:  http.MethodPut,
-				Url:     "/files/",
+				Url:     "/file",
 				Content: []byte("hello"),
 			},
 			want: http.StatusMethodNotAllowed,
@@ -196,7 +196,7 @@ func TestServer_PutHandler(t *testing.T) {
 			name: "PUT large file should fail",
 			args: args{
 				Method:  http.MethodPut,
-				Url:     "/files/toolarge",
+				Url:     "/file?=toolarge.pdf",
 				Content: []byte("ABCDEFGHIJKLMNOPQRSTUVWXYZ"),
 			},
 			want: http.StatusRequestEntityTooLarge,
@@ -213,7 +213,7 @@ func TestServer_PutHandler(t *testing.T) {
 			config := ServerConfig{
 				PictureRoot:  jpgRoot,
 				EnableCORS:    true,
-				MaxUploadSize: 16,
+				MaxUploadSize: 1000,
 			}
 			server := Server{config, }
 
