@@ -71,6 +71,7 @@ func NewServer(config ServerConfig) *Server {
 // Start starts listening on `addr`. This function blocks until the server is stopped.
 // Optionally you can pass a channel to `ready` to be notified when the server is ready to accept connections. You can pass nil if you don't need it.
 func (s *Server) Start(ctx context.Context, ready chan struct{}) error {
+
 	r := mux.NewRouter()
 	r.Path("/list/").Methods(http.MethodGet).HandlerFunc(s.handle(s.handleListGet))
 	r.Path("/list/").Methods(http.MethodOptions).HandlerFunc(s.handle(s.handleOptions))
@@ -85,6 +86,11 @@ func (s *Server) Start(ctx context.Context, ready chan struct{}) error {
 		r.Use(s.authenticationMiddleware)
 	}
 	r.Use(logAccess)
+
+	r = nil
+	http.HandleFunc( "DELETE /file", s.handle(s.handleFileDelete))	// DELETE makes no sense without (file) name
+	http.HandleFunc( "PUT /file",	 s.handle(s.handleFilePut))	// PUT makes no sense without (file) name
+	http.HandleFunc( "PUT /", handleNotFound)
 
 	addr := s.Addr
 	if addr == "" {
