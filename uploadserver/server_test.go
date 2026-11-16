@@ -147,7 +147,7 @@ func TestServer_PutHandler(t *testing.T) {
 			name: "PUT /file?name=hello.pdf with text",
 			args: args{
 				Method:  http.MethodPut,
-				Url:     "/file?name=hello.txt",
+				Url:     "/file?name=hello.pdf",
 				Content: []string{ "hello, world",},
 			},
 			want: http.StatusCreated,
@@ -170,7 +170,7 @@ func TestServer_PutHandler(t *testing.T) {
 			body: `"ok":true,"Files":[{"path":"empty.pdf","sha":"57d20af256113953067a09070dd51fc2cc487c8b7fc11759d5340b69876a2098"}]}`,
 		},
 		{
-			name: "PUT /files/hello/world.txt will create directory and file",
+			name: "PUT /files/hello/world.pdf will create directory and file",
 			args: args{
 				Method:  http.MethodPut,
 				Url:     "/file?name=hello/world.pdf",
@@ -214,12 +214,12 @@ func TestServer_PutHandler(t *testing.T) {
 			config := ServerConfig{
 				PictureRoot:   jpgRoot,
 				EnableCORS:    true,
-				MaxUploadSize: 2000,
+				MaxUploadSize: 1500,
 			}
 			server := Server{config, }
 
 			pdfFilePath := CreatePdfFile_TestHelper( t, tt.args.Content, pdfRoot)
-			// sha, err0 := calcSha( pdfFilePath)
+			sha, err0 := calcSha( pdfFilePath)
 			// require.Nil(t, err0)
 			file, err1 := os.Open( pdfFilePath)
 			assert.Nil(t, err1)
@@ -245,18 +245,26 @@ func TestServer_PutHandler(t *testing.T) {
 
 			status := rr.Code
 			assert.Equal( t, tt.want, status, fmt.Sprintf("status = %d, want = %d", status, tt.want))
-			if body := rr.Body.String(); body != tt.body {
-				t.Errorf("body = \"%s\", want = \"%s\"", body, tt.body)
-			}
+			//if body := rr.Body.String(); body != tt.body {
+				//t.Errorf("body = \"%s\", want = \"%s\"", body, tt.body)
+			//}
 			if rr.Code == http.StatusCreated || rr.Code == http.StatusOK {
 				var resp SuccessFileInfosResult
 				if err := json.NewDecoder(rr.Body).Decode(&resp); err != nil {
 					t.Errorf("unexpected response body: %v", err)
 				}
+				resp.Files[0].Sha = sha
+				if body := rr.Body.String(); body != tt.body {
+					t.Errorf("body = \"%s\", want = \"%s\"", body, tt.body)
+				}
 				localPath := strings.TrimSuffix(resp.Files[0].Path, ".pdf") + "-01.jpg"
 				localFullPath := filepath.Join(jpgRoot, localPath)
 				assert.FileExists( t, localFullPath)
 				t.Logf("opening %s to verify", localFullPath)
+			} else {
+				if body := rr.Body.String(); body != tt.body {
+					t.Errorf("body = \"%s\", want = \"%s\"", body, tt.body)
+				}
 			}
 			for k, v := range tt.headers {
 				if rr.Header().Get(k) != v {
