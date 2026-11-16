@@ -99,7 +99,7 @@ func (s *Server) Start(ctx context.Context, ready chan struct{}) error {
 	r.HandleFunc(  "DELETE /file/{$}", 	s.handle(s.handleFileDelete))	// DELETE makes no sense without (file) name
 	r.HandleFunc( "OPTIONS /file/{$}", 	s.handle(s.handleOptions))
 	//r.HandleFunc(    "POST /file/{$}",	s.handle(s.handleFilePost))
-	r.HandleFunc(         "/file/{$}", 	handleNotFound)
+	//r.HandleFunc(         "/file/{$}", 	handleNotFound)
 	var rh http.Handler
 	rh = r
 	if s.EnableAuth {
