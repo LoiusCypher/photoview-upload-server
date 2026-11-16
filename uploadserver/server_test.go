@@ -167,7 +167,7 @@ func TestServer_PutHandler(t *testing.T) {
 			headers: map[string]string{
 				"Access-Control-Allow-Origin": "*",
 			},
-			body: `"ok":true,"Files":[{"path":"empty.pdf","sha":"%s"}]}`,
+			body: `{"ok":true,"Files":[{"path":"empty.pdf","sha":"%s"}]}`,
 		},
 		{
 			name: "PUT /files/hello/world.pdf will create directory and file",
@@ -203,8 +203,6 @@ func TestServer_PutHandler(t *testing.T) {
 			body: `{"ok":false,"error":"file size limit exceeded"}`,
 		},
 		// TODO: add text without name
-/*
-*/
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

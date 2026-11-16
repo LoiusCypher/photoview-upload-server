@@ -72,12 +72,13 @@ func NewServer(config ServerConfig) *Server {
 // Optionally you can pass a channel to `ready` to be notified when the server is ready to accept connections. You can pass nil if you don't need it.
 func (s *Server) Start(ctx context.Context, ready chan struct{}) error {
 	r := mux.NewRouter()
-	r.Path("/list").Methods(http.MethodGet).HandlerFunc(s.handle(s.handleListGet))
-	r.Path("/list").Methods(http.MethodOptions).HandlerFunc(s.handle(s.handleOptions))
-	r.Path("/file").Methods(http.MethodGet).HandlerFunc(s.handle(s.handleFileGet))
-	r.Path("/file").Methods(http.MethodPut).HandlerFunc(s.handle(s.handleFilePut))
-	r.Path("/file").Methods(http.MethodDelete).HandlerFunc(s.handle(s.handleFileDelete))
-	r.Path("/file").Methods(http.MethodOptions).HandlerFunc(s.handle(s.handleOptions))
+	r.Path("/list{$}").Methods(http.MethodGet).HandlerFunc(s.handle(s.handleListGet))
+	r.Path("/list{$}").Methods(http.MethodOptions).HandlerFunc(s.handle(s.handleOptions))
+	r.Path("/file{$}").Methods(http.MethodGet).HandlerFunc(s.handle(s.handleFileGet))
+	//r.Path("/file{$}").Methods(http.MethodPut).HandlerFunc(s.handle(s.handleFilePut))
+	r.Path("PUT /file{$}").HandlerFunc(s.handle(s.handleFilePut))
+	r.Path("/file{$}").Methods(http.MethodDelete).HandlerFunc(s.handle(s.handleFileDelete))
+	r.Path("/file{$}").Methods(http.MethodOptions).HandlerFunc(s.handle(s.handleOptions))
 	r.NotFoundHandler = http.HandlerFunc(handleNotFound)
 	r.MethodNotAllowedHandler = http.HandlerFunc(handleMethodNotAllowed)
 	if s.EnableAuth {
