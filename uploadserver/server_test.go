@@ -65,7 +65,7 @@ func TestGetHandler(t *testing.T) {
 			body: `{"ok":false,"error":"not found"}`,
 		},
 		{
-			name: "get without endpoint should fail
+			name: "get without endpoint should fail",
 			args: args{
 				Method: http.MethodGet,
 				Url:    "/abc",
@@ -74,7 +74,7 @@ func TestGetHandler(t *testing.T) {
 			body: `{"ok":false,"error":"not found"}`,
 		},
 		{
-			name: "get /files should fail
+			name: "get /files should fail",
 			args: args{
 				Method: http.MethodGet,
 				Url:    "/files",
@@ -95,7 +95,7 @@ func TestGetHandler(t *testing.T) {
 			body: `{"ok":false,"error":"not found"}`,
 		},
 		{
-			name: "get /lists should fail
+			name: "get /lists should fail",
 			args: args{
 				Method: http.MethodGet,
 				Url:    "/list",
