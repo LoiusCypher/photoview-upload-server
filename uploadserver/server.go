@@ -14,7 +14,7 @@ import (
 	"strings"
 	"time"
 
-//	"github.com/gorilla/mux"
+	"github.com/gorilla/mux"
 )
 
 type Server struct {
@@ -72,11 +72,11 @@ func NewServer(config ServerConfig) *Server {
 // Optionally you can pass a channel to `ready` to be notified when the server is ready to accept connections. You can pass nil if you don't need it.
 func (s *Server) Start(ctx context.Context, ready chan struct{}) error {
 
-/*
+
 	r := mux.NewRouter()
 	r.Path("/list/").Methods(http.MethodGet).HandlerFunc(s.handle(s.handleListGet))
 	r.Path("/list/").Methods(http.MethodOptions).HandlerFunc(s.handle(s.handleOptions))
-	r.Path("/file/").Methods(http.MethodGet).HandlerFunc(s.handle(s.handleFileGet))
+	r.Path("/file/").Methods(http.MethodGet).Queries("name","").HandlerFunc(s.handle(s.handleFileGet))		// PUT makes no sense without (file) name
 	r.Path("/file/").Methods(http.MethodPut).Queries("name","").HandlerFunc(s.handle(s.handleFilePut))		// PUT makes no sense without (file) name
 	r.Path("/file/").Methods(http.MethodDelete).Queries("name","").HandlerFunc(s.handle(s.handleFileDelete))	// DELETE makes no sense without (file) name
 	r.Path("/file/").Methods(http.MethodOptions).HandlerFunc(s.handle(s.handleOptions))
@@ -87,7 +87,8 @@ func (s *Server) Start(ctx context.Context, ready chan struct{}) error {
 		r.Use(s.authenticationMiddleware)
 	}
 	r.Use(logAccess)
-*/
+
+/*
 	r := http.NewServeMux()
 	r.HandleFunc(         "/", 	handleNotFound)
 	r.HandleFunc(         "/list/{$}", 	handleMethodNotAllowed)
@@ -106,7 +107,7 @@ func (s *Server) Start(ctx context.Context, ready chan struct{}) error {
 		rh = s.authenticationMiddleware( rh)
 	}
 	rh = logAccess( rh)
-
+*/
 	addr := s.Addr
 	if addr == "" {
 		addr = DefaultAddr
