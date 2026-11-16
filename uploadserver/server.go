@@ -101,7 +101,7 @@ func (s *Server) Start(ctx context.Context, ready chan struct{}) error {
 	//r.HandleFunc(    "POST /file{$}",	s.handle(s.handleFilePost))
 	r.HandleFunc(         "/file{$}", 	handleNotFound)
 	var rh http.Handler
-	rh = h
+	rh = r
 	if s.EnableAuth {
 		rh = s.authenticationMiddleware( rh)
 	}
