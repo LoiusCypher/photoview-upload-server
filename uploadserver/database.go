@@ -27,18 +27,22 @@ type Once struct {
 	m sync.Mutex
 }
 
-func (o *Once) Do(f func() error) error {
-	if atomic.LoadUint32(&o.done) == 0 {
-		return o.doSlow(f)
+func (o *Once) Do( reset bool, f1 func() error) error {
+	if reset {
+		return o.doSlow( reset, f1)
+	} else {
+		if atomic.LoadUint32(&o.done) == 0 {
+			return o.doSlow( reset, f1)
+		}
+		return nil
 	}
-	return nil
 }
 
-func (o *Once) doSlow(f func() error) error {
+func (o *Once) doSlow( reset bool, f func() error) error {
 	o.m.Lock()
 	defer o.m.Unlock()
 	var err error
-	if o.done == 0 {
+	if o.done == 0 || reset {
 		err = f()
 		// Only set done if no error occurred
 		if err == nil {
@@ -49,7 +53,7 @@ func (o *Once) doSlow(f func() error) error {
 }
 
 func getDbPath() *string {
-	setPathOnce.Do(func() error {
+	setPathOnce.Do( false, func() error {
 		err := initDb( DefaultDbPath)
 		if err == nil {
 			dbPath = DefaultDbPath
@@ -60,7 +64,7 @@ func getDbPath() *string {
 }
 
 func SetDbPath( sqlPath string) *string {
-	setPathOnce.Do(func() error {
+	setPathOnce.Do( true, func() error {
 		err := initDb( sqlPath)
 		if err == nil {
 			dbPath = sqlPath
