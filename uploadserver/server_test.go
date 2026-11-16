@@ -51,8 +51,7 @@ func TestGetHandler(t *testing.T) {
 			headers: map[string]string{
 				"Access-Control-Allow-Origin": "*",
 			},
-			body: `{"ok":true,"Infos":""}`,
-			// []FileInfo{{ helloFile_db_path, helloSha},},}
+			body: `{"ok":true,"Files":[{"path":"foo/bar.pdf","sha":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"}]}`,
 		},
 		{
 			name: "get non-existing file",
@@ -85,7 +84,7 @@ func TestGetHandler(t *testing.T) {
 			headers: map[string]string{
 				"Access-Control-Allow-Origin": "*",
 			},
-			body: `{"ok":false,"error":"foo is a directory"}`,
+			body: `{"ok":false,"error":"not found"}`,
 		},
 	}
 	for _, tt := range tests {
@@ -213,7 +212,7 @@ func TestServer_PutHandler(t *testing.T) {
 			config := ServerConfig{
 				PictureRoot:  jpgRoot,
 				EnableCORS:    true,
-				MaxUploadSize: 1000,
+				MaxUploadSize: 5000,
 			}
 			server := Server{config, }
 
