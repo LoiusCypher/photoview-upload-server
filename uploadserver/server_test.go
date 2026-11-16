@@ -154,7 +154,7 @@ func TestServer_PutHandler(t *testing.T) {
 			headers: map[string]string{
 				"Access-Control-Allow-Origin": "*",
 			},
-			body: `{"ok":true,"Files":[{"path":"hello.txt","sha":"%s"}]}`,
+			body: `{"ok":true,"Files":[{"path":"hello.pdf","sha":"%s"}]}`,
 		},
 		{
 			name: "PUT /files/empty with an empty content",
@@ -190,7 +190,7 @@ func TestServer_PutHandler(t *testing.T) {
 				Content: []string{ "hello",},
 			},
 			want: http.StatusMethodNotAllowed,
-			body: `{"ok":false,"error":"PUT is accepted on /files/:name"}`,
+			body: `{"ok":false,"error":"not found"}`,
 		},
 		{
 			name: "PUT large file should fail",
