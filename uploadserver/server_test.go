@@ -128,7 +128,10 @@ func TestServer_PutHandler(t *testing.T) {
 	require.Nil(t, err2)
 	defer os.RemoveAll( pdfRoot)
 
-	jpgRoot := "/opt/app"
+	jpgRoot, err3 := os.MkdirTemp("", "")
+	require.Nil(t, err3)
+	defer os.RemoveAll( jpgRoot)
+
 	type args struct {
 		Method  string
 		Url     string
@@ -210,9 +213,9 @@ func TestServer_PutHandler(t *testing.T) {
 				t.Fatal(err)
 			}
 			config := ServerConfig{
-				PictureRoot:  jpgRoot,
+				PictureRoot:   jpgRoot,
 				EnableCORS:    true,
-				MaxUploadSize: 5000,
+				MaxUploadSize: 3000,
 			}
 			server := Server{config, }
 
@@ -254,23 +257,10 @@ func TestServer_PutHandler(t *testing.T) {
 				if err := json.NewDecoder(rr.Body).Decode(&resp); err != nil {
 					t.Errorf("unexpected response body: %v", err)
 				}
-				localPath := strings.TrimPrefix(resp.Path, "/files/")
+				localPath := strings.Trimsuffix(resp.Files[0].Path, ".pdf") + "-01.jpg"
 				localFullPath := filepath.Join(jpgRoot, localPath)
+				assert.FileExist( t, localFullPath)
 				t.Logf("opening %s to verify", localFullPath)
-				f, err := os.Open(localFullPath)
-				if err != nil {
-					t.Errorf("failed to verify local file. cannot open %s: %v", localFullPath, err)
-					return
-				}
-				defer f.Close()
-				uploaded, err := io.ReadAll(f)
-				if err != nil {
-					t.Errorf("failed to verify local file. cannot read %s: %v", localFullPath, err)
-					return
-				}
-				if !reflect.DeepEqual(uploaded, tt.args.Content) {
-					t.Errorf("failed to verify. request body = %v, local file = %v", tt.args.Content, uploaded)
-				}
 			}
 			for k, v := range tt.headers {
 				if rr.Header().Get(k) != v {
