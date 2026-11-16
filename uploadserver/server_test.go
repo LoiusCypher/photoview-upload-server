@@ -25,6 +25,10 @@ func TestGetHandler(t *testing.T) {
 	defer os.RemoveAll( sqlRoot)
 	CreateEmptyDatabase_TestHelper( t, path.Join( sqlRoot, "shafiles.db"))
 
+	jpgRoot, err3 := os.MkdirTemp("", "")
+	require.Nil(t, err3)
+	defer os.RemoveAll( jpgRoot)
+
 	fooBar_db_path := "foo/bar.pdf"
 	fooBar_db_sha := "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
 	_ = RecordPdfSha_TestHelper( t, fooBar_db_sha, fooBar_db_path)
@@ -98,7 +102,7 @@ func TestGetHandler(t *testing.T) {
 			name: "get /lists should fail",
 			args: args{
 				Method: http.MethodGet,
-				Url:    "/list",
+				Url:    "/lists",
 			},
 			want: http.StatusNotFound,
 			body: `{"ok":false,"error":"not found"}`,
@@ -109,7 +113,7 @@ func TestGetHandler(t *testing.T) {
 			// pdfRoot := "/tnp"
 			// _ := CreatePdfFile_TestHelper( t, []string{ "hello, world",}, pdfRoot)
 			config := ServerConfig{
-				PictureRoot:  "/opt/app",
+				PictureRoot:  jpgRoot,
 				EnableCORS:   true,
 			}
 			server := Server{config, }

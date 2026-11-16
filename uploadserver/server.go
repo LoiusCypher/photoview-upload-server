@@ -14,7 +14,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gorilla/mux"
+//	"github.com/gorilla/mux"
 )
 
 type Server struct {
@@ -72,6 +72,7 @@ func NewServer(config ServerConfig) *Server {
 // Optionally you can pass a channel to `ready` to be notified when the server is ready to accept connections. You can pass nil if you don't need it.
 func (s *Server) Start(ctx context.Context, ready chan struct{}) error {
 
+/*
 	r := mux.NewRouter()
 	r.Path("/list/").Methods(http.MethodGet).HandlerFunc(s.handle(s.handleListGet))
 	r.Path("/list/").Methods(http.MethodOptions).HandlerFunc(s.handle(s.handleOptions))
@@ -86,15 +87,16 @@ func (s *Server) Start(ctx context.Context, ready chan struct{}) error {
 		r.Use(s.authenticationMiddleware)
 	}
 	r.Use(logAccess)
-
-	r = nil
-	http.HandleFunc( "GET /list", 		s.handle(s.handleListGet))
-	http.HandleFunc( "OPTIONS /list", 	s.handle(s.handleOptions))
-	http.HandleFunc( "GET /file", 		s.handle(s.handleFileGet))
-	http.HandleFunc( "PUT /file",		s.handle(s.handleFilePut))	// PUT makes no sense without (file) name
-	http.HandleFunc( "DELETE /file", 	s.handle(s.handleFileDelete))	// DELETE makes no sense without (file) name
-	http.HandleFunc( "OPTIONS /file", 	s.handle(s.handleOptions))
-	http.HandleFunc( "/", 			handleNotFound)
+*/
+	r := http.NewServeMux()
+	r.HandleFunc( "GET /list", 		s.handle(s.handleListGet))
+	r.HandleFunc( "OPTIONS /list", 	s.handle(s.handleOptions))
+	r.HandleFunc( "GET /file", 		s.handle(s.handleFileGet))
+	r.HandleFunc( "PUT /file",		s.handle(s.handleFilePut))	// PUT makes no sense without (file) name
+	r.HandleFunc( "DELETE /file", 	s.handle(s.handleFileDelete))	// DELETE makes no sense without (file) name
+	r.HandleFunc( "OPTIONS /file", 	s.handle(s.handleOptions))
+	r.HandleFunc( "/file", 			handleNotFound)
+	r.HandleFunc( "/", 			handleNotFound)
 
 	addr := s.Addr
 	if addr == "" {
