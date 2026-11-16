@@ -255,7 +255,7 @@ func TestServer_PutHandler(t *testing.T) {
 				}
 				localPath := strings.TrimSuffix(resp.Files[0].Path, ".pdf") + "-01.jpg"
 				localFullPath := filepath.Join(jpgRoot, localPath)
-				assert.FileExist( t, localFullPath)
+				assert.FileExists( t, localFullPath)
 				t.Logf("opening %s to verify", localFullPath)
 			}
 			for k, v := range tt.headers {
