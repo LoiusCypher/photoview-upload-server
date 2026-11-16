@@ -26,6 +26,10 @@ func TestGetHandler(t *testing.T) {
 	defer os.RemoveAll( sqlRoot)
 	CreateEmptyDatabase_TestHelper( t, path.Join( sqlRoot, "shafiles.db"))
 
+	fooBar_db_path := "foo/bar,pdf"
+	fooBar_db_sha := "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+	_ := RecordFileSha_TestHelper( t, fooBar_db_sha, fooBar_db_path)
+
 	type args struct {
 		Method string
 		Url    string
@@ -37,7 +41,6 @@ func TestGetHandler(t *testing.T) {
 		body    string
 		headers map[string]string
 	}{
-/*
 		{
 			name: "get existing file",
 			args: args{
@@ -48,9 +51,10 @@ func TestGetHandler(t *testing.T) {
 			headers: map[string]string{
 				"Access-Control-Allow-Origin": "*",
 			},
+			body: `{"ok":true,"Infos":""}`,
+		// []FileInfo{{ helloFile_db_path, helloSha},},}
 			body: "hello, world",
 		},
-*/
 		{
 			name: "get non-existing file",
 			args: args{
@@ -72,12 +76,11 @@ func TestGetHandler(t *testing.T) {
 			want: http.StatusNotFound,
 			body: `{"ok":false,"error":"not found"}`,
 		},
-/*
 		{
 			name: "get directory",
 			args: args{
 				Method: http.MethodGet,
-				Url:    "/list/foo",
+				Url:    "/list?name=foo",
 			},
 			want: http.StatusNotFound,
 			headers: map[string]string{
@@ -85,7 +88,6 @@ func TestGetHandler(t *testing.T) {
 			},
 			body: `{"ok":false,"error":"foo is a directory"}`,
 		},
-*/
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
