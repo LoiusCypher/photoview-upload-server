@@ -120,17 +120,20 @@ func TestGetHandler(t *testing.T) {
 
 func TestServer_PutHandler(t *testing.T) {
 	// sqlite database has to be on real file system or in memory
+	sqlRoot, err0 := os.MkdirTemp("", "")
+	require.Nil( t, err0)
+	defer os.RemoveAll( sqlRoot)
+	CreateEmptyDatabase_TestHelper( t, path.Join( sqlRoot, "shafiles.db"))
+
 	sqlRoot, err1 := os.MkdirTemp("", "")
 	require.Nil( t, err1)
 	defer os.RemoveAll( sqlRoot)
-	CreateEmptyDatabase_TestHelper( t, path.Join( sqlRoot, "shafiles.db"))
 
 	jpgRoot := "/opt/app"
 	type args struct {
 		Method  string
 		Url     string
-		Content []byte
-		Name    string
+		Content []string
 	}
 	tests := []struct {
 		name    string
@@ -144,9 +147,7 @@ func TestServer_PutHandler(t *testing.T) {
 			args: args{
 				Method:  http.MethodPut,
 				Url:     "/file?name=hello.txt",
-				Content: []byte("hello, world"),
-		pdfFilePath := CreatePdfFile_TestHelper( t, []string{ "hello, world",}, pdfRoot)
-				Name:    "hello.txt",
+				Content: []string{ "hello, world",},
 			},
 			want: http.StatusCreated,
 			headers: map[string]string{
@@ -161,7 +162,6 @@ func TestServer_PutHandler(t *testing.T) {
 				Method:  http.MethodPut,
 				Url:     "/files/empty",
 				Content: []byte{},
-				Name:    "empty",
 			},
 			want: http.StatusCreated,
 			headers: map[string]string{
@@ -175,7 +175,6 @@ func TestServer_PutHandler(t *testing.T) {
 				Method:  http.MethodPut,
 				Url:     "/files/hello/world.txt",
 				Content: []byte("hello, world"),
-				Name:    "world.txt",
 			},
 			want: http.StatusCreated,
 			headers: map[string]string{
@@ -189,7 +188,6 @@ func TestServer_PutHandler(t *testing.T) {
 				Method:  http.MethodPut,
 				Url:     "/files/",
 				Content: []byte("hello"),
-				Name:    "hello",
 			},
 			want: http.StatusMethodNotAllowed,
 			body: `{"ok":false,"error":"PUT is accepted on /files/:name"}`,
@@ -200,7 +198,6 @@ func TestServer_PutHandler(t *testing.T) {
 				Method:  http.MethodPut,
 				Url:     "/files/toolarge",
 				Content: []byte("ABCDEFGHIJKLMNOPQRSTUVWXYZ"),
-				Name:    "toolarge",
 			},
 			want: http.StatusRequestEntityTooLarge,
 			body: `{"ok":false,"error":"file size limit exceeded"}`,
