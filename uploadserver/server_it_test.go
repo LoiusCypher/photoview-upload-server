@@ -82,7 +82,7 @@ func TestServer(t *testing.T) {
 	CreateEmptyDatabase_TestHelper( t, path.Join( sqlRoot, "shafiles.db"))
 
 	helloFile_db_path := "arbitrary / file path / hello,pdf"
-	_ = RecordPdf_TestHelper( t, pdfPath_hello, helloFile_db_path)
+	helloSha := RecordPdf_TestHelper( t, pdfPath_hello, helloFile_db_path)
 
 	var target string
 	if addr, ok := os.LookupEnv("TEST_TARGET_ADDR"); ok && addr != "" {
@@ -120,7 +120,8 @@ func TestServer(t *testing.T) {
 		assert.Nil(t, err4, fmt.Sprintf("failed to GET: %v", err4))
 		defer resp.Body.Close()
 		result := CheckResponseSuccess_TestHelper( t, resp, http.StatusNotFound)
-		expected := SuccessFileInfosResult{ false, nil,}
+		//expected := SuccessFileInfosResult{ false, nil,}
+		expected := SuccessFileInfosResult{ true, []FileInfo{{ helloFile_db_path, helloSha},},}
 		assert.Equal(t, expected.OK, result.OK, fmt.Sprintf("result = %+v, want = %+v", result, expected))
 		assert.Equal(t, expected.Files, result.Files, fmt.Sprintf("result = %+v, want = %+v", result, expected))
 		assert.True(t, slices.Equal( expected.Files, result.Files), fmt.Sprintf("result = %+v, want = %+v", result, expected))
@@ -136,7 +137,7 @@ func TestServer(t *testing.T) {
 		assert.Nil(t, err4, fmt.Sprintf("failed to PUT: %v", err4))
 		defer resp.Body.Close()
 		result := CheckResponseSuccess_TestHelper( t, resp, http.StatusCreated)
-		expected := SuccessFileInfosResult{ true, []FileInfo{{ pdfFilePath, sha},},}
+		expected := SuccessFileInfosResult{ true, []FileInfo{{ helloFile_db_path, helloSha}, { pdfFilePath, sha},},}
 		assert.Equal(t, expected.OK, result.OK, fmt.Sprintf("result = %+v, want = %+v", result, expected))
 		assert.Equal(t, expected.Files, result.Files, fmt.Sprintf("result = %+v, want = %+v", result, expected))
 		assert.True(t, slices.Equal( expected.Files, result.Files), fmt.Sprintf("result = %+v, want = %+v", result, expected))
