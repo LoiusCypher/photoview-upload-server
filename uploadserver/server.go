@@ -90,16 +90,16 @@ func (s *Server) Start(ctx context.Context, ready chan struct{}) error {
 */
 	r := http.NewServeMux()
 	r.HandleFunc(         "/", 	handleNotFound)
-	r.HandleFunc(         "/list{$}", 	handleMethodNotAllowed)
-	r.HandleFunc(     "GET /list{$}", 	s.handle(s.handleListGet))
-	r.HandleFunc( "OPTIONS /list{$}", 	s.handle(s.handleOptions))
-	r.HandleFunc(         "/file{$}", 	handleMethodNotAllowed)
-	r.HandleFunc(     "GET /file{$}", 	s.handle(s.handleFileGet))	// GET makes no sense without (file) name
-	r.HandleFunc(     "PUT /file{$}",	s.handle(s.handleFilePut))	// PUT makes no sense without (file) name
-	r.HandleFunc(  "DELETE /file{$}", 	s.handle(s.handleFileDelete))	// DELETE makes no sense without (file) name
-	r.HandleFunc( "OPTIONS /file{$}", 	s.handle(s.handleOptions))
-	//r.HandleFunc(    "POST /file{$}",	s.handle(s.handleFilePost))
-	r.HandleFunc(         "/file{$}", 	handleNotFound)
+	r.HandleFunc(         "/list/{$}", 	handleMethodNotAllowed)
+	r.HandleFunc(     "GET /list/{$}", 	s.handle(s.handleListGet))
+	r.HandleFunc( "OPTIONS /list/{$}", 	s.handle(s.handleOptions))
+	r.HandleFunc(         "/file/{$}", 	handleMethodNotAllowed)
+	r.HandleFunc(     "GET /file/{$}", 	s.handle(s.handleFileGet))	// GET makes no sense without (file) name
+	r.HandleFunc(     "PUT /file/{$}",	s.handle(s.handleFilePut))	// PUT makes no sense without (file) name
+	r.HandleFunc(  "DELETE /file/{$}", 	s.handle(s.handleFileDelete))	// DELETE makes no sense without (file) name
+	r.HandleFunc( "OPTIONS /file/{$}", 	s.handle(s.handleOptions))
+	//r.HandleFunc(    "POST /file/{$}",	s.handle(s.handleFilePost))
+	r.HandleFunc(         "/file/{$}", 	handleNotFound)
 	var rh http.Handler
 	rh = r
 	if s.EnableAuth {
