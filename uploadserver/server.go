@@ -126,7 +126,8 @@ func (s *Server) Start(ctx context.Context, ready chan struct{}) error {
 		WriteTimeout: s.WriteTimeout,
 		ReadTimeout:  s.ReadTimeout,
 		IdleTimeout:  60 * time.Second,
-		Handler:      rh,
+//		Handler:      rh,
+		Handler:      r,
 	}
 
 	ret := make(chan error, 1)
