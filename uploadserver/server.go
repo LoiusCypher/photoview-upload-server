@@ -95,6 +95,9 @@ func (s *Server) Start(ctx context.Context, ready chan struct{}) error {
 	h.HandleFunc(     "PUT /file",	s.handle(s.handleFilePut))	// PUT makes no sense without (file) name
 	h.HandleFunc(  "DELETE /file", 	s.handle(s.handleFileDelete))	// DELETE makes no sense without (file) name
 	h.HandleFunc( "OPTIONS /file", 	s.handle(s.handleOptions))
+
+	var r http.Handler
+
 	r = h
 	if s.EnableAuth {
 		r = s.authenticationMiddleware( r)
