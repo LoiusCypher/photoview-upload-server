@@ -74,10 +74,11 @@ func (s *Server) Start(ctx context.Context, ready chan struct{}) error {
 	h := http.NewServeMux()
 	h.HandleFunc(     "GET /list",   s.handle(s.handleListGet))
 	h.HandleFunc( "OPTIONS /list",   s.handle(s.handleOptions))
-	h.HandleFunc(    "POST /upload", s.handle(s.handlePostUpload))
+	//h.HandleFunc(    "POST /upload", s.handle(s.handlePostUpload))
 	h.HandleFunc(     "GET /file",   s.handle(s.handleFileGet))	// GET makes no sense without (file) name
 	h.HandleFunc(  "DELETE /file",   s.handle(s.handleFileDelete))	// DELETE makes no sense without (file) name
-	h.HandleFunc( "OPTIONS /file",   s.handle(s.handleOptions))
+	//h.HandleFunc( "OPTIONS /file",   s.handle(s.handleOptions))
+	h.HandleFunc( "OPTIONS /",   s.handle(s.handleOptions))
 
 	var r http.Handler
 	r = h
@@ -413,7 +414,8 @@ func handleNotFound(w http.ResponseWriter, r *http.Request) {
 }
 */
 var allowedMethodsList = []string{http.MethodGet}
-var allowedMethodsFile = []string{http.MethodGet, http.MethodPut, http.MethodDelete}
+var allowedMethodsFile = []string{http.MethodGet, http.MethodDelete}
+var allowedMethodsFile = []string{http.MethodPost}
 
 func (s *Server) handleOptions(w http.ResponseWriter, r *http.Request) (int, any) {
 	log.Printf("handleOptions %s %s", r.Method, r.URL)
@@ -423,6 +425,10 @@ func (s *Server) handleOptions(w http.ResponseWriter, r *http.Request) (int, any
 			allowedMethods = allowedMethodsList
 		case "/file":
 			allowedMethods = allowedMethodsFile
+		case "/upload":
+			allowedMethods = allowedMethodsUpload
+		default:
+			return http.StatusNotFound, nil
 	}
 	if s.EnableCORS {
 		w.Header().Set("Access-Control-Allow-Origin", "*")

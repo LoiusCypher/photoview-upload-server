@@ -242,7 +242,7 @@ func TestServer(t *testing.T) {
 		sha_hello := RecordPdfSha_TestHelper( t, sha_file, helloFile_db_path)
 		assert.Equal( t, sha_file, sha_hello)
 
-		u := base.JoinPath("/file")
+		u := base.JoinPath("/upload")
 		//GenerateUrl_TestHelper( t, u, helloFile_db_path)
 		req, shaNew := makeFormRequest( t, u, http.MethodPost, helloFile_db_path, []string{ "hello, new world", "with second side"}, pdfRoot)
 		resp, err4 := http.DefaultClient.Do(req)
