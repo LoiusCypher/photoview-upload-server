@@ -105,7 +105,7 @@ func (s *Server) Start(ctx context.Context, ready chan struct{}) error {
 	if s.EnableAuth {
 		r = s.authenticationMiddleware( r)
 	}
-	rh = logAccess( rh)
+	r = logAccess( r)
 
 	addr := s.Addr
 	if addr == "" {
