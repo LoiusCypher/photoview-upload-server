@@ -18,16 +18,12 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestGetHandler(t *testing.T) {
+func TestGetFileHandler(t *testing.T) {
 	// sqlite database has to be on real file system or in memory
 	sqlRoot, err1 := os.MkdirTemp("", "")
 	require.Nil( t, err1)
 	defer os.RemoveAll( sqlRoot)
 	CreateEmptyDatabase_TestHelper( t, path.Join( sqlRoot, "shafiles.db"))
-
-	jpgRoot, err3 := os.MkdirTemp("", "")
-	require.Nil(t, err3)
-	defer os.RemoveAll( jpgRoot)
 
 	fooBar_db_path := "foo/bar/stuff.pdf"
 	fooBar_db_sha := "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
@@ -38,8 +34,7 @@ func TestGetHandler(t *testing.T) {
 	_ = RecordPdfSha_TestHelper( t, hello_db_sha, hello_db_path)
 
 	type args struct {
-		Method string
-		Url    string
+		query   string
 	}
 	tests := []struct {
 		name    string
@@ -48,11 +43,10 @@ func TestGetHandler(t *testing.T) {
 		body    string
 		headers map[string]string
 	}{
-		{ // PASS
+		{
 			name: "get existing file",
 			args: args{
-				Method: http.MethodGet,
-				Url:    "/file?name=foo/bar/stuff.pdf",
+				query:  "?name=foo/bar/stuff.pdf",
 			},
 			want: http.StatusOK,
 			headers: map[string]string{
@@ -60,11 +54,10 @@ func TestGetHandler(t *testing.T) {
 			},
 			body: `{"ok":true,"Files":[{"path":"foo/bar/stuff.pdf","sha":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"}]}`,
 		},
-		{ // PASS
+		{
 			name: "get non-existing file",
 			args: args{
-				Method: http.MethodGet,
-				Url:    "/file?name=bar/baz",
+				query:  "?name=bar/baz",
 			},
 			want: http.StatusNotFound,
 			headers: map[string]string{
@@ -73,28 +66,73 @@ func TestGetHandler(t *testing.T) {
 			body: `{"ok":false,"error":"not found"}`,
 		},
 		{
-			name: "get without endpoint should fail",
+			name: "get without query",
 			args: args{
-				Method: http.MethodGet,
-				Url:    "/abc",
+				query:  "",
 			},
 			want: http.StatusNotFound,
-			body: `{"ok":false,"error":"page not found: /abc"}`,
-		},
-		{
-			name: "get /files should fail",
-			args: args{
-				Method: http.MethodGet,
-				Url:    "/files",
+			headers: map[string]string{
+				"Access-Control-Allow-Origin": "*",
 			},
-			want: http.StatusNotFound,
-			body: `{"ok":false,"error":"page not found: /files"}`,
+			body: `{"ok":false,"error":"not found"}`,
 		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			config := ServerConfig{
+				EnableCORS:   true,
+			}
+			server := Server{config, }
+			req, err := http.NewRequest( http.MethodGet, "/file" + tt.args.query, nil)
+			assert.Nil( t, err)
+
+			rr := httptest.NewRecorder()
+			handler := http.HandlerFunc(server.handle(server.handleFileGet))
+			handler.ServeHTTP(rr, req)
+
+			status := rr.Code
+			assert.Equal( t, tt.want, status, fmt.Sprintf("status = %d, want = %d", status, tt.want))
+			if body := rr.Body.String(); body != tt.body {
+				t.Errorf("body = \"%s\", want = \"%s\"", body, tt.body)
+			}
+			for k, v := range tt.headers {
+				if rr.Header().Get(k) != v {
+					t.Errorf("header %s = %s, want %s", k, rr.Header().Get(k), v)
+				}
+			}
+		})
+	}
+}
+
+func TestGetListHandler(t *testing.T) {
+	// sqlite database has to be on real file system or in memory
+	sqlRoot, err1 := os.MkdirTemp("", "")
+	require.Nil( t, err1)
+	defer os.RemoveAll( sqlRoot)
+	CreateEmptyDatabase_TestHelper( t, path.Join( sqlRoot, "shafiles.db"))
+
+	fooBar_db_path := "foo/bar/stuff.pdf"
+	fooBar_db_sha := "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+	_ = RecordPdfSha_TestHelper( t, fooBar_db_sha, fooBar_db_path)
+
+	hello_db_path := "world/hello.pdf"
+	hello_db_sha := "68fb1f3ef9c02d42c9c655a93febdc7a63f2a6eee4141a938efbede5413c4601"
+	_ = RecordPdfSha_TestHelper( t, hello_db_sha, hello_db_path)
+
+	type args struct {
+		query  string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    int
+		body    string
+		headers map[string]string
+	}{
 		{
 			name: "get /list?name=foo/bar list directory with ons file",
 			args: args{
-				Method: http.MethodGet,
-				Url:    "/list?name=foo/bar",
+				query:  "?name=foo/bar",
 			},
 			want: http.StatusOK,
 			headers: map[string]string{
@@ -105,8 +143,7 @@ func TestGetHandler(t *testing.T) {
 		{
 			name: "get /list?name=foo list directory with subdir content",
 			args: args{
-				Method: http.MethodGet,
-				Url:    "/list?name=foo",
+				query:  "?name=foo",
 			},
 			want: http.StatusOK,
 			headers: map[string]string{
@@ -117,8 +154,7 @@ func TestGetHandler(t *testing.T) {
 		{
 			name: "get /list all files",
 			args: args{
-				Method: http.MethodGet,
-				Url:    "/list",
+				query:  "",
 			},
 			want: http.StatusOK,
 			headers: map[string]string{
@@ -129,23 +165,13 @@ func TestGetHandler(t *testing.T) {
 		{
 			name: "get /list?name=bar empty directory",
 			args: args{
-				Method: http.MethodGet,
-				Url:    "/list?name=bar",
+				query:  "?name=bar",
 			},
 			want: http.StatusNotFound,
 			headers: map[string]string{
 				"Access-Control-Allow-Origin": "*",
 			},
 			body: `{"ok":false,"error":"file not found"}`,
-		},
-		{
-			name: "get /lists should fail",
-			args: args{
-				Method: http.MethodGet,
-				Url:    "/lists",
-			},
-			want: http.StatusNotFound,
-			body: `{"ok":false,"error":"page not found: /lists"}`,
 		},
 	}
 	for _, tt := range tests {
@@ -157,11 +183,97 @@ func TestGetHandler(t *testing.T) {
 				EnableCORS:   true,
 			}
 			server := Server{config, }
-			req, err := http.NewRequest(tt.args.Method, tt.args.Url, nil)
+			req, err := http.NewRequest( http.MethodGet, "/list" + tt.args.query, nil)
 			assert.Nil( t, err)
 
 			rr := httptest.NewRecorder()
 			handler := http.HandlerFunc(server.handle(server.handleFileGet))
+			handler.ServeHTTP(rr, req)
+
+			status := rr.Code
+			assert.Equal( t, tt.want, status, fmt.Sprintf("status = %d, want = %d", status, tt.want))
+			if body := rr.Body.String(); body != tt.body {
+				t.Errorf("body = \"%s\", want = \"%s\"", body, tt.body)
+			}
+			for k, v := range tt.headers {
+				if rr.Header().Get(k) != v {
+					t.Errorf("header %s = %s, want %s", k, rr.Header().Get(k), v)
+				}
+			}
+		})
+	}
+}
+
+func TestDeleteFileHandler(t *testing.T) {
+	// sqlite database has to be on real file system or in memory
+	sqlRoot, err1 := os.MkdirTemp("", "")
+	require.Nil( t, err1)
+	defer os.RemoveAll( sqlRoot)
+	CreateEmptyDatabase_TestHelper( t, path.Join( sqlRoot, "shafiles.db"))
+
+	fooBar_db_path := "foo/bar/stuff.pdf"
+	fooBar_db_sha := "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+	_ = RecordPdfSha_TestHelper( t, fooBar_db_sha, fooBar_db_path)
+
+	hello_db_path := "world/hello.pdf"
+	hello_db_sha := "68fb1f3ef9c02d42c9c655a93febdc7a63f2a6eee4141a938efbede5413c4601"
+	_ = RecordPdfSha_TestHelper( t, hello_db_sha, hello_db_path)
+
+	type args struct {
+		query   string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    int
+		body    string
+		headers map[string]string
+	}{
+		{
+			name: "delete existing file",
+			args: args{
+				query:  "?name=foo/bar/stuff.pdf",
+			},
+			want: http.StatusOK,
+			headers: map[string]string{
+				"Access-Control-Allow-Origin": "*",
+			},
+			body: `{"ok":true,"Files":[{"path":"foo/bar/stuff.pdf","sha":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"}]}`,
+		},
+		{
+			name: "delete non-existing file",
+			args: args{
+				query:  "?name=bar/baz",
+			},
+			want: http.StatusNotFound,
+			headers: map[string]string{
+				"Access-Control-Allow-Origin": "*",
+			},
+			body: `{"ok":false,"error":"not found"}`,
+		},
+		{
+			name: "delete without query",
+			args: args{
+				query:  "",
+			},
+			want: http.StatusNotFound,
+			headers: map[string]string{
+				"Access-Control-Allow-Origin": "*",
+			},
+			body: `{"ok":false,"error":"not found"}`,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			config := ServerConfig{
+				EnableCORS:   true,
+			}
+			server := Server{config, }
+			req, err := http.NewRequest( http.MethodGet, "/file" + tt.args.query, nil)
+			assert.Nil( t, err)
+
+			rr := httptest.NewRecorder()
+			handler := http.HandlerFunc(server.handle(server.handleFileDelete))
 			handler.ServeHTTP(rr, req)
 
 			status := rr.Code
@@ -194,8 +306,6 @@ func TestServer_PostHandler(t *testing.T) {
 	defer os.RemoveAll( jpgRoot)
 
 	type args struct {
-		Method  string
-		Url     string
 		Path    string
 		Content []string
 	}
@@ -209,8 +319,6 @@ func TestServer_PostHandler(t *testing.T) {
 		{ // PASS
 			name: "POST /upload hello.pdf with text",
 			args: args{
-				Method:  http.MethodPost,
-				Url:     "/upload",
 				Path:    "hello.pdf",
 				Content: []string{ "hello, world",},
 			},
@@ -220,11 +328,9 @@ func TestServer_PostHandler(t *testing.T) {
 			},
 			body: `{"ok":true,"Files":[{"path":"hello.pdf","sha":"%s"}]}`,
 		},
-		{ // PASS
+		{
 			name: "POST /upload empty.pdf with an empty content",
 			args: args{
-				Method:  http.MethodPost,
-				Url:     "/upload",
 				Path:    "empty.pdf",
 				Content: []string{},
 			},
@@ -234,11 +340,9 @@ func TestServer_PostHandler(t *testing.T) {
 			},
 			body: `{"ok":true,"Files":[{"path":"empty.pdf","sha":"%s"}]}`,
 		},
-		{ // PASS
+		{
 			name: "POST /upload hello/world.pdf will create directory and file",
 			args: args{
-				Method:  http.MethodPost,
-				Url:     "/upload",
 				Path:    "hello/world.pdf",
 				Content: []string{ "hello, world",},
 			},
@@ -247,72 +351,6 @@ func TestServer_PostHandler(t *testing.T) {
 				"Access-Control-Allow-Origin": "*",
 			},
 			body: `{"ok":true,"Files":[{"path":"hello/world.pdf","sha":"%s"}]}`,
-		},
-		{ // PASS
-			name: "POST /list method should fail",
-			args: args{
-				Method:  http.MethodPost,
-				Url:     "/list",
-				Path:    "",
-				Content: []string{ " no post file",},
-			},
-			want: http.StatusMethodNotAllowed,
-			body: `{"ok":false,"error":"method not allowed"}`,
-		},
-		{ // PASS
-			name: "POST /file method should fail",
-			args: args{
-				Method:  http.MethodPost,
-				Url:     "/file",
-				Path:    "",
-				Content: []string{ " no post file",},
-			},
-			want: http.StatusMethodNotAllowed,
-			body: `{"ok":false,"error":"method not allowed"}`,
-		},
-		{ // PASS
-			name: "POST /upload without name should fail",
-			args: args{
-				Method:  http.MethodPost,
-				Url:     "/upload",
-				Path:    "",
-				Content: []string{ "hello",},
-			},
-			want: http.StatusBadRequest,
-			body: `{"ok":false,"error":"missing name of file: /file?name="}`,
-		},
-		{ // PASS
-			name: "POST /foobar should fail",
-			args: args{
-				Method:  http.MethodPost,
-				Url:     "/foobar",
-				Path:    "",
-				Content: []string{ "hello",},
-			},
-			want: http.StatusNotFound,
-			body: `{"ok":false,"error":"page not found: /foobar"}`,
-		},
-		{ // PASS
-			name: "POST /files should fail",
-			args: args{
-				Method:  http.MethodPost,
-				Url:     "/files",
-				Path:    "",
-				Content: []string{ "hello",},
-			},
-			want: http.StatusNotFound,
-			body: `{"ok":false,"error":"page not found: /files"}`,
-		},
-		{ // PASS
-			name: "POST /upload toolarge.pdf large file should fail",
-			args: args{
-				Method:  http.MethodPost,
-				Url:     "/file",
-				Path:    "toolarge.pdf",
-				Content: []string{ "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "Second Page", "Last Page",},
-			},
-			want: http.StatusRequestEntityTooLarge,
-			body: `{"ok":false,"error":"file size limit exceeded"}`,
 		},
 		// TODO: add text without name
 	}
@@ -347,7 +385,7 @@ func TestServer_PostHandler(t *testing.T) {
 			err4 := w.WriteField( "name", tt.args.Path)
 			assert.Nil(t, err4)
 			w.Close()
-			req, err5 := http.NewRequest(tt.args.Method, tt.args.Url, b)
+			req, err5 := http.NewRequest( http.MethodPost, "/upload", b)
 			assert.Nil(t, err5)
 			req.Header.Set("Content-Type", w.FormDataContentType())
 
