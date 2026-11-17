@@ -105,7 +105,7 @@ func TestGetHandler(t *testing.T) {
 				Url:    "/lists",
 			},
 			want: http.StatusNotFound,
-			body: `{"ok":false,"error":"psge not found: /lists"}`,
+			body: `{"ok":false,"error":"page not found: /lists"}`,
 		},
 	}
 	for _, tt := range tests {

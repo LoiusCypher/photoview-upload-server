@@ -73,12 +73,12 @@ func NewServer(config ServerConfig) *Server {
 func (s *Server) Start(ctx context.Context, ready chan struct{}) error {
 
 	r := mux.NewRouter()
-	r.Path("/list/").Methods(http.MethodGet).HandlerFunc(s.handle(s.handleListGet))
-	r.Path("/list/").Methods(http.MethodOptions).HandlerFunc(s.handle(s.handleOptions))
-	r.Path("/file/").Methods(http.MethodGet).Queries("name","").HandlerFunc(s.handle(s.handleFileGet))		// PUT makes no sense without (file) name
-	r.Path("/file/").Methods(http.MethodPut).Queries("name","").HandlerFunc(s.handle(s.handleFilePut))		// PUT makes no sense without (file) name
-	r.Path("/file/").Methods(http.MethodDelete).Queries("name","").HandlerFunc(s.handle(s.handleFileDelete))	// DELETE makes no sense without (file) name
-	r.Path("/file/").Methods(http.MethodOptions).HandlerFunc(s.handle(s.handleOptions))
+	r.Path("/list").Methods(http.MethodGet).HandlerFunc(s.handle(s.handleListGet))
+	r.Path("/list").Methods(http.MethodOptions).HandlerFunc(s.handle(s.handleOptions))
+	r.Path("/file").Methods(http.MethodGet).Queries("name","").HandlerFunc(s.handle(s.handleFileGet))		// PUT makes no sense without (file) name
+	r.Path("/file").Methods(http.MethodPut).Queries("name","").HandlerFunc(s.handle(s.handleFilePut))		// PUT makes no sense without (file) name
+	r.Path("/file").Methods(http.MethodDelete).Queries("name","").HandlerFunc(s.handle(s.handleFileDelete))	// DELETE makes no sense without (file) name
+	r.Path("/file").Methods(http.MethodOptions).HandlerFunc(s.handle(s.handleOptions))
 	// r.Path("/").Methods(http.MethodPut).HandlerFunc(handleNotFound)
 	r.NotFoundHandler = http.HandlerFunc(handleNotFound)
 	r.MethodNotAllowedHandler = http.HandlerFunc(handleMethodNotAllowed)
