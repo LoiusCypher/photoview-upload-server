@@ -176,10 +176,7 @@ func TestGetListHandler(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// pdfRoot := "/tnp"
-			// _ := CreatePdfFile_TestHelper( t, []string{ "hello, world",}, pdfRoot)
 			config := ServerConfig{
-				PictureRoot:  jpgRoot,
 				EnableCORS:   true,
 			}
 			server := Server{config, }
