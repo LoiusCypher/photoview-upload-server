@@ -415,7 +415,7 @@ func handleNotFound(w http.ResponseWriter, r *http.Request) {
 */
 var allowedMethodsList = []string{http.MethodGet}
 var allowedMethodsFile = []string{http.MethodGet, http.MethodDelete}
-var allowedMethodsFile = []string{http.MethodPost}
+var allowedMethodsUpload = []string{http.MethodPost}
 
 func (s *Server) handleOptions(w http.ResponseWriter, r *http.Request) (int, any) {
 	log.Printf("handleOptions %s %s", r.Method, r.URL)
