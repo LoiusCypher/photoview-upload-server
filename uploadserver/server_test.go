@@ -221,7 +221,7 @@ func TestServer_PostHandler(t *testing.T) {
 		{ // PASS
 			name: "POST /file?name=empty.pdf with an empty content",
 			args: args{
-				Method:  http.MethodPos^t,
+				Method:  http.MethodPost,
 				Url:     "/file?name=empty.pdf",
 				Content: []string{},
 			},
@@ -234,7 +234,7 @@ func TestServer_PostHandler(t *testing.T) {
 		{ // PASS
 			name: "POST /file?name=hello/world.pdf will create directory and file",
 			args: args{
-				Method:  http.MethodPos^t,
+				Method:  http.MethodPost,
 				Url:     "/file?name=hello/world.pdf",
 				Content: []string{ "hello, world",},
 			},
@@ -257,7 +257,7 @@ func TestServer_PostHandler(t *testing.T) {
 		{ // PASS
 			name: "POST /file without name should fail",
 			args: args{
-				Method:  http.MethodPos^t,
+				Method:  http.MethodPost,
 				Url:     "/file",
 				Content: []string{ "hello",},
 			},
@@ -267,7 +267,7 @@ func TestServer_PostHandler(t *testing.T) {
 		{ // PASS
 			name: "POST /foobar should fail",
 			args: args{
-				Method:  http.MethodPos^t,
+				Method:  http.MethodPost,
 				Url:     "/foobar",
 				Content: []string{ "hello",},
 			},
@@ -277,7 +277,7 @@ func TestServer_PostHandler(t *testing.T) {
 		{ // PASS
 			name: "POST /files should fail",
 			args: args{
-				Method:  http.MethodPos^t,
+				Method:  http.MethodPost,
 				Url:     "/files",
 				Content: []string{ "hello",},
 			},
@@ -287,7 +287,7 @@ func TestServer_PostHandler(t *testing.T) {
 		{ // PASS
 			name: "POST /file?name=toolarge.pdf large file should fail",
 			args: args{
-				Method:  http.MethodPos^t,
+				Method:  http.MethodPost,
 				Url:     "/file?name=toolarge.pdf",
 				Content: []string{ "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "Second Page", "Last Page",},
 			},
