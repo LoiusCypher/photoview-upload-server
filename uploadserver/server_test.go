@@ -124,8 +124,7 @@ func TestGetHandler(t *testing.T) {
 			headers: map[string]string{
 				"Access-Control-Allow-Origin": "*",
 			},
-			body: `{"ok":true,"Files":[{"path":"foo/bar/stuff.pdf","sha":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},`
-						+ `{"path":"world/hello.pdf","sha":"68fb1f3ef9c02d42c9c655a93febdc7a63f2a6eee4141a938efbede5413c4601"}]}`,
+			body: `{"ok":true,"Files":[{"path":"foo/bar/stuff.pdf","sha":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},{"path":"world/hello.pdf","sha":"68fb1f3ef9c02d42c9c655a93febdc7a63f2a6eee4141a938efbede5413c4601"}]}`,
 		},
 		{
 			name: "get /list?name=bar empty directory",
