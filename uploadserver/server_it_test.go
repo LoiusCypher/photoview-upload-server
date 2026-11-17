@@ -174,11 +174,7 @@ func TestServer(t *testing.T) {
 		assert.Nil(t, err4, fmt.Sprintf("failed to POST: %v", err4))
 		defer resp.Body.Close()
 		body := CheckResponse_TestHelper( t, resp, http.StatusMethodNotAllowed)
-		var result ErrorResult
-		err6 := json.Unmarshal(body, &result)
-		assert.Nil(t, err6, fmt.Sprintf("failed to decode response body: %v", err6))
-		expected := ErrorResult{false, "POST is not allowed on /file"}
-		assert.True(t, reflect.DeepEqual(result, expected), fmt.Sprintf("result = %+v, want = %+v", result, expected))
+		assert.Equal(t, string(body), "Method Not Allowed")
 	})
 /*
 	t.Run("POST /upload should fail due to duplication", func(t *testing.T) {
