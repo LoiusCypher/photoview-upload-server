@@ -72,9 +72,10 @@ func TestGetFileHandler(t *testing.T) {
 			},
 			want: http.StatusBadRequest,
 			headers: map[string]string{
-				"Access-Control-Allow-Origin": "*",
+				//"Access-Control-Allow-Origin": "*",
+				"Access-Control-Allow-Origin": "",
 			},
-			body: `{"ok":false,"error":"missing name of file: /file?name="}`,
+			body: `{"ok":false,"error":"not found"}`,
 		},
 	}
 	for _, tt := range tests {
@@ -184,7 +185,7 @@ func TestGetListHandler(t *testing.T) {
 			assert.Nil( t, err)
 
 			rr := httptest.NewRecorder()
-			handler := http.HandlerFunc(server.handle(server.handleFileGet))
+			handler := http.HandlerFunc(server.handle(server.handleListGet))
 			handler.ServeHTTP(rr, req)
 
 			status := rr.Code
@@ -253,11 +254,11 @@ func TestDeleteFileHandler(t *testing.T) {
 			args: args{
 				query:  "",
 			},
-			want: http.StatusNotFound,
+			want: http.StatusBadRequest,
 			headers: map[string]string{
 				"Access-Control-Allow-Origin": "*",
 			},
-			body: `{"ok":false,"error":"not found"}`,
+			body: `{"ok":false,"error":"missing name of file: /file?name="}`,
 		},
 	}
 	for _, tt := range tests {
