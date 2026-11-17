@@ -1151,7 +1151,7 @@ func makeFormRequest( t *testing.T, url *url.URL, method string, filePath string
 	assert.Nil(t, err4)
 	w.Close()
 	req, err5 := http.NewRequest( method, url.String(), b)
-	require.Nil(t, err4)
+	require.Nil(t, err5)
 	req.Header.Set("Content-Type", w.FormDataContentType())
 	return req, sha
 }

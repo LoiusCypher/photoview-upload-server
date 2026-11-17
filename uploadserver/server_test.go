@@ -330,7 +330,7 @@ func TestServer_PutHandler(t *testing.T) {
 			req.Header.Set("Content-Type", w.FormDataContentType())
 
 			rr := httptest.NewRecorder()
-			handler := http.HandlerFunc(server.handle(server.handleFilePut))
+			handler := http.HandlerFunc(server.handle(server.handleFilePost))
 			handler.ServeHTTP(rr, req)
 
 			status := rr.Code
