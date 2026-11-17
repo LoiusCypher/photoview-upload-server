@@ -267,10 +267,16 @@ func (s *Server) handleListGet(w http.ResponseWriter, r *http.Request) (int, any
 }
 
 func (s *Server) handleFilePut(w http.ResponseWriter, r *http.Request) (int, any) {
+	if r.Method != http.MethodPut {
+		return http.StatusMethodNotAllowed, "method not allowed")
+	}
 	if r.URL.Path != "/file" {
 		return http.StatusNotFound, fmt.Errorf("page not found: %s", r.URL.Path)
 	}
-	requestPath := r.URL.Query().Get("name")
+	requestPath := strings.TrimPrefix( r.URL.Query().Get("name"), "/")
+	if requestPath != "" {
+		return http.StatusBadRequest, "missing name of file: /file?name=")
+	}
 	log.Printf("PUT %s -> %s", r.URL.Path, requestPath)
 	status, sha, err := s.processUpload(w, r, requestPath)
 	if err != nil {
@@ -283,10 +289,16 @@ func (s *Server) handleFilePut(w http.ResponseWriter, r *http.Request) (int, any
 }
 
 func (s *Server) handleFileGet(w http.ResponseWriter, r *http.Request) (int, any) {
+	if r.Method != http.MethodGet {
+		return http.StatusMethodNotAllowed, "method not allowed")
+	}
 	if r.URL.Path != "/file" {
 		return http.StatusNotFound, fmt.Errorf("page not found: %s", r.URL.Path)
 	}
-	requestPath := r.URL.Query().Get("name")
+	requestPath := strings.TrimPrefix( r.URL.Query().Get("name"), "/")
+	if requestPath != "" {
+		return http.StatusBadRequest, "missing name of file: /file?name=")
+	}
 	log.Printf("GET %s -> %s", r.URL.Path, requestPath)
 	sha, err := getPathSha( requestPath)
 	if err != nil {
@@ -302,10 +314,16 @@ func (s *Server) handleFileGet(w http.ResponseWriter, r *http.Request) (int, any
 }
 
 func (s *Server) handleFileDelete( w http.ResponseWriter, r *http.Request) (int, any) {
+	if r.Method != http.MethodDelete {
+		return http.StatusMethodNotAllowed, "method not allowed")
+	}
 	if r.URL.Path != "/file" {
 		return http.StatusNotFound, fmt.Errorf("page not found: %s", r.URL.Path)
 	}
-	requestPath := r.URL.Query().Get("name")
+	requestPath := strings.TrimPrefix( r.URL.Query().Get("name"), "/")
+	if requestPath != "" {
+		return http.StatusBadRequest, "missing name of file: /file?name=")
+	}
 	if err := deleteJpgs( s.PictureRoot, requestPath);err != nil {
 		return http.StatusInternalServerError, err
 	}
