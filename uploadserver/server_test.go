@@ -75,7 +75,7 @@ func TestGetFileHandler(t *testing.T) {
 				//"Access-Control-Allow-Origin": "*",
 				"Access-Control-Allow-Origin": "",
 			},
-			body: `{"ok":false,"error":"not found"}`,
+			body: `{"ok":false,"error":"missing name of file: /file?name="}`,
 		},
 	}
 	for _, tt := range tests {
@@ -256,7 +256,8 @@ func TestDeleteFileHandler(t *testing.T) {
 			},
 			want: http.StatusBadRequest,
 			headers: map[string]string{
-				"Access-Control-Allow-Origin": "*",
+				//"Access-Control-Allow-Origin": "*",
+				"Access-Control-Allow-Origin": "",
 			},
 			body: `{"ok":false,"error":"missing name of file: /file?name="}`,
 		},
