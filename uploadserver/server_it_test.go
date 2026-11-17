@@ -144,7 +144,7 @@ func TestServer(t *testing.T) {
 		u := base.JoinPath("/file")
 		pdfFilePath := "hello.pdf"
 		//GenerateUrl_TestHelper( t, u, pdfFilePath)
-		req, sha := makeFormRequest( t, u, http.MethodPost, pdfFilePath), []string{ "lorem ipsum",}, pdfRoot)
+		req, sha := makeFormRequest( t, u, http.MethodPost, pdfFilePath, []string{ "lorem ipsum",}, pdfRoot)
 		resp, err4 := http.DefaultClient.Do(req)
 		assert.Nil(t, err4, fmt.Sprintf("failed to PUT: %v", err4))
 		defer resp.Body.Close()
@@ -1147,7 +1147,7 @@ func makeFormRequest( t *testing.T, url *url.URL, method string, filePath string
 	assert.Nil(t, err3)
 	// assert.NotEqual(t, 0, written, fmt.Sprintf("no bytes written"))
 	assert.NotEqual(t, 0, written, "no bytes written")
-	err4 := w.WriteField( "name", filePath))
+	err4 := w.WriteField( "name", filePath)
 	assert.Nil(t, err4)
 	w.Close()
 	req, err5 := http.NewRequest( method, url.String(), b)

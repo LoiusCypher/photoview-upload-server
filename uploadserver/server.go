@@ -22,7 +22,6 @@ type Server struct {
 var (
 	FormFileKey       = "file"
 	FormNameKey       = "name"
-
 )
 
 var (
@@ -191,10 +190,10 @@ func (s *Server) processUpload(w http.ResponseWriter, r *http.Request) (string, 
 	if dstPath == "" {
 		return "", "", nil
 	}
-	log.Print( dstPath)
+	//log.Print( dstPath)
 	uplFile, uplHeader, err := r.FormFile( FormFileKey)
-	log.Print( uplHeader)
-	log.Print( uplFile)
+	//log.Print( uplHeader)
+	//log.Print( uplFile)
 	if err != nil {
 		log.Printf("failed to obtain form file: %v", err)
 		return "", "", fmt.Errorf("cannot obtain the uploaded content")
