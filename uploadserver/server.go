@@ -396,7 +396,7 @@ func handleNotFound(w http.ResponseWriter, r *http.Request) {
 		log.Printf("failed to write response: %v", err)
 	}
 }
-*/ /*
+*/
 var allowedMethodsList = []string{http.MethodGet}
 var allowedMethodsFile = []string{http.MethodGet, http.MethodDelete}
 var allowedMethodsUpload = []string{http.MethodPost}
@@ -421,7 +421,7 @@ func (s *Server) handleOptions(w http.ResponseWriter, r *http.Request) (int, any
 	w.Header().Set("Access-Control-Allow-Methods", strings.Join(allowedMethods, ", "))
 	return http.StatusNoContent, nil
 }
-*/ /*
+/*
 func handleMethodNotAllowed(w http.ResponseWriter, r *http.Request) {
 	log.Printf("handleMethodNotAllowed %s %s", r.Method, r.URL)
 	var allowedMethods []string
