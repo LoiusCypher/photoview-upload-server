@@ -165,7 +165,7 @@ func TestServer_PutHandler(t *testing.T) {
 		body    string
 		headers map[string]string
 	}{
-		{
+		{ // PASS
 			name: "PUT /file?name=hello.pdf with text",
 			args: args{
 				Method:  http.MethodPut,
@@ -178,7 +178,7 @@ func TestServer_PutHandler(t *testing.T) {
 			},
 			body: `{"ok":true,"Files":[{"path":"hello.pdf","sha":"%s"}]}`,
 		},
-		{
+		{ // PASS
 			name: "PUT /file?name=empty.pdf with an empty content",
 			args: args{
 				Method:  http.MethodPut,
@@ -191,7 +191,7 @@ func TestServer_PutHandler(t *testing.T) {
 			},
 			body: `{"ok":true,"Files":[{"path":"empty.pdf","sha":"%s"}]}`,
 		},
-		{
+		{ // PASS
 			name: "PUT /file?name=hello/world.pdf will create directory and file",
 			args: args{
 				Method:  http.MethodPut,
@@ -204,37 +204,27 @@ func TestServer_PutHandler(t *testing.T) {
 			},
 			body: `{"ok":true,"Files":[{"path":"hello/world.pdf","sha":"%s"}]}`,
 		},
-		{
-			name: "PUT /file without name should fail",
-			args: args{
-				Method:  http.MethodPut,
-				Url:     "/file",
-				Content: []string{ "no name",},
-			},
-			want: http.StatusMethodNotAllowed,
-			body: `{"ok":false,"error":"page not found: /foobar"}`,
-		},
-		{
+		{ // ok
 			name: "POST /file method should fail",
 			args: args{
 				Method:  http.MethodPost,
 				Url:     "/file",
 				Content: []string{ " no post file",},
 			},
-			want: http.StatusNotFound,
-			body: `{"ok":false,"error":"page not found: /foobar"}`,
+			want: http.StatusMethodNotAllowed,
+			body: `{"ok":false,"error":"method not allowed"}`,
 		},
-		{
+		{ // ok
 			name: "PUT /file without name should fail",
 			args: args{
 				Method:  http.MethodPut,
 				Url:     "/file",
 				Content: []string{ "hello",},
 			},
-			want: http.StatusMethodNotAllowed,
-			body: `{"ok":false,"error":"page not found: /foobar"}`,
+			want: http.StatusBadRequest,
+			body: `{"ok":false,"error":"missing name of file: /file?name="}`,
 		},
-		{
+		{ // ok
 			name: "PUT /foobar should fail",
 			args: args{
 				Method:  http.MethodPut,
@@ -244,7 +234,7 @@ func TestServer_PutHandler(t *testing.T) {
 			want: http.StatusNotFound,
 			body: `{"ok":false,"error":"page not found: /foobar"}`,
 		},
-		{
+		{ // ok
 			name: "PUT /files should fail",
 			args: args{
 				Method:  http.MethodPut,
@@ -254,7 +244,7 @@ func TestServer_PutHandler(t *testing.T) {
 			want: http.StatusNotFound,
 			body: `{"ok":false,"error":"page not found: /files"}`,
 		},
-		{
+		{ // Pass
 			name: "PUT /file?name=toolarge.pdf large file should fail",
 			args: args{
 				Method:  http.MethodPut,
