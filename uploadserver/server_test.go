@@ -44,7 +44,7 @@ func TestGetHandler(t *testing.T) {
 		body    string
 		headers map[string]string
 	}{
-		{ PASS
+		{ // PASS
 			name: "get existing file",
 			args: args{
 				Method: http.MethodGet,
@@ -56,7 +56,7 @@ func TestGetHandler(t *testing.T) {
 			},
 			body: `{"ok":true,"Files":[{"path":"foo/bar.pdf","sha":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"}]}`,
 		},
-		{ PASS
+		{ // PASS
 			name: "get non-existing file",
 			args: args{
 				Method: http.MethodGet,
