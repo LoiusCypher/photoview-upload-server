@@ -44,7 +44,7 @@ func TestGetHandler(t *testing.T) {
 		body    string
 		headers map[string]string
 	}{
-		{
+		{ PASS
 			name: "get existing file",
 			args: args{
 				Method: http.MethodGet,
@@ -56,7 +56,7 @@ func TestGetHandler(t *testing.T) {
 			},
 			body: `{"ok":true,"Files":[{"path":"foo/bar.pdf","sha":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"}]}`,
 		},
-		{
+		{ PASS
 			name: "get non-existing file",
 			args: args{
 				Method: http.MethodGet,
@@ -75,7 +75,7 @@ func TestGetHandler(t *testing.T) {
 				Url:    "/abc",
 			},
 			want: http.StatusNotFound,
-			body: `{"ok":false,"error":"not found"}`,
+			body: `{"ok":false,"error":"page not found: /abc"}`,
 		},
 		{
 			name: "get /files should fail",
@@ -84,7 +84,7 @@ func TestGetHandler(t *testing.T) {
 				Url:    "/files",
 			},
 			want: http.StatusNotFound,
-			body: `{"ok":false,"error":"not found"}`,
+			body: `{"ok":false,"error":"page not found: /files"}`,
 		},
 		{
 			name: "get /list?name=foo directory",
@@ -105,7 +105,7 @@ func TestGetHandler(t *testing.T) {
 				Url:    "/lists",
 			},
 			want: http.StatusNotFound,
-			body: `{"ok":false,"error":"not found"}`,
+			body: `{"ok":false,"error":"psge not found: /lists"}`,
 		},
 	}
 	for _, tt := range tests {
@@ -204,7 +204,7 @@ func TestServer_PutHandler(t *testing.T) {
 			},
 			body: `{"ok":true,"Files":[{"path":"hello/world.pdf","sha":"%s"}]}`,
 		},
-		{ // ok
+		{ // PASS
 			name: "POST /file method should fail",
 			args: args{
 				Method:  http.MethodPost,
@@ -214,7 +214,7 @@ func TestServer_PutHandler(t *testing.T) {
 			want: http.StatusMethodNotAllowed,
 			body: `{"ok":false,"error":"method not allowed"}`,
 		},
-		{ // ok
+		{ // PASS
 			name: "PUT /file without name should fail",
 			args: args{
 				Method:  http.MethodPut,

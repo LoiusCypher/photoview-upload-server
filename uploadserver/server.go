@@ -248,6 +248,7 @@ func (s *Server) processUpload(w http.ResponseWriter, r *http.Request, path stri
 }
 
 func (s *Server) handleListGet(w http.ResponseWriter, r *http.Request) (int, any) {
+	log.Printf("handleListGet %s", r.URL)
 	if r.URL.Path != "/list" {
 		return http.StatusNotFound, fmt.Errorf("page not found: %s", r.URL.Path)
 	}
@@ -267,6 +268,7 @@ func (s *Server) handleListGet(w http.ResponseWriter, r *http.Request) (int, any
 }
 
 func (s *Server) handleFilePut(w http.ResponseWriter, r *http.Request) (int, any) {
+	log.Printf("handleFilePut %s", r.URL)
 	if r.Method != http.MethodPut {
 		return http.StatusMethodNotAllowed, fmt.Errorf( "method not allowed")
 	}
@@ -289,6 +291,7 @@ func (s *Server) handleFilePut(w http.ResponseWriter, r *http.Request) (int, any
 }
 
 func (s *Server) handleFileGet(w http.ResponseWriter, r *http.Request) (int, any) {
+	log.Printf("handleFileGet %s", r.URL)
 	if r.Method != http.MethodGet {
 		return http.StatusMethodNotAllowed, fmt.Errorf( "method not allowed")
 	}
@@ -314,6 +317,7 @@ func (s *Server) handleFileGet(w http.ResponseWriter, r *http.Request) (int, any
 }
 
 func (s *Server) handleFileDelete( w http.ResponseWriter, r *http.Request) (int, any) {
+	log.Printf("handleFileDelete %s", r.URL)
 	if r.Method != http.MethodDelete {
 		return http.StatusMethodNotAllowed, fmt.Errorf( "method not allowed")
 	}
@@ -401,6 +405,7 @@ func writeUnauthorized(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleNotFound(w http.ResponseWriter, r *http.Request) {
+	log.Printf("handleNotFound %s", r.URL)
 	resp := ErrorResult{false, "not found"}
 	respBytes, err := json.Marshal(resp)
 	if err != nil {
