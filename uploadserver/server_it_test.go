@@ -127,9 +127,6 @@ func TestServer(t *testing.T) {
 		result := CheckResponseSuccess_TestHelper( t, resp, http.StatusNotFound)
 		//expected := SuccessFileInfosResult{ false, nil,}
 		expected := SuccessFileInfosResult{ true, []FileInfo{{ helloFile_db_path, helloSha},},}
-		assert.Equal(t, expected.OK, result.OK, fmt.Sprintf("result = %+v, want = %+v", result, expected))
-		assert.Equal(t, expected.Files, result.Files, fmt.Sprintf("result = %+v, want = %+v", result, expected))
-		assert.True(t, slices.Equal( expected.Files, result.Files), fmt.Sprintf("result = %+v, want = %+v", result, expected))
 		assert.True(t, reflect.DeepEqual(result, expected), fmt.Sprintf("result = %+v, want = %+v", result, expected))
 	})
 
@@ -143,9 +140,21 @@ func TestServer(t *testing.T) {
 		defer resp.Body.Close()
 		result := CheckResponseSuccess_TestHelper( t, resp, http.StatusCreated)
 		expected := SuccessFileInfosResult{ true, []FileInfo{ { pdfFilePath, sha},},}
-		assert.Equal(t, expected.OK, result.OK, fmt.Sprintf("result = %+v, want = %+v", result, expected))
-		assert.Equal(t, expected.Files, result.Files, fmt.Sprintf("result = %+v, want = %+v", result, expected))
-		assert.True(t, slices.Equal( expected.Files, result.Files), fmt.Sprintf("result = %+v, want = %+v", result, expected))
+		assert.True(t, reflect.DeepEqual(result, expected), fmt.Sprintf("result = %+v, want = %+v", result, expected))
+		assert.FileExists(t, filepath.Join( jpgRoot, "hello-01.jpg"))
+		lastPdfSha = sha
+	})
+
+	t.Run("PUT /file?name=hello.pdf overwrite should work the same", func(t *testing.T) {
+		u := base.JoinPath("/file")
+		pdfFilePath := "hello.pdf"
+		GenerateUrl_TestHelper( t, u, pdfFilePath)
+		req, sha := makeFormRequest( t, u, http.MethodPut, []string{ "new world", "page two",}, pdfRoot)
+		resp, err4 := http.DefaultClient.Do(req)
+		assert.Nil(t, err4, fmt.Sprintf("failed to PUT: %v", err4))
+		defer resp.Body.Close()
+		result := CheckResponseSuccess_TestHelper( t, resp, http.StatusCreated)
+		expected := SuccessFileInfosResult{ true, []FileInfo{ { pdfFilePath, sha},},}
 		assert.True(t, reflect.DeepEqual(result, expected), fmt.Sprintf("result = %+v, want = %+v", result, expected))
 		assert.FileExists(t, filepath.Join( jpgRoot, "hello-01.jpg"))
 		lastPdfSha = sha
@@ -159,9 +168,6 @@ func TestServer(t *testing.T) {
 		defer resp.Body.Close()
 		result := CheckResponseSuccess_TestHelper( t, resp, http.StatusOK)
 		expected := SuccessFileInfosResult{ true, []FileInfo{ { helloFile_db_path, helloSha}, { pdfFilePath, lastPdfSha},},}
-		assert.Equal(t, expected.OK, result.OK, fmt.Sprintf("result = %+v, want = %+v", result, expected))
-		assert.Equal(t, expected.Files, result.Files, fmt.Sprintf("result = %+v, want = %+v", result, expected))
-		assert.True(t, slices.Equal( expected.Files, result.Files), fmt.Sprintf("result = %+v, want = %+v", result, expected))
 		assert.True(t, reflect.DeepEqual(result, expected), fmt.Sprintf("result = %+v, want = %+v", result, expected))
 	})
 
@@ -174,7 +180,7 @@ func TestServer(t *testing.T) {
 		assert.Nil(t, err4, fmt.Sprintf("failed to POST: %v", err4))
 		defer resp.Body.Close()
 		body := CheckResponse_TestHelper( t, resp, http.StatusMethodNotAllowed)
-		assert.Equal(t, string(body), "Method Not Allowed")
+		assert.Equal(t, string(body), "Method Not Allowed\n")
 	})
 /*
 	t.Run("POST /upload should fail due to duplication", func(t *testing.T) {
@@ -237,9 +243,6 @@ func TestServer(t *testing.T) {
 		defer resp.Body.Close()
 		result := CheckResponseSuccess_TestHelper( t, resp, http.StatusCreated)
 		expected := SuccessFileInfosResult{ true, []FileInfo{{ helloFile_db_path, shaNew},},}
-		assert.Equal(t, expected.OK, result.OK, fmt.Sprintf("result = %+v, want = %+v", result, expected))
-		assert.Equal(t, expected.Files, result.Files, fmt.Sprintf("result = %+v, want = %+v", result, expected))
-		assert.True(t, slices.Equal( expected.Files, result.Files), fmt.Sprintf("result = %+v, want = %+v", result, expected))
 		assert.True(t, reflect.DeepEqual(result, expected), fmt.Sprintf("result = %+v, want = %+v", result, expected))
 		assert.FileExists(t, filepath.Join(jpgRoot, "hello-01.jpg"))
 	})
