@@ -73,8 +73,8 @@ func (s *Server) Start(ctx context.Context, ready chan struct{}) error {
 
 	h := http.NewServeMux()
 	h.HandleFunc(     "GET /list",   s.handle(s.handleListGet))
-	h.HandleFunc( "OPTIONS /list",   s.handle(s.handleOptions))
-	//h.HandleFunc(    "POST /upload", s.handle(s.handlePostUpload))
+	//h.HandleFunc( "OPTIONS /list",   s.handle(s.handleOptions))
+	h.HandleFunc(    "POST /upload", s.handle(s.handlePostUpload))
 	h.HandleFunc(     "GET /file",   s.handle(s.handleFileGet))	// GET makes no sense without (file) name
 	h.HandleFunc(  "DELETE /file",   s.handle(s.handleFileDelete))	// DELETE makes no sense without (file) name
 	//h.HandleFunc( "OPTIONS /file",   s.handle(s.handleOptions))
