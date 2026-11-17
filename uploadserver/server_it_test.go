@@ -124,8 +124,18 @@ func TestServer(t *testing.T) {
 		resp, err4 := http.Get(u.String())
 		assert.Nil(t, err4, fmt.Sprintf("failed to GET: %v", err4))
 		defer resp.Body.Close()
-		result := CheckResponseSuccess_TestHelper( t, resp, http.StatusNotFound)
-		//expected := SuccessFileInfosResult{ false, nil,}
+		result := CheckResponseSuccess_TestHelper( t, resp, http.StatusOK)
+		expected := SuccessFileInfosResult{ true, []FileInfo{{ helloFile_db_path, helloSha},},}
+		assert.True(t, reflect.DeepEqual(result, expected), fmt.Sprintf("result = %+v, want = %+v", result, expected))
+	})
+
+	t.Run("GET /list\name=", func(t *testing.T) {
+		u := base.JoinPath("/list")
+		GenerateUrl_TestHelper( t, u, "")
+		resp, err4 := http.Get(u.String())
+		assert.Nil(t, err4, fmt.Sprintf("failed to GET: %v", err4))
+		defer resp.Body.Close()
+		result := CheckResponseSuccess_TestHelper( t, resp, http.StatusOK)
 		expected := SuccessFileInfosResult{ true, []FileInfo{{ helloFile_db_path, helloSha},},}
 		assert.True(t, reflect.DeepEqual(result, expected), fmt.Sprintf("result = %+v, want = %+v", result, expected))
 	})
