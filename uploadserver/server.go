@@ -72,7 +72,7 @@ func NewServer(config ServerConfig) *Server {
 func (s *Server) Start(ctx context.Context, ready chan struct{}) error {
 
 	h := http.NewServeMux()
-	h.HandleFunc(     "GET /list{$}",   s.handle(s.handleListGet))
+	h.HandleFunc(     "GET /list",   s.handle(s.handleListGet))
 	h.HandleFunc(    "POST /upload{$}", s.handle(s.handlePostUpload))
 	h.HandleFunc(     "GET /file{$}",   s.handle(s.handleFileGet))
 	h.HandleFunc(  "DELETE /file{$}",   s.handle(s.handleFileDelete))
