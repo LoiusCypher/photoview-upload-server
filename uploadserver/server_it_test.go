@@ -143,8 +143,8 @@ func TestServer(t *testing.T) {
 	t.Run("PUT /file?name=hello.pdf", func(t *testing.T) {
 		u := base.JoinPath("/file")
 		pdfFilePath := "hello.pdf"
-		GenerateUrl_TestHelper( t, u, pdfFilePath)
-		req, sha := makeFormRequest( t, u, http.MethodPut, []string{ "lorem ipsum",}, pdfRoot)
+		//GenerateUrl_TestHelper( t, u, pdfFilePath)
+		req, sha := makeFormRequest( t, u, http.MethodPost, pdfFilePath), []string{ "lorem ipsum",}, pdfRoot)
 		resp, err4 := http.DefaultClient.Do(req)
 		assert.Nil(t, err4, fmt.Sprintf("failed to PUT: %v", err4))
 		defer resp.Body.Close()
@@ -158,8 +158,8 @@ func TestServer(t *testing.T) {
 	t.Run("PUT /file?name=hello.pdf overwrite should work the same", func(t *testing.T) {
 		u := base.JoinPath("/file")
 		pdfFilePath := "hello.pdf"
-		GenerateUrl_TestHelper( t, u, pdfFilePath)
-		req, sha := makeFormRequest( t, u, http.MethodPut, []string{ "new world", "page two",}, pdfRoot)
+		//GenerateUrl_TestHelper( t, u, pdfFilePath)
+		req, sha := makeFormRequest( t, u, http.MethodPost, pdfFilePath, []string{ "new world", "page two",}, pdfRoot)
 		resp, err4 := http.DefaultClient.Do(req)
 		assert.Nil(t, err4, fmt.Sprintf("failed to PUT: %v", err4))
 		defer resp.Body.Close()
@@ -184,8 +184,8 @@ func TestServer(t *testing.T) {
 	t.Run("POST /file?name=foo.pdf should fail due to an invalid method", func(t *testing.T) {
 		u := base.JoinPath("/file")
 		pdfFilePath := "foo.pdf"
-		GenerateUrl_TestHelper( t, u, pdfFilePath)
-		req, _ := makeFormRequest( t, u, http.MethodPost, []string{ "hello, world",}, pdfRoot)
+		//GenerateUrl_TestHelper( t, u, pdfFilePath)
+		req, _ := makeFormRequest( t, u, http.MethodPut, pdfFilePath, []string{ "hello, world",}, pdfRoot)
 		resp, err4 := http.DefaultClient.Do(req)
 		assert.Nil(t, err4, fmt.Sprintf("failed to POST: %v", err4))
 		defer resp.Body.Close()
@@ -246,8 +246,8 @@ func TestServer(t *testing.T) {
 		assert.Equal( t, sha_file, sha_hello)
 
 		u := base.JoinPath("/file")
-		GenerateUrl_TestHelper( t, u, helloFile_db_path)
-		req, shaNew := makeFormRequest( t, u, http.MethodPut, []string{ "hello, new world", "with second side"}, pdfRoot)
+		//GenerateUrl_TestHelper( t, u, helloFile_db_path)
+		req, shaNew := makeFormRequest( t, u, http.MethodPost, helloFile_db_path, []string{ "hello, new world", "with second side"}, pdfRoot)
 		resp, err4 := http.DefaultClient.Do(req)
 		assert.Nil(t, err4, fmt.Sprintf("failed to PUT: %v", err4))
 		defer resp.Body.Close()
@@ -574,7 +574,7 @@ func TestServerWithAuth(t *testing.T) {
 	}
 	t.Run("POST /upload token via header", func(t *testing.T) {
 		u := base.JoinPath("/upload")
-		req, err := makeFormRequest(u, http.MethodPost, "hello.txt", bytes.NewBufferString("hello, world"))
+		req, err := makeFormRequest(u, http.MethodPost, "hello.pdf", bytes.NewBufferString("hello, world"), pdfRoot)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -1130,7 +1130,7 @@ func containsAll[T comparable](a, b []T) bool {
 }
 
 // makeFormRequest creates a new http.Request with multipart/form-data.
-func makeFormRequest( t *testing.T, url *url.URL, method string, contentPages []string, pdfRoot string) (*http.Request, string) {
+func makeFormRequest( t *testing.T, url *url.URL, method string, filePath string, contentPages []string, pdfRoot string) (*http.Request, string) {
 	filename := CreatePdfFile_TestHelper( t, contentPages, pdfRoot)
 	sha, err0 := calcSha( filename)
 	require.Nil(t, err0)
@@ -1147,8 +1147,10 @@ func makeFormRequest( t *testing.T, url *url.URL, method string, contentPages []
 	assert.Nil(t, err3)
 	// assert.NotEqual(t, 0, written, fmt.Sprintf("no bytes written"))
 	assert.NotEqual(t, 0, written, "no bytes written")
+	err4 := w.WriteField( "name", filePath))
+	assert.Nil(t, err4)
 	w.Close()
-	req, err4 := http.NewRequest( method, url.String(), b)
+	req, err5 := http.NewRequest( method, url.String(), b)
 	require.Nil(t, err4)
 	req.Header.Set("Content-Type", w.FormDataContentType())
 	return req, sha

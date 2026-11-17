@@ -13,8 +13,6 @@ import (
 	"slices"
 	"strings"
 	"time"
-
-	//"github.com/gorilla/mux"
 )
 
 type Server struct {
@@ -23,6 +21,8 @@ type Server struct {
 
 var (
 	FormFileKey       = "file"
+	FormNameKey       = "name"
+
 )
 
 var (
@@ -71,33 +71,16 @@ func NewServer(config ServerConfig) *Server {
 // Start starts listening on `addr`. This function blocks until the server is stopped.
 // Optionally you can pass a channel to `ready` to be notified when the server is ready to accept connections. You can pass nil if you don't need it.
 func (s *Server) Start(ctx context.Context, ready chan struct{}) error {
-/*
-	r := mux.NewRouter()
-	r.Path("/list").Methods(http.MethodGet).HandlerFunc(s.handle(s.handleListGet))
-	r.Path("/list").Methods(http.MethodOptions).HandlerFunc(s.handle(s.handleOptions))
-	r.Path("/file").Methods(http.MethodGet).Queries("name","").HandlerFunc(s.handle(s.handleFileGet))		// PUT makes no sense without (file) name
-	r.Path("/file").Methods(http.MethodPut).Queries("name","").HandlerFunc(s.handle(s.handleFilePut))		// PUT makes no sense without (file) name
-	r.Path("/file").Methods(http.MethodDelete).Queries("name","").HandlerFunc(s.handle(s.handleFileDelete))	// DELETE makes no sense without (file) name
-	r.Path("/file").Methods(http.MethodOptions).HandlerFunc(s.handle(s.handleOptions))
-	// r.Path("/").Methods(http.MethodPut).HandlerFunc(handleNotFound)
-	r.NotFoundHandler = http.HandlerFunc(handleNotFound)
-	r.MethodNotAllowedHandler = http.HandlerFunc(handleMethodNotAllowed)
-	if s.EnableAuth {
-		r.Use(s.authenticationMiddleware)
-	}
-	r.Use(logAccess)
-*/
 
 	h := http.NewServeMux()
-	h.HandleFunc(     "GET /list", 	s.handle(s.handleListGet))
-	h.HandleFunc( "OPTIONS /list", 	s.handle(s.handleOptions))
-	h.HandleFunc(     "GET /file", 	s.handle(s.handleFileGet))	// GET makes no sense without (file) name
-	h.HandleFunc(     "PUT /file",	s.handle(s.handleFilePut))	// PUT makes no sense without (file) name
-	h.HandleFunc(  "DELETE /file", 	s.handle(s.handleFileDelete))	// DELETE makes no sense without (file) name
-	h.HandleFunc( "OPTIONS /file", 	s.handle(s.handleOptions))
+	h.HandleFunc(     "GET /list",   s.handle(s.handleListGet))
+	h.HandleFunc( "OPTIONS /list",   s.handle(s.handleOptions))
+	h.HandleFunc(    "POST /upload", s.handle(s.handlePostUpload))
+	h.HandleFunc(     "GET /file",   s.handle(s.handleFileGet))	// GET makes no sense without (file) name
+	h.HandleFunc(  "DELETE /file",   s.handle(s.handleFileDelete))	// DELETE makes no sense without (file) name
+	h.HandleFunc( "OPTIONS /file",   s.handle(s.handleOptions))
 
 	var r http.Handler
-
 	r = h
 	if s.EnableAuth {
 		r = s.authenticationMiddleware( r)
@@ -203,44 +186,77 @@ func (s *Server) handle(f func(w http.ResponseWriter, r *http.Request) (int, any
 	}
 }
 
-func (s *Server) processUpload(w http.ResponseWriter, r *http.Request, path string) (int, string, error) {
-	srcFile, srcHeader, err := r.FormFile(FormFileKey)
+func (s *Server) processUpload(w http.ResponseWriter, r *http.Request) (string, string, error) {
+	dstPath := r.FormValue( FormNameKey)
+	if dstPath == "" {
+		return "", "", nil
+	}
+	log.Print( dstPath)
+	uplFile, uplHeader, err := r.FormFile( FormFileKey)
+	log.Print( uplHeader)
+	log.Print( uplFile)
 	if err != nil {
 		log.Printf("failed to obtain form file: %v", err)
-		return http.StatusInternalServerError, "", fmt.Errorf("cannot obtain the uploaded content")
+		return "", "", fmt.Errorf("cannot obtain the uploaded content")
 	}
-	log.Printf("processUpload file: %s", srcHeader.Filename)
-	src := http.MaxBytesReader(w, srcFile, s.MaxUploadSize)
+	log.Printf("processUpload file: %s", uplHeader.Filename)
+	fileContent := http.MaxBytesReader(w, uplFile, s.MaxUploadSize)
 	// MaxBytesReader closes the underlying io.Reader on its Close() is called
-	defer src.Close()
+	defer fileContent.Close()
 
-	dstFile, err := os.CreateTemp( "", "*.pdf")
+	pdfFile, err := os.CreateTemp( "", "*.pdf")
 	if err != nil {
-		log.Printf("failed to create temp file (path=%s): %v", path, err)
-		return http.StatusInternalServerError, "", fmt.Errorf("cannot open file")
+		log.Printf("failed to create temp file (dstPath=%s): %v", dstPath, err)
+		return "", "", fmt.Errorf("cannot open file %v", err)
 	}
-	defer os.Remove(dstFile.Name())
-	log.Printf("processUpload dstFile: %s", dstFile.Name())
-	written, err := io.Copy(dstFile, src)
+	defer os.Remove(pdfFile.Name())
+	log.Printf("processUpload pdfFile: %s", pdfFile.Name())
+	written, err := io.Copy(pdfFile, fileContent)
 	if err != nil {
 		var maxBytesError *http.MaxBytesError
 		if errors.As(err, &maxBytesError) {
-			return http.StatusRequestEntityTooLarge, "", ErrFileSizeLimitExceeded
+			return "", "", ErrFileSizeLimitExceeded
 		}
 		log.Printf("failed to write the uploaded content: %v", err)
-		return http.StatusInternalServerError, "", fmt.Errorf("failed to write the content")
+		return "", "", fmt.Errorf("failed to write the content")
 	}
-	log.Printf("uploaded by PUT to %s (%d bytes)", dstFile.Name(), written)
-	err = convertPdfToJpg( dstFile.Name(), s.PictureRoot, path)
+	log.Printf("uploaded by PUT to %s (%d bytes)", pdfFile.Name(), written)
+	err = convertPdfToJpg( pdfFile.Name(), s.PictureRoot, dstPath)
 	if err != nil {
-		return http.StatusInternalServerError, "", err
+		return "", "", err
 	}
 	var sha string
-	sha, err = recordFile( dstFile.Name(), path)
+	sha, err = recordFile( pdfFile.Name(), dstPath)
 	if err != nil {
-		return http.StatusInternalServerError, "", err
+		return "", "", err
 	}
-	return http.StatusCreated, sha, nil
+	return dstPath, sha, nil
+}
+
+func (s *Server) handlePostUpload(w http.ResponseWriter, r *http.Request) (int, any) {
+	log.Printf("handlePostUpload %s %s", r.Method, r.URL)
+	if r.Method != http.MethodPost {
+		return http.StatusMethodNotAllowed, fmt.Errorf( "method not allowed")
+	}
+	if r.URL.Path != "/upload" {
+		return http.StatusNotFound, fmt.Errorf("page not found: %s", r.URL.Path)
+	}
+	log.Printf("POST %s -> %s", r.URL.Path, "")
+	requestPath, sha, err := s.processUpload(w, r)
+	if err != nil {
+		if err == ErrFileSizeLimitExceeded {
+			return http.StatusRequestEntityTooLarge, err
+		} else {
+			return http.StatusRequestEntityTooLarge, err
+		}
+	}
+	if requestPath == "" || sha == "" {
+		return http.StatusBadRequest, fmt.Errorf( "missing name parameter")
+	}
+	if s.EnableCORS {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+	}
+	return http.StatusCreated, SuccessFileInfosResult{ true, []FileInfo{ FileInfo{ requestPath, sha,},},}
 }
 
 func (s *Server) handleListGet(w http.ResponseWriter, r *http.Request) (int, any) {
@@ -261,29 +277,6 @@ func (s *Server) handleListGet(w http.ResponseWriter, r *http.Request) (int, any
 		return http.StatusNotFound, fmt.Errorf( "file not found")
 	}
 	return http.StatusOK, SuccessFileInfosResult{ true, fileInfos}
-}
-
-func (s *Server) handleFilePut(w http.ResponseWriter, r *http.Request) (int, any) {
-	log.Printf("handleFilePut %s %s", r.Method, r.URL)
-	if r.Method != http.MethodPut {
-		return http.StatusMethodNotAllowed, fmt.Errorf( "method not allowed")
-	}
-	if r.URL.Path != "/file" {
-		return http.StatusNotFound, fmt.Errorf("page not found: %s", r.URL.Path)
-	}
-	requestPath := strings.TrimPrefix( r.URL.Query().Get("name"), "/")
-	if requestPath == "" {
-		return http.StatusBadRequest, fmt.Errorf( "missing name of file: /file?name=")
-	}
-	log.Printf("PUT %s -> %s", r.URL.Path, requestPath)
-	status, sha, err := s.processUpload(w, r, requestPath)
-	if err != nil {
-		return status, err
-	}
-	if s.EnableCORS {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-	}
-	return http.StatusCreated, SuccessFileInfosResult{ true, []FileInfo{ FileInfo{ requestPath, sha,},},}
 }
 
 func (s *Server) handleFileGet(w http.ResponseWriter, r *http.Request) (int, any) {
