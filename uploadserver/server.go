@@ -89,12 +89,12 @@ func (s *Server) Start(ctx context.Context, ready chan struct{}) error {
 */
 
 	h := http.NewServeMux()
-	h.HandleFunc(         "/", 		handleNotFound)
-	h.HandleFunc(         "/list", 	handleMethodNotAllowed)
+	//h.HandleFunc(         "/", 		handleNotFound)
+	//h.HandleFunc(         "/list", 	handleMethodNotAllowed)
 	h.HandleFunc(     "GET /list", 	s.handle(s.handleListGet))
 	h.HandleFunc( "OPTIONS /list/{$}", 	s.handle(s.handleOptions))
-	h.HandleFunc(         "/file/{$}", 	handleMethodNotAllowed)
-	h.HandleFunc(     "GET /file/{$}", 	s.handle(s.handleFileGet))	// GET makes no sense without (file) name
+	//h.HandleFunc(         "/file/{$}", 	handleMethodNotAllowed)
+	h.HandleFunc(     "GET /file", 	s.handle(s.handleFileGet))	// GET makes no sense without (file) name
 	h.HandleFunc(     "PUT /file/{$}",	s.handle(s.handleFilePut))	// PUT makes no sense without (file) name
 	h.HandleFunc(  "DELETE /file/{$}", 	s.handle(s.handleFileDelete))	// DELETE makes no sense without (file) name
 	h.HandleFunc( "OPTIONS /file/{$}", 	s.handle(s.handleOptions))
