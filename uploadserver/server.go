@@ -290,7 +290,7 @@ func (s *Server) handleFileGet(w http.ResponseWriter, r *http.Request) (int, any
 	log.Printf("handleFileGet %s %s %s %t %t", r.Method, r.URL, r.URL.Path, r.Method != http.MethodGet, r.URL.Path != "/file" )
 	switch r.URL.Path {
 		case "/list":
-			return handleListGet( w, r)
+			return s.handleListGet( w, r)
 	}
 	if r.Method != http.MethodGet {
 		return http.StatusMethodNotAllowed, fmt.Errorf( "method not allowed")
