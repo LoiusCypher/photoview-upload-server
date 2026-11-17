@@ -14,7 +14,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gorilla/mux"
+	//"github.com/gorilla/mux"
 )
 
 type Server struct {
@@ -88,22 +88,22 @@ func (s *Server) Start(ctx context.Context, ready chan struct{}) error {
 	r.Use(logAccess)
 */
 
-	r := http.NewServeMux()
-	r.HandleFunc(         "/", 	handleNotFound)
-	r.HandleFunc(         "/list/{$}", 	handleMethodNotAllowed)
-	r.HandleFunc(     "GET /list/{$}", 	s.handle(s.handleListGet))
-	r.HandleFunc( "OPTIONS /list/{$}", 	s.handle(s.handleOptions))
-	r.HandleFunc(         "/file/{$}", 	handleMethodNotAllowed)
-	r.HandleFunc(     "GET /file/{$}", 	s.handle(s.handleFileGet))	// GET makes no sense without (file) name
-	r.HandleFunc(     "PUT /file/{$}",	s.handle(s.handleFilePut))	// PUT makes no sense without (file) name
-	r.HandleFunc(  "DELETE /file/{$}", 	s.handle(s.handleFileDelete))	// DELETE makes no sense without (file) name
-	r.HandleFunc( "OPTIONS /file/{$}", 	s.handle(s.handleOptions))
-	//r.HandleFunc(    "POST /file/{$}",	s.handle(s.handleFilePost))
-	//r.HandleFunc(         "/file/{$}", 	handleNotFound)
-	var rh http.Handler
-	rh = r
+	h := http.NewServeMux()
+	h.HandleFunc(         "/", 	handleNotFound)
+	h.HandleFunc(         "/list/{$}", 	handleMethodNotAllowed)
+	h.HandleFunc(     "GET /list/{$}", 	s.handle(s.handleListGet))
+	h.HandleFunc( "OPTIONS /list/{$}", 	s.handle(s.handleOptions))
+	h.HandleFunc(         "/file/{$}", 	handleMethodNotAllowed)
+	h.HandleFunc(     "GET /file/{$}", 	s.handle(s.handleFileGet))	// GET makes no sense without (file) name
+	h.HandleFunc(     "PUT /file/{$}",	s.handle(s.handleFilePut))	// PUT makes no sense without (file) name
+	h.HandleFunc(  "DELETE /file/{$}", 	s.handle(s.handleFileDelete))	// DELETE makes no sense without (file) name
+	h.HandleFunc( "OPTIONS /file/{$}", 	s.handle(s.handleOptions))
+	//h.HandleFunc(    "POST /file/{$}",	s.handle(s.handleFilePost))
+	//h.HandleFunc(         "/file/{$}", 	handleNotFound)
+	var r http.Handler
+	r = h
 	if s.EnableAuth {
-		rh = s.authenticationMiddleware( rh)
+		r = s.authenticationMiddleware( r)
 	}
 	rh = logAccess( rh)
 
@@ -125,7 +125,6 @@ func (s *Server) Start(ctx context.Context, ready chan struct{}) error {
 		WriteTimeout: s.WriteTimeout,
 		ReadTimeout:  s.ReadTimeout,
 		IdleTimeout:  60 * time.Second,
-//		Handler:      rh,
 		Handler:      r,
 	}
 
