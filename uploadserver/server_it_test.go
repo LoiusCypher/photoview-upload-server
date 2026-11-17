@@ -40,8 +40,12 @@ func GenerateRequest_TestHelper(t *testing.T, method string, u *url.URL, filePat
 }
 
 func CheckResponseCode_TestHelper(t *testing.T, resp *http.Response, statusCode int) {
-	assert.Equal(t, resp.StatusCode, resp.StatusCode)
-	assert.Equal(t, "application/json", resp.Header.Get("Content-Type"))
+	assert.Equal(t, statusCode, resp.StatusCode)
+	if statusCode == http.StatusMethodNotAllowed {
+		assert.Equal(t, "text/plain; charset=utf-8", resp.Header.Get("Content-Type"))
+	} else {
+		assert.Equal(t, "application/json", resp.Header.Get("Content-Type"))
+	}
 }
 
 func CheckResponse_TestHelper(t *testing.T, resp *http.Response, statusCode int) []byte {
