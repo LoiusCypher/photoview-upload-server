@@ -235,7 +235,7 @@ func (s *Server) processUpload(w http.ResponseWriter, r *http.Request) (string, 
 
 func (s *Server) handlePostUpload(w http.ResponseWriter, r *http.Request) (int, any) {
 	log.Printf("handlePostUpload %s %s", r.Method, r.URL)
-	if rr.URL.Path != "/upload" && rr.URL.Path != "/upload/" {
+	if r.URL.Path != "/upload" && r.URL.Path != "/upload/" {
 		return http.StatusNotFound, fmt.Errorf("page not found: %s", r.URL.Path)
 	}
 	log.Printf("POST %s -> %s", r.URL.Path, "")
