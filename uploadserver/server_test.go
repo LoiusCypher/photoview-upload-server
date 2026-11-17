@@ -29,9 +29,13 @@ func TestGetHandler(t *testing.T) {
 	require.Nil(t, err3)
 	defer os.RemoveAll( jpgRoot)
 
-	fooBar_db_path := "foo/bar.pdf"
+	fooBar_db_path := "foo/bar/stuff.pdf"
 	fooBar_db_sha := "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
 	_ = RecordPdfSha_TestHelper( t, fooBar_db_sha, fooBar_db_path)
+
+	hello_db_path := "world/hello.pdf"
+	hello_db_sha := "68fb1f3ef9c02d42c9c655a93febdc7a63f2a6eee4141a938efbede5413c4601"
+	_ = RecordPdfSha_TestHelper( t, hello_db_sha, hello_db_path)
 
 	type args struct {
 		Method string
@@ -87,10 +91,46 @@ func TestGetHandler(t *testing.T) {
 			body: `{"ok":false,"error":"page not found: /files"}`,
 		},
 		{
-			name: "get /list?name=foo directory",
+			name: "get /list?name=foo/bar list directory with ons file",
+			args: args{
+				Method: http.MethodGet,
+				Url:    "/list?name=foo/bar",
+			},
+			want: http.StatusOK,
+			headers: map[string]string{
+				"Access-Control-Allow-Origin": "*",
+			},
+			body: `{"ok":true,"Files":[{"path":"foo/bar/stuff.pdf","sha":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"}]}`,
+		},
+		{
+			name: "get /list?name=foo list directory with subdir content",
 			args: args{
 				Method: http.MethodGet,
 				Url:    "/list?name=foo",
+			},
+			want: http.StatusOK,
+			headers: map[string]string{
+				"Access-Control-Allow-Origin": "*",
+			},
+			body: `{"ok":true,"Files":[{"path":"foo/bar/stuff.pdf","sha":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"}]}`,
+		},
+		{
+			name: "get /list all files",
+			args: args{
+				Method: http.MethodGet,
+				Url:    "/list",
+			},
+			want: http.StatusOK,
+			headers: map[string]string{
+				"Access-Control-Allow-Origin": "*",
+			},
+			body: `{"ok":false,"error":"not found"}`,
+		},
+		{
+			name: "get /list?name=bar empty directory",
+			args: args{
+				Method: http.MethodGet,
+				Url:    "/list?name=bar",
 			},
 			want: http.StatusNotFound,
 			headers: map[string]string{
