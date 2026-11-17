@@ -290,7 +290,7 @@ func (s *Server) handleFilePut(w http.ResponseWriter, r *http.Request) (int, any
 }
 
 func (s *Server) handleFileGet(w http.ResponseWriter, r *http.Request) (int, any) {
-	log.Printf("handleFileGet %s %s $s", r.Method, r.URL, r.URL.Path)
+	log.Printf("handleFileGet %s %s %s", r.Method, r.URL, r.URL.Path)
 	if r.Method != http.MethodGet {
 		return http.StatusMethodNotAllowed, fmt.Errorf( "method not allowed")
 	}
