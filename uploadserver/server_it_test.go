@@ -140,13 +140,13 @@ func TestServer(t *testing.T) {
 		assert.True(t, reflect.DeepEqual(result, expected), fmt.Sprintf("result = %+v, want = %+v", result, expected))
 	})
 
-	t.Run("PUT /file?name=hello.pdf", func(t *testing.T) {
+	t.Run("POST /file?name=hello.pdf", func(t *testing.T) {
 		u := base.JoinPath("/file")
 		pdfFilePath := "hello.pdf"
 		//GenerateUrl_TestHelper( t, u, pdfFilePath)
 		req, sha := makeFormRequest( t, u, http.MethodPost, pdfFilePath, []string{ "lorem ipsum",}, pdfRoot)
 		resp, err4 := http.DefaultClient.Do(req)
-		assert.Nil(t, err4, fmt.Sprintf("failed to PUT: %v", err4))
+		assert.Nil(t, err4, fmt.Sprintf("failed to POST: %v", err4))
 		defer resp.Body.Close()
 		result := CheckResponseSuccess_TestHelper( t, resp, http.StatusCreated)
 		expected := SuccessFileInfosResult{ true, []FileInfo{ { pdfFilePath, sha},},}
@@ -155,13 +155,13 @@ func TestServer(t *testing.T) {
 		lastPdfSha = sha
 	})
 
-	t.Run("PUT /file?name=hello.pdf overwrite should work the same", func(t *testing.T) {
+	t.Run("POST /file?name=hello.pdf overwrite should work the same", func(t *testing.T) {
 		u := base.JoinPath("/file")
 		pdfFilePath := "hello.pdf"
 		//GenerateUrl_TestHelper( t, u, pdfFilePath)
 		req, sha := makeFormRequest( t, u, http.MethodPost, pdfFilePath, []string{ "new world", "page two",}, pdfRoot)
 		resp, err4 := http.DefaultClient.Do(req)
-		assert.Nil(t, err4, fmt.Sprintf("failed to PUT: %v", err4))
+		assert.Nil(t, err4, fmt.Sprintf("failed to POST: %v", err4))
 		defer resp.Body.Close()
 		result := CheckResponseSuccess_TestHelper( t, resp, http.StatusCreated)
 		expected := SuccessFileInfosResult{ true, []FileInfo{ { pdfFilePath, sha},},}
@@ -185,7 +185,7 @@ func TestServer(t *testing.T) {
 		u := base.JoinPath("/file")
 		pdfFilePath := "foo.pdf"
 		//GenerateUrl_TestHelper( t, u, pdfFilePath)
-		req, _ := makeFormRequest( t, u, http.MethodPut, pdfFilePath, []string{ "hello, world",}, pdfRoot)
+		req, _ := makeFormRequest( t, u, http.MethodPost, pdfFilePath, []string{ "hello, world",}, pdfRoot)
 		resp, err4 := http.DefaultClient.Do(req)
 		assert.Nil(t, err4, fmt.Sprintf("failed to POST: %v", err4))
 		defer resp.Body.Close()
@@ -201,7 +201,7 @@ func TestServer(t *testing.T) {
 		}
 
 		u := base.JoinPath("/upload")
-		req, sha := makeFormRequest( t, u, http.MethodPut, []string{ "hello, new world",}, pdfRoot)
+		req, sha := makeFormRequest( t, u, http.MethodPost, []string{ "hello, new world",}, pdfRoot)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -231,7 +231,7 @@ func TestServer(t *testing.T) {
 		verifyLocalFile(t, localPath, localOriginal)
 	})
 */
-	t.Run("PUT /file?name=arbitrary / file / path/hello.pdf should succeed even on overwrite", func(t *testing.T) {
+	t.Run("POST /file?name=arbitrary / file / path/hello.pdf should succeed even on overwrite", func(t *testing.T) {
 		pdfFilePath := CreatePdfFile_TestHelper( t, []string{ "hello, world",}, pdfRoot)
 		//file, err1 := os.Open( pdfFilePath)
 		//assert.Nil(t, err1)
@@ -249,7 +249,7 @@ func TestServer(t *testing.T) {
 		//GenerateUrl_TestHelper( t, u, helloFile_db_path)
 		req, shaNew := makeFormRequest( t, u, http.MethodPost, helloFile_db_path, []string{ "hello, new world", "with second side"}, pdfRoot)
 		resp, err4 := http.DefaultClient.Do(req)
-		assert.Nil(t, err4, fmt.Sprintf("failed to PUT: %v", err4))
+		assert.Nil(t, err4, fmt.Sprintf("failed to POST: %v", err4))
 		defer resp.Body.Close()
 		result := CheckResponseSuccess_TestHelper( t, resp, http.StatusCreated)
 		expected := SuccessFileInfosResult{ true, []FileInfo{{ helloFile_db_path, shaNew},},}
@@ -257,16 +257,16 @@ func TestServer(t *testing.T) {
 		assert.FileExists(t, filepath.Join(jpgRoot, "hello-01.jpg"))
 	})
 /*
-	t.Run("PUT /files/hello_put.txt", func(t *testing.T) {
+	t.Run("POST /files/hello_put.txt", func(t *testing.T) {
 		u := base.JoinPath("/files/hello_put.txt")
 		content := bytes.NewBufferString("hello, world")
-		req, err := makeFormRequest( t, u, http.MethodPut, "hello.txt", content)
+		req, err := makeFormRequest( t, u, http.MethodPost, "hello.txt", content)
 		if err != nil {
 			t.Fatal(err)
 		}
 		resp, err := http.DefaultClient.Do(req)
 		if err != nil {
-			t.Fatalf("failed to PUT: %v", err)
+			t.Fatalf("failed to POST: %v", err)
 		}
 		defer resp.Body.Close()
 		if resp.StatusCode != http.StatusCreated {
@@ -290,15 +290,15 @@ func TestServer(t *testing.T) {
 		verifyLocalFile(t, filepath.Join(docRoot, "hello_put.txt"), []byte("hello, world"))
 	})
 */ /*
-	t.Run("PUT /files/hello/world.txt", func(t *testing.T) {
+	t.Run("POST /files/hello/world.txt", func(t *testing.T) {
 		u := base.JoinPath("/files/hello/world.txt")
-		req, err := makeFormRequest(u, http.MethodPut, "world.txt", bytes.NewBufferString("hello, world"))
+		req, err := makeFormRequest(u, http.MethodPost, "world.txt", bytes.NewBufferString("hello, world"))
 		if err != nil {
 			t.Fatal(err)
 		}
 		resp, err := http.DefaultClient.Do(req)
 		if err != nil {
-			t.Fatalf("failed to PUT: %v", err)
+			t.Fatalf("failed to POST: %v", err)
 		}
 		defer resp.Body.Close()
 		if resp.StatusCode != http.StatusCreated {
@@ -331,15 +331,15 @@ func TestServer(t *testing.T) {
 		verifyLocalFile(t, filepath.Join(docRoot, "hello", "world.txt"), []byte("hello, world"))
 	})
 */ /*
-	t.Run("PUT /upload should fail", func(t *testing.T) {
+	t.Run("POST /upload should fail", func(t *testing.T) {
 		u := base.JoinPath("/upload")
-		req, err := makeFormRequest(u, http.MethodPut, "foo.txt", bytes.NewBufferString("hello, world"))
+		req, err := makeFormRequest(u, http.MethodPost, "foo.txt", bytes.NewBufferString("hello, world"))
 		if err != nil {
 			t.Fatal(err)
 		}
 		resp, err := http.DefaultClient.Do(req)
 		if err != nil {
-			t.Fatalf("failed to PUT: %v", err)
+			t.Fatalf("failed to POST: %v", err)
 		}
 		defer resp.Body.Close()
 		if resp.StatusCode != http.StatusMethodNotAllowed {
@@ -356,21 +356,21 @@ func TestServer(t *testing.T) {
 		if err := json.Unmarshal(body, &result); err != nil {
 			t.Fatalf("failed to decode response body: %v", err)
 		}
-		expected := ErrorResult{false, "PUT is not allowed on /upload"}
+		expected := ErrorResult{false, "POST is not allowed on /upload"}
 		if !reflect.DeepEqual(result, expected) {
 			t.Errorf("result = %+v, want = %+v", result, expected)
 		}
 	})
 */ /*
-	t.Run("PUT /files/foo/bar.txt should fail (conflict)", func(t *testing.T) {
+	t.Run("POST /files/foo/bar.txt should fail (conflict)", func(t *testing.T) {
 		u := base.JoinPath("/files/foo/bar.txt")
-		req, err := makeFormRequest(u, http.MethodPut, "foo.txt", bytes.NewBufferString("new world"))
+		req, err := makeFormRequest(u, http.MethodPost, "foo.txt", bytes.NewBufferString("new world"))
 		if err != nil {
 			t.Fatal(err)
 		}
 		resp, err := http.DefaultClient.Do(req)
 		if err != nil {
-			t.Fatalf("failed to PUT: %v", err)
+			t.Fatalf("failed to POST: %v", err)
 		}
 		defer resp.Body.Close()
 		if resp.StatusCode != http.StatusConflict {
@@ -393,7 +393,7 @@ func TestServer(t *testing.T) {
 		}
 	})
 */ /*
-	t.Run("PUT /files/foo/bar.txt should succeed (overwrite)", func(t *testing.T) {
+	t.Run("POST /files/foo/bar.txt should succeed (overwrite)", func(t *testing.T) {
 		localPath := filepath.Join(docRoot, "foo", "bar.txt")
 		withPreservingOriginal(t, localPath, func() {
 			u := base.JoinPath("/files/foo/bar.txt")
@@ -401,13 +401,13 @@ func TestServer(t *testing.T) {
 			q.Set("overwrite", "true")
 			u.RawQuery = q.Encode()
 
-			req, err := makeFormRequest(u, http.MethodPut, "foo.txt", bytes.NewBufferString("new world"))
+			req, err := makeFormRequest(u, http.MethodPost, "foo.txt", bytes.NewBufferString("new world"))
 			if err != nil {
 				t.Fatal(err)
 			}
 			resp, err := http.DefaultClient.Do(req)
 			if err != nil {
-				t.Fatalf("failed to PUT: %v", err)
+				t.Fatalf("failed to POST: %v", err)
 			}
 			defer resp.Body.Close()
 			if resp.StatusCode != http.StatusCreated {
@@ -525,7 +525,7 @@ func TestServer(t *testing.T) {
 		for i := range allowedMethods {
 			allowedMethods[i] = strings.TrimSpace(allowedMethods[i])
 		}
-		expectedAllowedMethods := []string{ "PUT", "GET", "DELETE",}
+		expectedAllowedMethods := []string{ "POST", "GET", "DELETE",}
 		assert.True( t, containsAll(allowedMethods, expectedAllowedMethods), fmt.Sprintf("Access-Control-Allow-Methods = %v, want = %v", allowedMethods, expectedAllowedMethods))
 		assert.Equal( t, resp.Header.Get("Access-Control-Allow-Origin"), "*")
 	})
@@ -704,17 +704,17 @@ func TestServerWithAuth(t *testing.T) {
 		}
 	})
 
-	t.Run("PUT /files/hello_put.txt with read-write token", func(t *testing.T) {
+	t.Run("POST /files/hello_put.txt with read-write token", func(t *testing.T) {
 		u := base.JoinPath("/files/hello_put.txt")
 		content := bytes.NewBufferString("hello, world")
-		req, err := makeFormRequest(u, http.MethodPut, "hello.txt", content)
+		req, err := makeFormRequest(u, http.MethodPost, "hello.txt", content)
 		if err != nil {
 			t.Fatal(err)
 		}
 		req.Header.Set("Authorization", "Bearer "+rwToken)
 		resp, err := http.DefaultClient.Do(req)
 		if err != nil {
-			t.Fatalf("failed to PUT: %v", err)
+			t.Fatalf("failed to POST: %v", err)
 		}
 		defer resp.Body.Close()
 		if resp.StatusCode != http.StatusCreated {
@@ -738,17 +738,17 @@ func TestServerWithAuth(t *testing.T) {
 		verifyLocalFile(t, filepath.Join(docRoot, "hello_put.txt"), []byte("hello, world"))
 	})
 
-	t.Run("PUT /files/hello_put.txt with read-only token", func(t *testing.T) {
+	t.Run("POST /files/hello_put.txt with read-only token", func(t *testing.T) {
 		u := base.JoinPath("/files/hello_put.txt")
 		content := bytes.NewBufferString("hello, world")
-		req, err := makeFormRequest(u, http.MethodPut, "hello.txt", content)
+		req, err := makeFormRequest(u, http.MethodPost, "hello.txt", content)
 		if err != nil {
 			t.Fatal(err)
 		}
 		req.Header.Set("Authorization", "Bearer "+roToken)
 		resp, err := http.DefaultClient.Do(req)
 		if err != nil {
-			t.Fatalf("failed to PUT: %v", err)
+			t.Fatalf("failed to POST: %v", err)
 		}
 		defer resp.Body.Close()
 		if resp.StatusCode != http.StatusUnauthorized {
@@ -771,16 +771,16 @@ func TestServerWithAuth(t *testing.T) {
 		}
 	})
 
-	t.Run("PUT /files/hello_put.txt without tokens", func(t *testing.T) {
+	t.Run("POST /files/hello_put.txt without tokens", func(t *testing.T) {
 		u := base.JoinPath("/files/hello_put.txt")
 		content := bytes.NewBufferString("hello, world")
-		req, err := makeFormRequest(u, http.MethodPut, "hello.txt", content)
+		req, err := makeFormRequest(u, http.MethodPost, "hello.txt", content)
 		if err != nil {
 			t.Fatal(err)
 		}
 		resp, err := http.DefaultClient.Do(req)
 		if err != nil {
-			t.Fatalf("failed to PUT: %v", err)
+			t.Fatalf("failed to POST: %v", err)
 		}
 		defer resp.Body.Close()
 		if resp.StatusCode != http.StatusUnauthorized {
@@ -999,7 +999,7 @@ func TestServerWithAuth(t *testing.T) {
 		for i := range allowedMethods {
 			allowedMethods[i] = strings.TrimSpace(allowedMethods[i])
 		}
-		expectedAllowedMethods := []string{"GET", "HEAD", "PUT"}
+		expectedAllowedMethods := []string{"GET", "HEAD", "POST"}
 		if !containsAll(allowedMethods, expectedAllowedMethods) {
 			t.Errorf("Access-Control-Allow-Methods = %v, want = %v", allowedMethods, expectedAllowedMethods)
 		}
@@ -1032,7 +1032,7 @@ func TestServerWithAuth(t *testing.T) {
 		for i := range allowedMethods {
 			allowedMethods[i] = strings.TrimSpace(allowedMethods[i])
 		}
-		expectedAllowedMethods := []string{"GET", "HEAD", "PUT"}
+		expectedAllowedMethods := []string{"GET", "HEAD", "POST"}
 		if !containsAll(allowedMethods, expectedAllowedMethods) {
 			t.Errorf("Access-Control-Allow-Methods = %v, want = %v", allowedMethods, expectedAllowedMethods)
 		}
@@ -1068,7 +1068,7 @@ func TestServerWithAuth(t *testing.T) {
 		for i := range allowedMethods {
 			allowedMethods[i] = strings.TrimSpace(allowedMethods[i])
 		}
-		expectedAllowedMethods := []string{"GET", "HEAD", "PUT"}
+		expectedAllowedMethods := []string{"GET", "HEAD", "POST"}
 		if !containsAll(allowedMethods, expectedAllowedMethods) {
 			t.Errorf("Access-Control-Allow-Methods = %v, want = %v", allowedMethods, expectedAllowedMethods)
 		}
@@ -1099,7 +1099,7 @@ func TestServerWithAuth(t *testing.T) {
 		for i := range allowedMethods {
 			allowedMethods[i] = strings.TrimSpace(allowedMethods[i])
 		}
-		expectedAllowedMethods := []string{"GET", "HEAD", "PUT"}
+		expectedAllowedMethods := []string{"GET", "HEAD", "POST"}
 		if !containsAll(allowedMethods, expectedAllowedMethods) {
 			t.Errorf("Access-Control-Allow-Methods = %v, want = %v", allowedMethods, expectedAllowedMethods)
 		}
