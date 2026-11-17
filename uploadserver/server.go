@@ -76,9 +76,9 @@ func (s *Server) Start(ctx context.Context, ready chan struct{}) error {
 	//h.HandleFunc( "OPTIONS /list",   s.handle(s.handleOptions))
 	h.HandleFunc(    "POST /upload/{$}", s.handle(s.handlePostUpload))
 	h.HandleFunc(     "GET /file",   s.handle(s.handleFileGet))	// GET makes no sense without (file) name
-	h.HandleFunc(  "DELETE /file",   s.handle(s.handleFileDelete))	// DELETE makes no sense without (file) name
+	h.HandleFunc(  "DELETE /file/{$}",   s.handle(s.handleFileDelete))	// DELETE makes no sense without (file) name
 	//h.HandleFunc( "OPTIONS /file",   s.handle(s.handleOptions))
-	//h.HandleFunc( "OPTIONS /",   s.handle(s.handleOptions))
+	h.HandleFunc( "OPTIONS /",   s.handle(s.handleOptions))
 
 	var r http.Handler
 	r = h
@@ -235,10 +235,9 @@ func (s *Server) processUpload(w http.ResponseWriter, r *http.Request) (string, 
 
 func (s *Server) handlePostUpload(w http.ResponseWriter, r *http.Request) (int, any) {
 	log.Printf("handlePostUpload %s %s", r.Method, r.URL)
-	if r.URL.Path != "/upload" && r.URL.Path != "/upload/" {
-		return http.StatusNotFound, fmt.Errorf("page not found: %s", r.URL.Path)
-	}
-	log.Printf("POST %s -> %s", r.URL.Path, "")
+	//if r.URL.Path != "/upload" && r.URL.Path != "/upload/" {
+		//return http.StatusNotFound, fmt.Errorf("page not found: %s", r.URL.Path)
+	//}
 	requestPath, sha, err := s.processUpload(w, r)
 	if err != nil {
 		if err == ErrFileSizeLimitExceeded {
@@ -258,9 +257,9 @@ func (s *Server) handlePostUpload(w http.ResponseWriter, r *http.Request) (int, 
 
 func (s *Server) handleListGet(w http.ResponseWriter, r *http.Request) (int, any) {
 	log.Printf("handleListGet %s %s", r.Method, r.URL)
-	if r.URL.Path != "/list" {
-		return http.StatusNotFound, fmt.Errorf("page not found: %s", r.URL.Path)
-	}
+	//if r.URL.Path != "/list" {
+		//return http.StatusNotFound, fmt.Errorf("page not found: %s", r.URL.Path)
+	//}
 	requestPath := r.URL.Query().Get("name")
 	log.Printf("GET %s -> %s", r.URL.Path, requestPath)
 	fileInfos, err := listShas( requestPath)
@@ -278,18 +277,13 @@ func (s *Server) handleListGet(w http.ResponseWriter, r *http.Request) (int, any
 
 func (s *Server) handleFileGet(w http.ResponseWriter, r *http.Request) (int, any) {
 	log.Printf("handleFileGet %s %s", r.Method, r.URL)
-	if r.Method != http.MethodGet {
-		return http.StatusMethodNotAllowed, fmt.Errorf( "method not allowed")
-	}
-	if r.URL.Path != "/file" {
-		return http.StatusNotFound, fmt.Errorf("page not found: %s", r.URL.Path)
-	}
+	//if r.URL.Path != "/file" && r.URL.Path != "/file/" {
+		//return http.StatusNotFound, fmt.Errorf("page not found: %s", r.URL.Path)
+	//}
 	requestPath := strings.TrimPrefix( r.URL.Query().Get("name"), "/")
-	log.Printf("handleFileGet %s %s %s", r.Method, r.URL, requestPath)
 	if requestPath == "" {
 		return http.StatusBadRequest, fmt.Errorf( "missing name of file: /file?name=")
 	}
-	log.Printf("GET %s -> %s", r.URL.Path, requestPath)
 	sha, err := getPathSha( requestPath)
 	if err != nil {
 		return http.StatusInternalServerError, err
@@ -305,12 +299,9 @@ func (s *Server) handleFileGet(w http.ResponseWriter, r *http.Request) (int, any
 
 func (s *Server) handleFileDelete( w http.ResponseWriter, r *http.Request) (int, any) {
 	log.Printf("handleFileDelete %s %s", r.Method, r.URL)
-	if r.Method != http.MethodDelete {
-		return http.StatusMethodNotAllowed, fmt.Errorf( "method not allowed")
-	}
-	if r.URL.Path != "/file" {
-		return http.StatusNotFound, fmt.Errorf( "page not found: %s", r.URL.Path)
-	}
+	//if r.URL.Path != "/file" && r.URL.Path != "/file/" {
+		//return http.StatusNotFound, fmt.Errorf( "page not found: %s", r.URL.Path)
+	//}
 	requestPath := strings.TrimPrefix( r.URL.Query().Get("name"), "/")
 	if requestPath == "" {
 		return http.StatusBadRequest, fmt.Errorf( "missing name of file: /file?name=")
