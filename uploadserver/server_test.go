@@ -253,7 +253,7 @@ func TestServer_PostHandler(t *testing.T) {
 			args: args{
 				Method:  http.MethodPost,
 				Url:     "/list",
-				Path     "",
+				Path:    "",
 				Content: []string{ " no post file",},
 			},
 			want: http.StatusMethodNotAllowed,
@@ -264,7 +264,7 @@ func TestServer_PostHandler(t *testing.T) {
 			args: args{
 				Method:  http.MethodPost,
 				Url:     "/file",
-				Path     "",
+				Path:    "",
 				Content: []string{ " no post file",},
 			},
 			want: http.StatusMethodNotAllowed,
@@ -275,7 +275,7 @@ func TestServer_PostHandler(t *testing.T) {
 			args: args{
 				Method:  http.MethodPost,
 				Url:     "/upload",
-				Path     "",
+				Path:    "",
 				Content: []string{ "hello",},
 			},
 			want: http.StatusBadRequest,
@@ -286,7 +286,7 @@ func TestServer_PostHandler(t *testing.T) {
 			args: args{
 				Method:  http.MethodPost,
 				Url:     "/foobar",
-				Path     "",
+				Path:    "",
 				Content: []string{ "hello",},
 			},
 			want: http.StatusNotFound,
@@ -297,7 +297,7 @@ func TestServer_PostHandler(t *testing.T) {
 			args: args{
 				Method:  http.MethodPost,
 				Url:     "/files",
-				Path     "",
+				Path:    "",
 				Content: []string{ "hello",},
 			},
 			want: http.StatusNotFound,
