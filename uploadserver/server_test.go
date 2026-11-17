@@ -223,6 +223,7 @@ func TestServer_PutHandler(t *testing.T) {
 			},
 			want: http.StatusNotFound,
 			body: `{"ok":false,"error":"page not found: /foobar"}`,
+		},
 		{
 			name: "PUT /file without name should fail",
 			args: args{
