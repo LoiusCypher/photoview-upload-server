@@ -298,6 +298,7 @@ func (s *Server) handleFileGet(w http.ResponseWriter, r *http.Request) (int, any
 		return http.StatusNotFound, fmt.Errorf("page not found: %s", r.URL.Path)
 	}
 	requestPath := strings.TrimPrefix( r.URL.Query().Get("name"), "/")
+	log.Printf("handleFileGet %s %s %s %s", r.Method, r.URL, r.URL.Path, requestPath)
 	if requestPath == "" {
 		return http.StatusBadRequest, fmt.Errorf( "missing name of file: /file?name=")
 	}
