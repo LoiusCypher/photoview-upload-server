@@ -70,11 +70,11 @@ func TestGetFileHandler(t *testing.T) {
 			args: args{
 				query:  "",
 			},
-			want: http.StatusNotFound,
+			want: http.StatusBadRequest,
 			headers: map[string]string{
 				"Access-Control-Allow-Origin": "*",
 			},
-			body: `{"ok":false,"error":"not found"}`,
+			body: `{"ok":false,"error":"missing name of file: /file?name="}`,
 		},
 	}
 	for _, tt := range tests {
@@ -266,7 +266,7 @@ func TestDeleteFileHandler(t *testing.T) {
 				EnableCORS:   true,
 			}
 			server := Server{config, }
-			req, err := http.NewRequest( http.MethodGet, "/file" + tt.args.query, nil)
+			req, err := http.NewRequest( http.MethodDelete, "/file" + tt.args.query, nil)
 			assert.Nil( t, err)
 
 			rr := httptest.NewRecorder()
@@ -313,7 +313,7 @@ func TestServer_PostHandler(t *testing.T) {
 		body    string
 		headers map[string]string
 	}{
-		{ // PASS
+		{
 			name: "POST /upload hello.pdf with text",
 			args: args{
 				Path:    "hello.pdf",

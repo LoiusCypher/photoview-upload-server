@@ -280,11 +280,7 @@ func (s *Server) handleListGet(w http.ResponseWriter, r *http.Request) (int, any
 }
 
 func (s *Server) handleFileGet(w http.ResponseWriter, r *http.Request) (int, any) {
-	log.Printf("handleFileGet %s %s %s %t %t", r.Method, r.URL, r.URL.Path, r.Method != http.MethodGet, r.URL.Path != "/file" )
-	switch r.URL.Path {
-		case "/list":
-			return s.handleListGet( w, r)
-	}
+	log.Printf("handleFileGet %s %s", r.Method, r.URL)
 	if r.Method != http.MethodGet {
 		return http.StatusMethodNotAllowed, fmt.Errorf( "method not allowed")
 	}
@@ -292,7 +288,7 @@ func (s *Server) handleFileGet(w http.ResponseWriter, r *http.Request) (int, any
 		return http.StatusNotFound, fmt.Errorf("page not found: %s", r.URL.Path)
 	}
 	requestPath := strings.TrimPrefix( r.URL.Query().Get("name"), "/")
-	log.Printf("handleFileGet %s %s %s %s", r.Method, r.URL, r.URL.Path, requestPath)
+	log.Printf("handleFileGet %s %s %s", r.Method, r.URL, requestPath)
 	if requestPath == "" {
 		return http.StatusBadRequest, fmt.Errorf( "missing name of file: /file?name=")
 	}
