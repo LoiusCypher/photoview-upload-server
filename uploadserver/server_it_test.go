@@ -140,8 +140,8 @@ func TestServer(t *testing.T) {
 		assert.True(t, reflect.DeepEqual(result, expected), fmt.Sprintf("result = %+v, want = %+v", result, expected))
 	})
 
-	t.Run("POST /file?name=hello.pdf", func(t *testing.T) {
-		u := base.JoinPath("/file")
+	t.Run("POST /upload hello.pdf", func(t *testing.T) {
+		u := base.JoinPath("/upload")
 		pdfFilePath := "hello.pdf"
 		//GenerateUrl_TestHelper( t, u, pdfFilePath)
 		req, sha := makeFormRequest( t, u, http.MethodPost, pdfFilePath, []string{ "lorem ipsum",}, pdfRoot)
@@ -155,7 +155,7 @@ func TestServer(t *testing.T) {
 		lastPdfSha = sha
 	})
 
-	t.Run("POST /file?name=hello.pdf overwrite should work the same", func(t *testing.T) {
+	t.Run("POST /upload hello.pdf overwrite should work the same", func(t *testing.T) {
 		u := base.JoinPath("/file")
 		pdfFilePath := "hello.pdf"
 		//GenerateUrl_TestHelper( t, u, pdfFilePath)
@@ -181,7 +181,7 @@ func TestServer(t *testing.T) {
 		assert.True(t, reflect.DeepEqual(result, expected), fmt.Sprintf("result = %+v, want = %+v", result, expected))
 	})
 
-	t.Run("POST /file?name=foo.pdf should fail due to an invalid method", func(t *testing.T) {
+	t.Run("POST /upload foo.pdf should fail due to an invalid method", func(t *testing.T) {
 		u := base.JoinPath("/file")
 		pdfFilePath := "foo.pdf"
 		//GenerateUrl_TestHelper( t, u, pdfFilePath)
@@ -231,7 +231,7 @@ func TestServer(t *testing.T) {
 		verifyLocalFile(t, localPath, localOriginal)
 	})
 */
-	t.Run("POST /file?name=arbitrary / file / path/hello.pdf should succeed even on overwrite", func(t *testing.T) {
+	t.Run("POST /upload arbitrary / file / path/hello.pdf should succeed even on overwrite", func(t *testing.T) {
 		pdfFilePath := CreatePdfFile_TestHelper( t, []string{ "hello, world",}, pdfRoot)
 		//file, err1 := os.Open( pdfFilePath)
 		//assert.Nil(t, err1)
@@ -257,7 +257,7 @@ func TestServer(t *testing.T) {
 		assert.FileExists(t, filepath.Join(jpgRoot, "hello-01.jpg"))
 	})
 /*
-	t.Run("POST /files/hello_put.txt", func(t *testing.T) {
+	t.Run("POST /upload/hello_put.txt", func(t *testing.T) {
 		u := base.JoinPath("/files/hello_put.txt")
 		content := bytes.NewBufferString("hello, world")
 		req, err := makeFormRequest( t, u, http.MethodPost, "hello.txt", content)
@@ -290,7 +290,7 @@ func TestServer(t *testing.T) {
 		verifyLocalFile(t, filepath.Join(docRoot, "hello_put.txt"), []byte("hello, world"))
 	})
 */ /*
-	t.Run("POST /files/hello/world.txt", func(t *testing.T) {
+	t.Run("POST /upload/hello/world.txt", func(t *testing.T) {
 		u := base.JoinPath("/files/hello/world.txt")
 		req, err := makeFormRequest(u, http.MethodPost, "world.txt", bytes.NewBufferString("hello, world"))
 		if err != nil {
@@ -362,7 +362,7 @@ func TestServer(t *testing.T) {
 		}
 	})
 */ /*
-	t.Run("POST /files/foo/bar.txt should fail (conflict)", func(t *testing.T) {
+	t.Run("POST /upload/foo/bar.txt should fail (conflict)", func(t *testing.T) {
 		u := base.JoinPath("/files/foo/bar.txt")
 		req, err := makeFormRequest(u, http.MethodPost, "foo.txt", bytes.NewBufferString("new world"))
 		if err != nil {
@@ -393,7 +393,7 @@ func TestServer(t *testing.T) {
 		}
 	})
 */ /*
-	t.Run("POST /files/foo/bar.txt should succeed (overwrite)", func(t *testing.T) {
+	t.Run("POST /upload/foo/bar.txt should succeed (overwrite)", func(t *testing.T) {
 		localPath := filepath.Join(docRoot, "foo", "bar.txt")
 		withPreservingOriginal(t, localPath, func() {
 			u := base.JoinPath("/files/foo/bar.txt")
@@ -738,7 +738,7 @@ func TestServerWithAuth(t *testing.T) {
 		verifyLocalFile(t, filepath.Join(docRoot, "hello_put.txt"), []byte("hello, world"))
 	})
 
-	t.Run("POST /files/hello_put.txt with read-only token", func(t *testing.T) {
+	t.Run("POST /upload/hello_put.txt with read-only token", func(t *testing.T) {
 		u := base.JoinPath("/files/hello_put.txt")
 		content := bytes.NewBufferString("hello, world")
 		req, err := makeFormRequest(u, http.MethodPost, "hello.txt", content)
@@ -771,7 +771,7 @@ func TestServerWithAuth(t *testing.T) {
 		}
 	})
 
-	t.Run("POST /files/hello_put.txt without tokens", func(t *testing.T) {
+	t.Run("POST /upload/hello_put.txt without tokens", func(t *testing.T) {
 		u := base.JoinPath("/files/hello_put.txt")
 		content := bytes.NewBufferString("hello, world")
 		req, err := makeFormRequest(u, http.MethodPost, "hello.txt", content)
