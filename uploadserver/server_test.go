@@ -178,7 +178,7 @@ func TestGetHandler(t *testing.T) {
 	}
 }
 
-func TestServer_PutHandler(t *testing.T) {
+func TestServer_PostHandler(t *testing.T) {
 	// sqlite database has to be on real file system or in memory
 	sqlRoot, err0 := os.MkdirTemp("", "")
 	require.Nil( t, err0)
@@ -206,9 +206,9 @@ func TestServer_PutHandler(t *testing.T) {
 		headers map[string]string
 	}{
 		{ // PASS
-			name: "PUT /file?name=hello.pdf with text",
+			name: "POST /file?name=hello.pdf with text",
 			args: args{
-				Method:  http.MethodPut,
+				Method:  http.MethodPost,
 				Url:     "/file?name=hello.pdf",
 				Content: []string{ "hello, world",},
 			},
@@ -219,9 +219,9 @@ func TestServer_PutHandler(t *testing.T) {
 			body: `{"ok":true,"Files":[{"path":"hello.pdf","sha":"%s"}]}`,
 		},
 		{ // PASS
-			name: "PUT /file?name=empty.pdf with an empty content",
+			name: "POST /file?name=empty.pdf with an empty content",
 			args: args{
-				Method:  http.MethodPut,
+				Method:  http.MethodPos^t,
 				Url:     "/file?name=empty.pdf",
 				Content: []string{},
 			},
@@ -232,9 +232,9 @@ func TestServer_PutHandler(t *testing.T) {
 			body: `{"ok":true,"Files":[{"path":"empty.pdf","sha":"%s"}]}`,
 		},
 		{ // PASS
-			name: "PUT /file?name=hello/world.pdf will create directory and file",
+			name: "POST /file?name=hello/world.pdf will create directory and file",
 			args: args{
-				Method:  http.MethodPut,
+				Method:  http.MethodPos^t,
 				Url:     "/file?name=hello/world.pdf",
 				Content: []string{ "hello, world",},
 			},
@@ -255,9 +255,9 @@ func TestServer_PutHandler(t *testing.T) {
 			body: `{"ok":false,"error":"method not allowed"}`,
 		},
 		{ // PASS
-			name: "PUT /file without name should fail",
+			name: "POST /file without name should fail",
 			args: args{
-				Method:  http.MethodPut,
+				Method:  http.MethodPos^t,
 				Url:     "/file",
 				Content: []string{ "hello",},
 			},
@@ -265,9 +265,9 @@ func TestServer_PutHandler(t *testing.T) {
 			body: `{"ok":false,"error":"missing name of file: /file?name="}`,
 		},
 		{ // PASS
-			name: "PUT /foobar should fail",
+			name: "POST /foobar should fail",
 			args: args{
-				Method:  http.MethodPut,
+				Method:  http.MethodPos^t,
 				Url:     "/foobar",
 				Content: []string{ "hello",},
 			},
@@ -275,9 +275,9 @@ func TestServer_PutHandler(t *testing.T) {
 			body: `{"ok":false,"error":"page not found: /foobar"}`,
 		},
 		{ // PASS
-			name: "PUT /files should fail",
+			name: "POST /files should fail",
 			args: args{
-				Method:  http.MethodPut,
+				Method:  http.MethodPos^t,
 				Url:     "/files",
 				Content: []string{ "hello",},
 			},
@@ -285,9 +285,9 @@ func TestServer_PutHandler(t *testing.T) {
 			body: `{"ok":false,"error":"page not found: /files"}`,
 		},
 		{ // PASS
-			name: "PUT /file?name=toolarge.pdf large file should fail",
+			name: "POST /file?name=toolarge.pdf large file should fail",
 			args: args{
-				Method:  http.MethodPut,
+				Method:  http.MethodPos^t,
 				Url:     "/file?name=toolarge.pdf",
 				Content: []string{ "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "Second Page", "Last Page",},
 			},
@@ -330,7 +330,7 @@ func TestServer_PutHandler(t *testing.T) {
 			req.Header.Set("Content-Type", w.FormDataContentType())
 
 			rr := httptest.NewRecorder()
-			handler := http.HandlerFunc(server.handle(server.handleFilePost))
+			handler := http.HandlerFunc(server.handle(server.handlePostUpload))
 			handler.ServeHTTP(rr, req)
 
 			status := rr.Code
