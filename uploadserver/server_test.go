@@ -196,6 +196,7 @@ func TestServer_PostHandler(t *testing.T) {
 	type args struct {
 		Method  string
 		Url     string
+		Path    string
 		Content []string
 	}
 	tests := []struct {
@@ -206,10 +207,11 @@ func TestServer_PostHandler(t *testing.T) {
 		headers map[string]string
 	}{
 		{ // PASS
-			name: "POST /file?name=hello.pdf with text",
+			name: "POST /upload hello.pdf with text",
 			args: args{
 				Method:  http.MethodPost,
-				Url:     "/file?name=hello.pdf",
+				Url:     "/upload",
+				Path:    "hello.pdf",
 				Content: []string{ "hello, world",},
 			},
 			want: http.StatusCreated,
@@ -219,10 +221,11 @@ func TestServer_PostHandler(t *testing.T) {
 			body: `{"ok":true,"Files":[{"path":"hello.pdf","sha":"%s"}]}`,
 		},
 		{ // PASS
-			name: "POST /file?name=empty.pdf with an empty content",
+			name: "POST /upload empty.pdf with an empty content",
 			args: args{
 				Method:  http.MethodPost,
-				Url:     "/file?name=empty.pdf",
+				Url:     "/upload",
+				Path:    "empty.pdf",
 				Content: []string{},
 			},
 			want: http.StatusCreated,
@@ -232,10 +235,11 @@ func TestServer_PostHandler(t *testing.T) {
 			body: `{"ok":true,"Files":[{"path":"empty.pdf","sha":"%s"}]}`,
 		},
 		{ // PASS
-			name: "POST /file?name=hello/world.pdf will create directory and file",
+			name: "POST /upload hello/world.pdf will create directory and file",
 			args: args{
 				Method:  http.MethodPost,
-				Url:     "/file?name=hello/world.pdf",
+				Url:     "/upload",
+				Path:    "hello/world.pdf",
 				Content: []string{ "hello, world",},
 			},
 			want: http.StatusCreated,
@@ -245,20 +249,33 @@ func TestServer_PostHandler(t *testing.T) {
 			body: `{"ok":true,"Files":[{"path":"hello/world.pdf","sha":"%s"}]}`,
 		},
 		{ // PASS
-			name: "POST /file method should fail",
+			name: "POST /list method should fail",
 			args: args{
 				Method:  http.MethodPost,
-				Url:     "/file",
+				Url:     "/list",
+				Path     "",
 				Content: []string{ " no post file",},
 			},
 			want: http.StatusMethodNotAllowed,
 			body: `{"ok":false,"error":"method not allowed"}`,
 		},
 		{ // PASS
-			name: "POST /file without name should fail",
+			name: "POST /file method should fail",
 			args: args{
 				Method:  http.MethodPost,
 				Url:     "/file",
+				Path     "",
+				Content: []string{ " no post file",},
+			},
+			want: http.StatusMethodNotAllowed,
+			body: `{"ok":false,"error":"method not allowed"}`,
+		},
+		{ // PASS
+			name: "POST /upload without name should fail",
+			args: args{
+				Method:  http.MethodPost,
+				Url:     "/upload",
+				Path     "",
 				Content: []string{ "hello",},
 			},
 			want: http.StatusBadRequest,
@@ -269,6 +286,7 @@ func TestServer_PostHandler(t *testing.T) {
 			args: args{
 				Method:  http.MethodPost,
 				Url:     "/foobar",
+				Path     "",
 				Content: []string{ "hello",},
 			},
 			want: http.StatusNotFound,
@@ -279,16 +297,18 @@ func TestServer_PostHandler(t *testing.T) {
 			args: args{
 				Method:  http.MethodPost,
 				Url:     "/files",
+				Path     "",
 				Content: []string{ "hello",},
 			},
 			want: http.StatusNotFound,
 			body: `{"ok":false,"error":"page not found: /files"}`,
 		},
 		{ // PASS
-			name: "POST /file?name=toolarge.pdf large file should fail",
+			name: "POST /upload toolarge.pdf large file should fail",
 			args: args{
 				Method:  http.MethodPost,
-				Url:     "/file?name=toolarge.pdf",
+				Url:     "/file",
+				Path:    "toolarge.pdf",
 				Content: []string{ "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "Second Page", "Last Page",},
 			},
 			want: http.StatusRequestEntityTooLarge,
@@ -324,9 +344,11 @@ func TestServer_PostHandler(t *testing.T) {
 			assert.Nil(t, err3)
 			// assert.NotEqual(t, 0, written, fmt.Sprintf("no bytes written"))
 			assert.NotEqual(t, 0, written, "no bytes written")
-			w.Close()
-			req, err4 := http.NewRequest(tt.args.Method, tt.args.Url, b)
+			err4 := w.WriteField( "name", tt.args.Path)
 			assert.Nil(t, err4)
+			w.Close()
+			req, err5 := http.NewRequest(tt.args.Method, tt.args.Url, b)
+			assert.Nil(t, err5)
 			req.Header.Set("Content-Type", w.FormDataContentType())
 
 			rr := httptest.NewRecorder()

@@ -522,7 +522,7 @@ func TestServer(t *testing.T) {
 		for i := range allowedMethods {
 			allowedMethods[i] = strings.TrimSpace(allowedMethods[i])
 		}
-		expectedAllowedMethods := []string{ "PUT", "GET", "DELETE",}
+		expectedAllowedMethods := []string{ "GET", "DELETE",}
 		assert.True( t, containsAll(allowedMethods, expectedAllowedMethods), fmt.Sprintf("Access-Control-Allow-Methods = %v, want = %v", allowedMethods, expectedAllowedMethods))
 		assert.Equal( t, resp.Header.Get("Access-Control-Allow-Origin"), "*")
 	})
