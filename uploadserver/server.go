@@ -89,9 +89,9 @@ func (s *Server) Start(ctx context.Context, ready chan struct{}) error {
 */
 
 	h := http.NewServeMux()
-	h.HandleFunc(         "/", 	handleNotFound)
-	h.HandleFunc(         "/list/{$}", 	handleMethodNotAllowed)
-	h.HandleFunc(     "GET /list/{$}", 	s.handle(s.handleListGet))
+	h.HandleFunc(         "/", 		handleNotFound)
+	h.HandleFunc(         "/list", 	handleMethodNotAllowed)
+	h.HandleFunc(     "GET /list", 	s.handle(s.handleListGet))
 	h.HandleFunc( "OPTIONS /list/{$}", 	s.handle(s.handleOptions))
 	h.HandleFunc(         "/file/{$}", 	handleMethodNotAllowed)
 	h.HandleFunc(     "GET /file/{$}", 	s.handle(s.handleFileGet))	// GET makes no sense without (file) name
@@ -247,7 +247,7 @@ func (s *Server) processUpload(w http.ResponseWriter, r *http.Request, path stri
 }
 
 func (s *Server) handleListGet(w http.ResponseWriter, r *http.Request) (int, any) {
-	log.Printf("handleListGet %s", r.URL)
+	log.Printf("handleListGet %s %s", r.Method, r.URL)
 	if r.URL.Path != "/list" {
 		return http.StatusNotFound, fmt.Errorf("page not found: %s", r.URL.Path)
 	}
@@ -267,7 +267,7 @@ func (s *Server) handleListGet(w http.ResponseWriter, r *http.Request) (int, any
 }
 
 func (s *Server) handleFilePut(w http.ResponseWriter, r *http.Request) (int, any) {
-	log.Printf("handleFilePut %s", r.URL)
+	log.Printf("handleFilePut %s %s", r.Method, r.URL)
 	if r.Method != http.MethodPut {
 		return http.StatusMethodNotAllowed, fmt.Errorf( "method not allowed")
 	}
@@ -290,7 +290,7 @@ func (s *Server) handleFilePut(w http.ResponseWriter, r *http.Request) (int, any
 }
 
 func (s *Server) handleFileGet(w http.ResponseWriter, r *http.Request) (int, any) {
-	log.Printf("handleFileGet %s", r.URL)
+	log.Printf("handleFileGet %s %s", r.Method, r.URL)
 	if r.Method != http.MethodGet {
 		return http.StatusMethodNotAllowed, fmt.Errorf( "method not allowed")
 	}
@@ -316,7 +316,7 @@ func (s *Server) handleFileGet(w http.ResponseWriter, r *http.Request) (int, any
 }
 
 func (s *Server) handleFileDelete( w http.ResponseWriter, r *http.Request) (int, any) {
-	log.Printf("handleFileDelete %s", r.URL)
+	log.Printf("handleFileDelete %s %s", r.Method, r.URL)
 	if r.Method != http.MethodDelete {
 		return http.StatusMethodNotAllowed, fmt.Errorf( "method not allowed")
 	}
@@ -404,7 +404,7 @@ func writeUnauthorized(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleNotFound(w http.ResponseWriter, r *http.Request) {
-	log.Printf("handleNotFound %s", r.URL)
+	log.Printf("handleNotFound %s %s", r.Method, r.URL)
 	resp := ErrorResult{false, "not found"}
 	respBytes, err := json.Marshal(resp)
 	if err != nil {
@@ -422,6 +422,7 @@ var allowedMethodsList = []string{http.MethodGet}
 var allowedMethodsFile = []string{http.MethodGet, http.MethodPut, http.MethodDelete}
 
 func (s *Server) handleOptions(w http.ResponseWriter, r *http.Request) (int, any) {
+	log.Printf("handleOptions %s %s", r.Method, r.URL)
 	var allowedMethods []string
 	switch r.URL.Path {
 		case "/list":
@@ -438,6 +439,7 @@ func (s *Server) handleOptions(w http.ResponseWriter, r *http.Request) (int, any
 }
 
 func handleMethodNotAllowed(w http.ResponseWriter, r *http.Request) {
+	log.Printf("handleMethodNotAllowed %s %s", r.Method, r.URL)
 	var allowedMethods []string
 	switch r.URL.Path {
 		case "/list":
