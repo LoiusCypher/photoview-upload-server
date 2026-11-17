@@ -89,18 +89,12 @@ func (s *Server) Start(ctx context.Context, ready chan struct{}) error {
 */
 
 	h := http.NewServeMux()
-	//h.HandleFunc(         "/", 		handleNotFound)
-	//h.HandleFunc(         "/list", 	handleMethodNotAllowed)
 	h.HandleFunc(     "GET /list", 	s.handle(s.handleListGet))
-	h.HandleFunc( "OPTIONS /list/{$}", 	s.handle(s.handleOptions))
-	//h.HandleFunc(         "/file/{$}", 	handleMethodNotAllowed)
+	h.HandleFunc( "OPTIONS /list", 	s.handle(s.handleOptions))
 	h.HandleFunc(     "GET /file", 	s.handle(s.handleFileGet))	// GET makes no sense without (file) name
-	h.HandleFunc(     "PUT /file/{$}",	s.handle(s.handleFilePut))	// PUT makes no sense without (file) name
-	h.HandleFunc(  "DELETE /file/{$}", 	s.handle(s.handleFileDelete))	// DELETE makes no sense without (file) name
-	h.HandleFunc( "OPTIONS /file/{$}", 	s.handle(s.handleOptions))
-	//h.HandleFunc(    "POST /file/{$}",	s.handle(s.handleFilePost))
-	//h.HandleFunc(         "/file/{$}", 	handleNotFound)
-	var r http.Handler
+	h.HandleFunc(     "PUT /file",	s.handle(s.handleFilePut))	// PUT makes no sense without (file) name
+	h.HandleFunc(  "DELETE /file", 	s.handle(s.handleFileDelete))	// DELETE makes no sense without (file) name
+	h.HandleFunc( "OPTIONS /file", 	s.handle(s.handleOptions))
 	r = h
 	if s.EnableAuth {
 		r = s.authenticationMiddleware( r)
@@ -291,6 +285,10 @@ func (s *Server) handleFilePut(w http.ResponseWriter, r *http.Request) (int, any
 
 func (s *Server) handleFileGet(w http.ResponseWriter, r *http.Request) (int, any) {
 	log.Printf("handleFileGet %s %s %s %t %t", r.Method, r.URL, r.URL.Path, r.Method != http.MethodGet, r.URL.Path != "/file" )
+	switch r.URL.Path {
+		case "/list":
+			return handleListGet( w, r)
+	}
 	if r.Method != http.MethodGet {
 		return http.StatusMethodNotAllowed, fmt.Errorf( "method not allowed")
 	}
