@@ -146,9 +146,8 @@ func TestServer(t *testing.T) {
 		resp, err4 := http.Get(u.String())
 		assert.Nil(t, err4, fmt.Sprintf("failed to GET: %v", err4))
 		defer resp.Body.Close()
-		result := CheckResponseSuccess_TestHelper( t, resp, http.StatusOK)
-		expected := SuccessFileInfosResult{ true, []FileInfo{{ helloFile_db_path, helloSha},},}
-		assert.True(t, reflect.DeepEqual(result, expected), fmt.Sprintf("result = %+v, want = %+v", result, expected))
+		body := CheckResponse_TestHelper( t, resp, http.StatusMethodNotAllowed)
+		assert.Equal(t, string(body), "Method Not Allowed\n")
 	})
 
 	t.Run("POST /upload hello.pdf", func(t *testing.T) {
@@ -453,6 +452,17 @@ func TestServer(t *testing.T) {
 		assert.Equal(t, expected.Files, result.Files, fmt.Sprintf("result = %+v, want = %+v", result, expected))
 		assert.True(t, slices.Equal( expected.Files, result.Files), fmt.Sprintf("result = %+v, want = %+v", result, expected))
 		assert.True(t, reflect.DeepEqual(result, expected), fmt.Sprintf("result = %+v, want = %+v", result, expected))
+	})
+
+	t.Run("GET /file/all?name=hello.pdf", func(t *testing.T) {
+		u := base.JoinPath("/file/all")
+		pdfFilePath := "hello.pdf"
+		req := GenerateRequest_TestHelper( t, http.MethodGet, u, pdfFilePath)
+		resp, err4 := http.DefaultClient.Do(req)
+		assert.Nil(t, err4, fmt.Sprintf("failed to GET: %v", err4))
+		defer resp.Body.Close()
+		body := CheckResponse_TestHelper( t, resp, http.StatusMethodNotAllowed)
+		assert.Equal(t, string(body), "Method Not Allowed\n")
 	})
 
 	t.Run("GET /files?name=foo/bar/baz.txt should fail (not found)", func(t *testing.T) {
