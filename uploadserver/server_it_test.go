@@ -185,7 +185,7 @@ func TestServer(t *testing.T) {
 		u := base.JoinPath("/file")
 		pdfFilePath := "foo.pdf"
 		//GenerateUrl_TestHelper( t, u, pdfFilePath)
-		req, _ := makeFormRequest( t, u, http.MethodPutt, pdfFilePath, []string{ "hello, world",}, pdfRoot)
+		req, _ := makeFormRequest( t, u, http.MethodPut, pdfFilePath, []string{ "hello, world",}, pdfRoot)
 		resp, err4 := http.DefaultClient.Do(req)
 		assert.Nil(t, err4, fmt.Sprintf("failed to PUT: %v", err4))
 		defer resp.Body.Close()
