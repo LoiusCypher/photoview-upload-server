@@ -119,7 +119,7 @@ func TestServer(t *testing.T) {
 
 	var lastPdfSha string
 
-	t.Run("GET /list", func(t *testing.T) {
+	t.Run("GET /list expect one file from setup", func(t *testing.T) {
 		u := base.JoinPath("/list")
 		resp, err4 := http.Get(u.String())
 		assert.Nil(t, err4, fmt.Sprintf("failed to GET: %v", err4))
@@ -129,7 +129,7 @@ func TestServer(t *testing.T) {
 		assert.True(t, reflect.DeepEqual(result, expected), fmt.Sprintf("result = %+v, want = %+v", result, expected))
 	})
 
-	t.Run("GET /list\name=", func(t *testing.T) {
+	t.Run("GET /list?name=", func(t *testing.T) {
 		u := base.JoinPath("/list")
 		GenerateUrl_TestHelper( t, u, "")
 		resp, err4 := http.Get(u.String())
@@ -156,7 +156,7 @@ func TestServer(t *testing.T) {
 	})
 
 	t.Run("POST /upload hello.pdf overwrite should work the same", func(t *testing.T) {
-		u := base.JoinPath("/file")
+		u := base.JoinPath("/upload")
 		pdfFilePath := "hello.pdf"
 		//GenerateUrl_TestHelper( t, u, pdfFilePath)
 		req, sha := makeFormRequest( t, u, http.MethodPost, pdfFilePath, []string{ "new world", "page two",}, pdfRoot)
@@ -170,7 +170,7 @@ func TestServer(t *testing.T) {
 		lastPdfSha = sha
 	})
 
-	t.Run("GET /list", func(t *testing.T) {
+	t.Run("GET /list expect sha changed from update", func(t *testing.T) {
 		u := base.JoinPath("/list")
 		pdfFilePath := "hello.pdf"
 		resp, err4 := http.Get(u.String())
@@ -181,13 +181,13 @@ func TestServer(t *testing.T) {
 		assert.True(t, reflect.DeepEqual(result, expected), fmt.Sprintf("result = %+v, want = %+v", result, expected))
 	})
 
-	t.Run("POST /upload foo.pdf should fail due to an invalid method", func(t *testing.T) {
+	t.Run("PUT /upload foo.pdf should fail due to an invalid method", func(t *testing.T) {
 		u := base.JoinPath("/file")
 		pdfFilePath := "foo.pdf"
 		//GenerateUrl_TestHelper( t, u, pdfFilePath)
-		req, _ := makeFormRequest( t, u, http.MethodPost, pdfFilePath, []string{ "hello, world",}, pdfRoot)
+		req, _ := makeFormRequest( t, u, http.MethodPutt, pdfFilePath, []string{ "hello, world",}, pdfRoot)
 		resp, err4 := http.DefaultClient.Do(req)
-		assert.Nil(t, err4, fmt.Sprintf("failed to POST: %v", err4))
+		assert.Nil(t, err4, fmt.Sprintf("failed to PUT: %v", err4))
 		defer resp.Body.Close()
 		body := CheckResponse_TestHelper( t, resp, http.StatusMethodNotAllowed)
 		assert.Equal(t, string(body), "Method Not Allowed\n")
@@ -233,9 +233,6 @@ func TestServer(t *testing.T) {
 */
 	t.Run("POST /upload arbitrary / file / path/hello.pdf should succeed even on overwrite", func(t *testing.T) {
 		pdfFilePath := CreatePdfFile_TestHelper( t, []string{ "hello, world",}, pdfRoot)
-		//file, err1 := os.Open( pdfFilePath)
-		//assert.Nil(t, err1)
-		//defer file.Close()
 		sha_file, err2 := calcSha( pdfFilePath)
 		assert.Nil(t, err2)
 		fmt.Println("SHA 2", sha_file)
@@ -525,7 +522,26 @@ func TestServer(t *testing.T) {
 		for i := range allowedMethods {
 			allowedMethods[i] = strings.TrimSpace(allowedMethods[i])
 		}
-		expectedAllowedMethods := []string{ "POST", "GET", "DELETE",}
+		expectedAllowedMethods := []string{ "PUT", "GET", "DELETE",}
+		assert.True( t, containsAll(allowedMethods, expectedAllowedMethods), fmt.Sprintf("Access-Control-Allow-Methods = %v, want = %v", allowedMethods, expectedAllowedMethods))
+		assert.Equal( t, resp.Header.Get("Access-Control-Allow-Origin"), "*")
+	})
+
+	t.Run("OPTIONS /upload", func(t *testing.T) {
+		u := base.JoinPath("/upload")
+		req, err1 := http.NewRequest(http.MethodOptions, u.String(), nil)
+		assert.Nil(t, err1)
+		resp, err2 := http.DefaultClient.Do(req)
+		assert.Nil(t, err2)
+		defer resp.Body.Close()
+		CheckResponseCode_TestHelper( t, resp, http.StatusNoContent)
+		acam := resp.Header.Get("Access-Control-Allow-Methods")
+		assert.NotEqual(t, acam, "")
+		allowedMethods := strings.Split(acam, ",")
+		for i := range allowedMethods {
+			allowedMethods[i] = strings.TrimSpace(allowedMethods[i])
+		}
+		expectedAllowedMethods := []string{ "POST",}
 		assert.True( t, containsAll(allowedMethods, expectedAllowedMethods), fmt.Sprintf("Access-Control-Allow-Methods = %v, want = %v", allowedMethods, expectedAllowedMethods))
 		assert.Equal( t, resp.Header.Get("Access-Control-Allow-Origin"), "*")
 	})
