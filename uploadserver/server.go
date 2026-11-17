@@ -249,7 +249,7 @@ func (s *Server) processUpload(w http.ResponseWriter, r *http.Request, path stri
 
 func (s *Server) handleListGet(w http.ResponseWriter, r *http.Request) (int, any) {
 	if r.URL.Path != "/list" {
-		return http.StatusNotFound, fmt.Errorf("route not found %s", r.URL.Path)
+		return http.StatusNotFound, fmt.Errorf("page not found: %s", r.URL.Path)
 	}
 	requestPath := r.URL.Query().Get("name")
 	log.Printf("GET %s -> %s", r.URL.Path, requestPath)
@@ -268,7 +268,7 @@ func (s *Server) handleListGet(w http.ResponseWriter, r *http.Request) (int, any
 
 func (s *Server) handleFilePut(w http.ResponseWriter, r *http.Request) (int, any) {
 	if r.URL.Path != "/file" {
-		return http.StatusNotFound, fmt.Errorf("route not found %s", r.URL.Path)
+		return http.StatusNotFound, fmt.Errorf(":route not found: %s", r.URL.Path)
 	}
 	requestPath := r.URL.Query().Get("name")
 	log.Printf("PUT %s -> %s", r.URL.Path, requestPath)
@@ -284,7 +284,7 @@ func (s *Server) handleFilePut(w http.ResponseWriter, r *http.Request) (int, any
 
 func (s *Server) handleFileGet(w http.ResponseWriter, r *http.Request) (int, any) {
 	if r.URL.Path != "/file" {
-		return http.StatusNotFound, fmt.Errorf("route not found %s", r.URL.Path)
+		return http.StatusNotFound, fmt.Errorf("page not found: %s", r.URL.Path)
 	}
 	requestPath := r.URL.Query().Get("name")
 	log.Printf("GET %s -> %s", r.URL.Path, requestPath)
