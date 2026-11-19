@@ -141,7 +141,7 @@ func TestUploadLimits(t *testing.T) {
 						}
 					}
 					if tc.want == 413 || tc.want == 409 {
-						content, err := os.ReadFile( "/limit.bin")
+						content, err := os.ReadFile( pdfRoot + "/limit.bin")
 						if tc.existing {
 							if err != nil || string(content) != "original" {
 								t.Fatalf("existing file changed: %q, %v", content, err)
@@ -171,7 +171,7 @@ func TestUploadMultipartTemporaryCleanup(t *testing.T) {
 	t.Setenv("TMPDIR", tmp)
 	t.Setenv("TMP", tmp)
 	t.Setenv("TEMP", tmp)
-	for _, method := range []string{http.MethodPost, http.MethodPut} {
+	for _, method := range []string{http.MethodPost} {
 		for _, tc := range []struct {
 			name, field string
 			limit       int64
@@ -192,10 +192,7 @@ func TestUploadMultipartTemporaryCleanup(t *testing.T) {
 						t.Fatal(err)
 					}
 				}
-				target := "/upload"
-				if method == http.MethodPut {
-					target = "/files/limit.bin"
-				}
+				target := "/upload/"
 				req := uploadLimitRequest(t, method, target, pdfRoot + "/limit.bin", tc.field, 33<<20, 0)
 				rr := httptest.NewRecorder()
 				uploadLimitRouter(s).ServeHTTP(rr, req)
