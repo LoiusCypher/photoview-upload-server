@@ -212,6 +212,7 @@ func (s *Server) processUpload(w http.ResponseWriter, r *http.Request) (string, 
 	if err != nil {
 		var maxBytesError *http.MaxBytesError
 		if errors.As(err, &maxBytesError) || errors.Is(err, multipart.ErrMessageTooLarge) {
+			log.Printf("maxBytes")
 			return "", "", ErrFileSizeLimitExceeded
 		}
 		log.Printf("failed to obtain form file: %v", err)
@@ -219,6 +220,7 @@ func (s *Server) processUpload(w http.ResponseWriter, r *http.Request) (string, 
 	}
 	defer uplFile.Close()
 	if uplHeader.Size > fileLimit {
+		log.Printf("uplHeader.Size %d > fileLimit %d", uplHeader.Size, fileLimit)
 		return "", "", ErrFileSizeLimitExceeded
 	}
 	log.Printf("processUpload file: %s", uplHeader.Filename)
