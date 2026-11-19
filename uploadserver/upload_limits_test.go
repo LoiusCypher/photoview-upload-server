@@ -11,7 +11,6 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/gorilla/mux"
 	"github.com/spf13/afero"
 )
 
@@ -62,10 +61,10 @@ func (endlessZeros) Read(p []byte) (int, error) {
 }
 
 func uploadLimitRouter(s *Server) http.Handler {
-	r := mux.NewRouter()
-	r.HandleFunc("/upload", s.handle(s.handlePost)).Methods(http.MethodPost)
-	r.PathPrefix("/files/").HandlerFunc(s.handle(s.handlePut)).Methods(http.MethodPut)
+	r := http.NewServeMux()
+	r.HandleFunc(    "POST /upload/{$}", s.handle(s.handlePostUpload))
 	return r
+
 }
 
 func TestUploadLimits(t *testing.T) {
