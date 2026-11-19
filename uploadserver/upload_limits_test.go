@@ -72,6 +72,7 @@ func TestUploadLimits(t *testing.T) {
 				name                string
 				limit               int64
 				size, extra         int
+				existing            bool
 				want                int
 			}{
 				{name: "empty", limit: 16, want: 201},
