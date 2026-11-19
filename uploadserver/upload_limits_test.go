@@ -26,11 +26,11 @@ func (b *uploadBodyCounter) Read(p []byte) (int, error) {
 	return n, err
 }
 
-func uploadLimitRequest(t *testing.T, method, target, field string, size, extra int) *http.Request {
+func uploadLimitRequest(t *testing.T, method, target, path, field string, size, extra int) *http.Request {
 	t.Helper()
 	var body bytes.Buffer
 	mw := multipart.NewWriter(&body)
-	file, err := mw.CreateFormFile(field, "limit.bin")
+	file, err := mw.CreateFormFile(field, path)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -75,6 +75,15 @@ func TestUploadLimits(t *testing.T) {
 	defer os.RemoveAll( sqlRoot)
 	CreateEmptyDatabase_TestHelper( t, path.Join( sqlRoot, "shafiles.db"))
 
+	// ghostscript output has to be on real file system
+	jpgRoot, err1 := os.MkdirTemp( "", "")
+	require.Nil(t, err1)
+	defer os.RemoveAll( jpgRoot)
+
+	pdfRoot, err2 := os.MkdirTemp("", "")
+	require.Nil(t, err2)
+	defer os.RemoveAll( pdfRoot)
+
 	for _, method := range []string{http.MethodPost} {
 		for _, unknownLength := range []bool{false, true} {
 			for _, tc := range []struct {
@@ -102,7 +111,7 @@ func TestUploadLimits(t *testing.T) {
 				t.Run(method+"/"+map[bool]string{true: "unknown", false: "known"}[unknownLength]+"/"+tc.name, func(t *testing.T) {
 					s := &Server{ServerConfig: ServerConfig{MaxUploadSize: tc.limit},}
 					if tc.existing {
-						if err := os.WriteFile( "/limit.bin", []byte("original"), 0600); err != nil {
+						if err := os.WriteFile( pdfRoot + "/limit.bin", []byte("original"), 0600); err != nil {
 							t.Fatal(err)
 						}
 					}
@@ -113,7 +122,7 @@ func TestUploadLimits(t *testing.T) {
 						attempts = 2
 					}
 					for attempt := 0; attempt < attempts; attempt++ {
-						req := uploadLimitRequest(t, method, target, "file", tc.size, tc.extra)
+						req := uploadLimitRequest(t, method, target, pdfRoot + "/limit.bin", "file", tc.size, tc.extra)
 						if unknownLength {
 							req.ContentLength = -1
 						}
@@ -175,7 +184,7 @@ func TestUploadMultipartTemporaryCleanup(t *testing.T) {
 				root := t.TempDir()
 				s := NewServer(ServerConfig{PictureRoot: root, MaxUploadSize: tc.limit})
 				if tc.existing {
-					if err := os.WriteFile(filepath.Join(root, "limit.bin"), []byte("original"), 0600); err != nil {
+					if err := os.WriteFile(filepath.Join(root, pdfRoot + "limit.bin"), []byte("original"), 0600); err != nil {
 						t.Fatal(err)
 					}
 				}
@@ -183,7 +192,7 @@ func TestUploadMultipartTemporaryCleanup(t *testing.T) {
 				if method == http.MethodPut {
 					target = "/files/limit.bin"
 				}
-				req := uploadLimitRequest(t, method, target, tc.field, 33<<20, 0)
+				req := uploadLimitRequest(t, method, target, pdfRoot + "/limit.bin", tc.field, 33<<20, 0)
 				rr := httptest.NewRecorder()
 				uploadLimitRouter(s).ServeHTTP(rr, req)
 				if rr.Code != tc.want {
