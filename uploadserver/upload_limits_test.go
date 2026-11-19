@@ -93,7 +93,7 @@ func TestUploadLimits(t *testing.T) {
 				{name: "maximum integer limit", limit: math.MaxInt64, size: 16, want: 201},
 			} {
 				t.Run(method+"/"+map[bool]string{true: "unknown", false: "known"}[unknownLength]+"/"+tc.name, func(t *testing.T) {
-					s := &Server{ServerConfig: ServerConfig{MaxUploadSize: tc.limit}, "/")}
+					s := &Server{ServerConfig: ServerConfig{MaxUploadSize: tc.limit},}
 					if tc.existing {
 						if err := os.WriteFile( "/limit.bin", []byte("original"), 0600); err != nil {
 							t.Fatal(err)
