@@ -66,6 +66,12 @@ func uploadLimitRouter(s *Server) http.Handler {
 }
 
 func TestUploadLimits(t *testing.T) {
+	// sqlite database has to be on real file system or in memory
+	sqlRoot, err1 := os.MkdirTemp("", "")
+	require.Nil( t, err1)
+	defer os.RemoveAll( sqlRoot)
+	CreateEmptyDatabase_TestHelper( t, path.Join( sqlRoot, "shafiles.db"))
+
 	for _, method := range []string{http.MethodPost} {
 		for _, unknownLength := range []bool{false, true} {
 			for _, tc := range []struct {
@@ -139,6 +145,12 @@ func TestUploadLimits(t *testing.T) {
 }
 
 func TestUploadMultipartTemporaryCleanup(t *testing.T) {
+	// sqlite database has to be on real file system or in memory
+	sqlRoot, err1 := os.MkdirTemp("", "")
+	require.Nil( t, err1)
+	defer os.RemoveAll( sqlRoot)
+	CreateEmptyDatabase_TestHelper( t, path.Join( sqlRoot, "shafiles.db"))
+
 	tmp := t.TempDir()
 	t.Setenv("TMPDIR", tmp)
 	t.Setenv("TMP", tmp)
