@@ -93,9 +93,9 @@ func TestUploadLimits(t *testing.T) {
 				{name: "maximum integer limit", limit: math.MaxInt64, size: 16, want: 201},
 			} {
 				t.Run(method+"/"+map[bool]string{true: "unknown", false: "known"}[unknownLength]+"/"+tc.name, func(t *testing.T) {
-					s := &Server{ServerConfig: ServerConfig{MaxUploadSize: tc.limit}, fs: afero.NewBasePathFs(afero.NewMemMapFs(), "/")}
+					s := &Server{ServerConfig: ServerConfig{MaxUploadSize: tc.limit}, "/")}
 					if tc.existing {
-						if err := afero.WriteFile(s.fs, "/limit.bin", []byte("original"), 0600); err != nil {
+						if err := os.WriteFile( "/limit.bin", []byte("original"), 0600); err != nil {
 							t.Fatal(err)
 						}
 					}
@@ -131,7 +131,7 @@ func TestUploadLimits(t *testing.T) {
 						}
 					}
 					if tc.want == 413 || tc.want == 409 {
-						content, err := afero.ReadFile(s.fs, "/limit.bin")
+						content, err := os.ReadFile( "/limit.bin")
 						if tc.existing {
 							if err != nil || string(content) != "original" {
 								t.Fatalf("existing file changed: %q, %v", content, err)
@@ -166,7 +166,7 @@ func TestUploadMultipartTemporaryCleanup(t *testing.T) {
 		} {
 			t.Run(method+"/"+tc.name, func(t *testing.T) {
 				root := t.TempDir()
-				s := NewServer(ServerConfig{DocumentRoot: root, MaxUploadSize: tc.limit})
+				s := NewServer(ServerConfig{PictureRoot: root, MaxUploadSize: tc.limit})
 				if tc.existing {
 					if err := os.WriteFile(filepath.Join(root, "limit.bin"), []byte("original"), 0600); err != nil {
 						t.Fatal(err)
