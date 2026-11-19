@@ -163,6 +163,10 @@ func TestUploadMultipartTemporaryCleanup(t *testing.T) {
 	defer os.RemoveAll( sqlRoot)
 	CreateEmptyDatabase_TestHelper( t, path.Join( sqlRoot, "shafiles.db"))
 
+	pdfRoot, err2 := os.MkdirTemp("", "")
+	require.Nil(t, err2)
+	defer os.RemoveAll( pdfRoot)
+
 	tmp := t.TempDir()
 	t.Setenv("TMPDIR", tmp)
 	t.Setenv("TMP", tmp)
