@@ -15,12 +15,13 @@ import (
 	"time"
 
 	"dario.cat/mergo"
-	simpleuploadserver "github.com/mayth/go-simple-upload-server/v2/pkg"
+	"github.com/LoiusCypher/photoview-upload-server/uploadserver" 
 )
 
 var DefaultConfig = ServerConfig{
-	DocumentRoot:       ".",
-	Addr:               simpleuploadserver.DefaultAddr,
+	PictureRoot:        ".",
+	ConvFlags:          "-r300",
+	Addr:               uploadserver.DefaultAddr,
 	EnableCORS:         nil,
 	MaxUploadSize:      1024 * 1024,
 	FileNamingStrategy: "uuid",
@@ -107,12 +108,14 @@ func (d *Duration) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-// ServerConfig wraps simpleuploadserver.ServerConfig to provide JSON marshaling.
+// ServerConfig wraps ServerConfig to provide JSON marshaling.
 type ServerConfig struct {
 	// Address where the server listens on.
 	Addr string `json:"addr"`
-	// Path to the document root.
-	DocumentRoot string `json:"document_root"`
+	// Path to the picture root.
+	PictureRoot string `json:"picture_root"`
+	// Ghostscript conversion flags.
+	ConvFlags string `json:"conv_flags"`
 	// Determines whether to enable CORS header.
 	EnableCORS *bool `json:"enable_cors"`
 	// Maximum upload size in bytes.
@@ -133,7 +136,7 @@ type ServerConfig struct {
 	WriteTimeout Duration `json:"write_timeout"`
 }
 
-func (c *ServerConfig) AsConfig() simpleuploadserver.ServerConfig {
+func (c *ServerConfig) AsConfig() uploadserver.ServerConfig {
 	if c.EnableCORS == nil {
 		c.EnableCORS = BoolPointer(true)
 	}
@@ -141,9 +144,10 @@ func (c *ServerConfig) AsConfig() simpleuploadserver.ServerConfig {
 		c.EnableAuth = BoolPointer(false)
 	}
 
-	return simpleuploadserver.ServerConfig{
+	return uploadserver.ServerConfig{
 		Addr:               c.Addr,
-		DocumentRoot:       c.DocumentRoot,
+		PictureRoot:        c.PictureRoot,
+		ConvFlags:          c.ConvFlags,
 		EnableCORS:         *c.EnableCORS,
 		MaxUploadSize:      c.MaxUploadSize,
 		FileNamingStrategy: c.FileNamingStrategy,
@@ -163,7 +167,8 @@ func main() {
 type app struct {
 	flagSet            *flag.FlagSet
 	configFilePath     string
-	documentRoot       string
+	pictureRoot        string
+	convFlags          string
 	addr               string
 	enableCORS         boolOptFlag
 	maxUploadSize      int64
@@ -180,7 +185,8 @@ func NewApp(name string) *app {
 	a := &app{}
 	fs := flag.NewFlagSet(name, flag.ExitOnError)
 	fs.StringVar(&a.configFilePath, "config", "", "path to config file")
-	fs.StringVar(&a.documentRoot, "document_root", "", "path to document root directory")
+	fs.StringVar(&a.pictureRoot, "picture_root", "", "path to picture root directory")
+	fs.StringVar(&a.convFlags, "conv_flags", "", "ghostscript conversion flags")
 	fs.StringVar(&a.addr, "addr", "", "address to listen")
 	fs.Var(&a.enableCORS, "enable_cors", "enable CORS header")
 	fs.Int64Var(&a.maxUploadSize, "max_upload_size", 0, "max upload size in bytes")
@@ -218,7 +224,7 @@ func (a *app) Run(args []string) {
 		log.Printf("generated read write token: %s", readWriteToken)
 	}
 
-	s := simpleuploadserver.NewServer(*config)
+	s := uploadserver.NewServer(*config)
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer stop()
 	err = s.Start(ctx, nil)
@@ -235,7 +241,7 @@ func generateToken() (string, error) {
 }
 
 // parseConfig parses the configuration from the `src` and merges it with the `orig` configuration.
-func (a *app) ParseConfig(args []string) (*simpleuploadserver.ServerConfig, error) {
+func (a *app) ParseConfig(args []string) (*uploadserver.ServerConfig, error) {
 	if err := a.flagSet.Parse(args); err != nil {
 		return nil, err
 	}
@@ -262,7 +268,8 @@ func (a *app) ParseConfig(args []string) (*simpleuploadserver.ServerConfig, erro
 	}
 
 	configFromFlags := ServerConfig{
-		DocumentRoot:       a.documentRoot,
+		PictureRoot:        a.pictureRoot,
+		ConvFlags:          a.convFlags,
 		Addr:               a.addr,
 		MaxUploadSize:      a.maxUploadSize,
 		FileNamingStrategy: a.fileNamingStrategy,

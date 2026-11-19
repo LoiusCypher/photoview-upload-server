@@ -1,0 +1,13 @@
+services:
+  app:
+    image: loiuscypher/photoview-upload-server:latest
+    build:
+      context: .
+      tags:
+        - "loiuscypher/photoview-upload-server:testing"
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./_container_data/jpgroot:/jpgroot
+      - ./_container_data/sqlroot:/sqlroot
+    command: -picture_root=/jpgroot -addr=:8080 -max_upload_size 30485760

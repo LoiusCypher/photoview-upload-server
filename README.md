@@ -1,20 +1,18 @@
-go-simple-upload-server
+photoview-upload-server
 =======================
 
 Simple HTTP server to save artifacts
 
 - [Usage](#usage)
-- [Authentication](#authentication)
-- [TLS](#tls)
 - [Timeouts](#timeouts)
 - [Testing](#testing)
 - [API](#api)
-  - [`POST /upload`](#post-upload)
-  - [`PUT /files/:path`](#put-filespath)
-  - [`GET /files/:path`](#get-filespath)
-  - [`HEAD /files/:path`](#head-filespath)
-  - [`OPTIONS /files/:path`](#options-filespath)
-  - [`OPTIONS /upload`](#options-upload)
+  - [`GET /list?name=path`](#get-list)
+  - [`OPTIONS /list`](#options-list)
+  - [`PUT /file?name=path`](#put-file)
+  - [`GET /file?name=path`](#get-file)
+  - [`DELETE /file?name=path`](#delete-file)
+  - [`OPTIONS /file`](#options-file)
 
 
 ## Usage
@@ -24,8 +22,8 @@ Simple HTTP server to save artifacts
         address to listen
   -config string
         path to config file
-  -document_root string
-        path to document root directory
+  -picture_root string
+        path to picture root directory
   -enable_auth
         enable authentication
   -enable_cors
@@ -94,7 +92,7 @@ Please consider using a reverse proxy like nginx.
 (Since v2.1.0)
 
 There are 2 timeout configurations: read and write.
-The terms "read" and "write" are from the server's perspective. From clients, they are "upload" (`POST`/`PUT`) and "download" (`GET`) respectively.
+The terms "read" and "write" are from the server's perspective. From clients, they are "upload" (`PUT`) and "get info" (`GET`) respectively.
 
 Read timeout (`-read_timeout`) is the maximum duration for the server reading the request.
 Clients should finish sending request headers and the entire content within this timeout.
@@ -122,11 +120,11 @@ $ go test ./...
 This includes end-to-end tests. By default, the server with on-memory FileSystem is created and it starts listening on
 the port chosen randomly. You can control this behavior by setting the environment variables.
 
-If `TEST_WITH_REAL_FS=${PATH_TO_DOCUMENT_ROOT}` is set, the test server uses the real filesystem. Make sure the document
+`TEST_WITH_REAL_FS=${PATH_TO_PICTURE_ROOT}` has to be set, because the test server needs a real filesystem. Make sure the picture
 root directory contains no files; otherwise, some tests might be failed. The directory will not be cleaned after testing.
 
 If `TEST_TARGET_ADDR-${HOST}:${PORT}` is set, the test program doesn't start a local test server and sends requests to
-`http://${HOST}:${PORT}`. Note that the target server's document root should be cleared prior to testing.
+`http://${HOST}:${PORT}`. Note that the target server's picture root should be cleared prior to testing.
 
 This repository has `docker-compose.e2e.yml` to run the E2E test. To run tests using this:
 
@@ -137,8 +135,8 @@ $ docker compose -f docker-compose.e2e.yml down --rmi local --volumes
 
 ## API
 
-### `POST /upload`
-
+### `GET /list?name=path`
+<<<<<<< HEAD
 Uploads a new file. The name of the local (= server-side) file is taken from the uploading file.
 
 #### Request
@@ -239,6 +237,7 @@ Hello, world!
 ### `GET /files/:path`
 
 Downloads a file.
+Request a list of uploaded files in the specified directory tree.
 
 #### Request
 
@@ -246,7 +245,7 @@ Parameters:
 
 |  Name  | Required? |   Type   |     Description     | Default |
 | ------ | :-------: | -------- | ------------------- | ------- |
-| `path` |     x     | `string` | A path to the file. |         |
+| `path` |     x     | `string` | A path name filter. |         |
 
 #### Response
 
@@ -256,10 +255,16 @@ Status Code
 : `200 OK`
 
 Content-Type
-: Depends on the content.
+: `application/json`
 
 Body
-: The content of the request file.
+
+Array of:
+
+|  Name  |   Type    |               Description               |
+| ------ | --------- | --------------------------------------- |
+| `path` | `string`  | A path to access this file in this API. |
+| `sha`  | `string`  | Sha256 of the uploaded file contents.   |
 
 ##### On Failure
 
@@ -273,13 +278,56 @@ Content-Type
 #### Example
 
 ```
-$ curl http://localhost:25478/files/sample.txt
-Hello, world!
+$ curl "http://localhost:25478/list"
+[{"path":"my files/foobar.txt","sha":"dbc08b031f67a6a5bf77a911a02542d91accb466750276452637ab050994547c"}
+ {"path":"my files/my samples/sample.txt","sha":"f982b83f83557bbb1d7d7e330a2c038137a1df0ff9462ff4eb7c8bacc020d971"}]
+
+$ curl --url-query "path=my files" "http://localhost:25478/list"
+[{"path":"my files/foobar.txt","sha":"dbc08b031f67a6a5bf77a911a02542d91accb466750276452637ab050994547c"}]
+
+### `PUT /file?name=path`
+
+Uploads a file. The original file name is ignored and the name is taken from the path in the request URL.
+
+#### Parameters
+
+|    Name     | Required? |   Type    |                    Description                     | Default |
+| ----------- | :-------: | --------- | -------------------------------------------------- | ------- |
+| `path`      |     x     | `string`  | Path to the file.                                  |         |
+| `file`      |     x     | Form Data | Content of the file.                               |         |
+
+#### Response
+
+##### On Successful
+
+Status Code
+: `201 Created`
+
+Content-Type
+: `application/json`
+
+Body:
+
+|  Name  |   Type    |               Description               |
+| ------ | --------- | --------------------------------------- |
+| `path` | `string`  | A path to access this file in this API. |
+| `sha`  | `string`  | Sha256 of the uploaded file contents.   |
+
+##### On Failure
+
+|   StatusCode   |                                              When                                              |
+| -------------- | ---------------------------------------------------------------------------------------------- |
+|                |                                                                                                |
+
+#### Example
+
 ```
+$ curl -XPUT -Ffile=@examples/sample.txt --url-query "path=my files/foobar.txt" "http://localhost:25478/file"
+{"path":"my files/foobar.txt","sha":"dbc08b031f67a6a5bf77a911a02542d91accb466750276452637ab050994547c"}
 
-### `HEAD /files/:path`
+### `GET /file?name=path`
 
-Check existence of a file.
+Check if file was uploaded before and get its sha256 sum if so.
 
 #### Request
 
@@ -296,8 +344,56 @@ Parameters:
 Status Code
 : `200 OK`
 
+Content-Type
+: `application/json`
+
 Body
-: Not Available
+
+|  Name  |   Type    |               Description               |
+| ------ | --------- | --------------------------------------- |
+| `path` | `string`  | A path to access this file in this API. |
+| `sha`  | `string`  | Sha256 of the uploaded file contents.   |
+
+##### On Failure
+
+Content-Type
+: `application/json`
+
+|   StatusCode    |          When          |
+| --------------- | ---------------------- |
+| `404 Not Found` | There is no such file. |
+
+#### Example
+
+```
+$ curl --url-query "name=my files/foobar.txt" "http://localhost:25478/file"
+{"path":"my files/foobar.txt","sha":"dbc08b031f67a6a5bf77a911a02542d91accb466750276452637ab050994547c"}
+
+### `DELETE /file?name=path`
+
+Deletes a file. The name is taken from the path in the request URL.
+
+#### Parameters
+
+|    Name     | Required? |   Type    |                    Description                     | Default |
+| ----------- | :-------: | --------- | -------------------------------------------------- | ------- |
+| `path`      |     x     | `string`  | Path to the file.                                  |         |
+
+#### Response
+
+##### On Successful
+
+Status Code
+: `202 Accepted`
+
+Content-Type
+: `application/json`
+
+Body:
+
+|  Name  |   Type    |               Description               |
+| ------ | --------- | --------------------------------------- |
+| `path` | `string`  | A path to access this file in this API. |
 
 ##### On Failure
 
@@ -308,11 +404,11 @@ Body
 #### Example
 
 ```
-$ curl -I http://localhost:25478/files/foobar.txt
-```
+$ curl -X DELETE --url-query "path=my files/foobar.txt" "http://localhost:25478/file"
+{"path":"my files/foobar.txt"}
 
-### `OPTIONS /files/:path`
-### `OPTIONS /upload`
+### `OPTIONS /file`
+### `OPTIONS /list`
 
 CORS preflight request.
 

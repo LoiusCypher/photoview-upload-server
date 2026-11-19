@@ -3,23 +3,25 @@ services:
     build:
       context: .
       tags:
-        - "mayth/simple-upload-server:testing"
+        - "loiuscypher/photoview-upload-server:testing"
     ports:
       - "127.0.0.1::8080"
     volumes:
-      - docroot:/docroot
-    command: -document_root=/docroot -addr=:8080
+      - jpgroot:/jpgroot
+    command: -picture_root=/jpgroot -addr=:8080
   test:
     image: golang:1.26
     environment:
-      - TEST_WITH_REAL_FS=/docroot
+      - TEST_WITH_REAL_FS=/jpgroot
       - TEST_TARGET_ADDR=app:8080
     volumes:
       - .:/app
-      - docroot:/docroot
+      - jpgroot:/jpgroot
+      - sqlroot:/sqlroot
     working_dir: /app
     command: go test -v -run TestServer ./...
     depends_on:
       - app
 volumes:
-  docroot:
+  jpgroot:
+  sqlroot:

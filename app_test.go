@@ -6,12 +6,12 @@ import (
 	"testing"
 	"time"
 
-	simpleuploadserver "github.com/mayth/go-simple-upload-server/v2/pkg"
+	"github.com/LoiusCypher/photoview-upload-server/uploadserver"
 )
 
 func Test_parseConfig(t *testing.T) {
 	t.Run("use config file only", func(t *testing.T) {
-		f, err := os.CreateTemp("", "simple-upload-server-config.*.json")
+		f, err := os.CreateTemp("", "photoview-upload-server-config.*.json")
 		if err != nil {
 			t.Fatalf("failed to create temp file: %v", err)
 		}
@@ -19,7 +19,8 @@ func Test_parseConfig(t *testing.T) {
 		defer f.Close()
 		if _, err := f.WriteString(`{
 			"addr": ":8123",
-			"document_root": "/opt/app",
+			"picture_root": "/opt/app",
+			"conv_flags": "-r150",
 			"enable_cors": true,
 			"max_upload_size": 1234567,
 			"file_naming_strategy": "uuid",
@@ -45,9 +46,10 @@ func Test_parseConfig(t *testing.T) {
 			t.Errorf("parseConfig() error = %v", err)
 			return
 		}
-		want := &simpleuploadserver.ServerConfig{
+		want := &uploadserver.ServerConfig{
 			Addr:               ":8123",
-			DocumentRoot:       "/opt/app",
+			PictureRoot:        "/opt/app",
+			ConvFlags:          "-r150",
 			EnableCORS:         true,
 			MaxUploadSize:      1234567,
 			FileNamingStrategy: "uuid",
@@ -67,7 +69,8 @@ func Test_parseConfig(t *testing.T) {
 		app := NewApp(os.Args[0])
 		args := []string{
 			"-addr", ":8987",
-			"-document_root", "/tmp/sus",
+			"-picture_root", "/tmp/sus",
+			"-conv_flags", "-r200",
 			"-enable_cors=false",
 			"-max_upload_size", "987654",
 			"-file_naming_strategy", "uuid",
@@ -83,9 +86,10 @@ func Test_parseConfig(t *testing.T) {
 			t.Errorf("parseConfig() error = %v", err)
 			return
 		}
-		want := &simpleuploadserver.ServerConfig{
+		want := &uploadserver.ServerConfig{
 			Addr:               ":8987",
-			DocumentRoot:       "/tmp/sus",
+			PictureRoot:        "/tmp/sus",
+			ConvFlags:          "-r200",
 			EnableCORS:         false,
 			MaxUploadSize:      987654,
 			FileNamingStrategy: "uuid",
@@ -105,7 +109,8 @@ func Test_parseConfig(t *testing.T) {
 		app := NewApp(os.Args[0])
 		args := []string{
 			"-addr", ":8987",
-			"-document_root", "/tmp/sus",
+			"-picture_root", "/tmp/sus",
+			"-conv_flags", "-r200",
 			"-enable_cors=true",
 			"-max_upload_size", "987654",
 			"-file_naming_strategy", "uuid",
@@ -113,7 +118,7 @@ func Test_parseConfig(t *testing.T) {
 			"-read_timeout", "16s",
 		}
 
-		f, err := os.CreateTemp("", "simple-upload-server-config.*.json")
+		f, err := os.CreateTemp("", "photoview-upload-server-config.*.json")
 		if err != nil {
 			t.Fatalf("failed to create temp file: %v", err)
 		}
@@ -121,7 +126,8 @@ func Test_parseConfig(t *testing.T) {
 		defer f.Close()
 		if _, err := f.WriteString(`{
 			"addr": ":8123",
-			"document_root": "/opt/app",
+			"picture_root": "/opt/app",
+			"conv_flags": "-r150",
 			"enable_cors": true,
 			"max_upload_size": 1234567,
 			"file_naming_strategy": "uuid",
@@ -147,9 +153,10 @@ func Test_parseConfig(t *testing.T) {
 			t.Errorf("parseConfig() error = %v", err)
 			return
 		}
-		want := &simpleuploadserver.ServerConfig{
+		want := &uploadserver.ServerConfig{
 			Addr:               ":8987",
-			DocumentRoot:       "/tmp/sus",
+			PictureRoot:        "/tmp/sus",
+			ConvFlags:          "-r200",
 			EnableCORS:         true,
 			MaxUploadSize:      987654,
 			FileNamingStrategy: "uuid",
