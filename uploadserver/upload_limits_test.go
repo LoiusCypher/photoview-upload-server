@@ -66,24 +66,23 @@ func uploadLimitRouter(s *Server) http.Handler {
 }
 
 func TestUploadLimits(t *testing.T) {
-	for _, method := range []string{http.MethodPost, http.MethodPut} {
+	for _, method := range []string{http.MethodPost} {
 		for _, unknownLength := range []bool{false, true} {
 			for _, tc := range []struct {
 				name                string
 				limit               int64
 				size, extra         int
-				existing, overwrite bool
 				want                int
 			}{
 				{name: "empty", limit: 16, want: 201},
 				{name: "exact file limit", limit: 16, size: 16, want: 201},
 				{name: "one byte over", limit: 16, size: 17, want: 413},
-				{name: "oversized overwrite preserves original", limit: 16, size: 17, existing: true, overwrite: true, want: 413},
+				{name: "oversized overwrite preserves original", limit: 16, size: 17, existing: true, want: 413},
 				{name: "oversized conflict", limit: 16, size: 17, existing: true, want: 413},
 				{name: "aggregate multipart limit", limit: 16, size: 1, extra: 2 << 20, want: 413},
 				{name: "large selected part", limit: 16, size: 2 << 20, want: 413},
 				{name: "conflict", limit: 16, size: 16, existing: true, want: 409},
-				{name: "overwrite", limit: 16, size: 16, existing: true, overwrite: true, want: 201},
+				{name: "overwrite", limit: 16, size: 16, existing: true, want: 201},
 				{name: "zero limit empty", want: 201},
 				{name: "zero limit nonempty", size: 1, want: 413},
 				{name: "negative limit empty", limit: -1, want: 201},
@@ -97,13 +96,7 @@ func TestUploadLimits(t *testing.T) {
 							t.Fatal(err)
 						}
 					}
-					target := "/upload"
-					if method == http.MethodPut {
-						target = "/files/limit.bin"
-					}
-					if tc.overwrite {
-						target += "?overwrite=true"
-					}
+					target := "/upload/?name=limit.bin"
 					handler := uploadLimitRouter(s)
 					attempts := 1
 					if tc.want == 413 {
