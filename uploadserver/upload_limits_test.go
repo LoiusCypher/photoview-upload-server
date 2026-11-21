@@ -115,7 +115,9 @@ func TestUploadLimits(t *testing.T) {
 						if err := os.WriteFile( pdfRoot + "/limit.bin", []byte("original"), 0600); err != nil {
 							t.Fatal(err)
 						}
-						if shaExisting, err := recordFile( pdfRoot + "/limit.bin", "limit.bin"); err != nil {
+						var err
+						shaExisting, err = recordFile( pdfRoot + "/limit.bin", "limit.bin"); err != nil {
+						if  err != nil {
 							t.Fatal(err)
 						}
 					}
@@ -148,10 +150,10 @@ func TestUploadLimits(t *testing.T) {
 						currentSha, err := getPathSha( "limit.bin")
 						if tc.existing {
 							if err != nil || currentSha != shaExisting {
-								t.Fatalf("existing file changed: %q, %v", content, err)
+								t.Fatalf("existing file changed: %q, %q, %v", shaExisting, currentSha, err)
 							}
 						} else if !os.IsNotExist(err) {
-							t.Fatalf("rejected upload left destination: %q, %v", content, err)
+							t.Fatalf("rejected upload left destination: %q, %v", shaExisting, err)
 						}
 					}
 				})
