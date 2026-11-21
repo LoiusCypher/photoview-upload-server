@@ -115,7 +115,9 @@ func TestUploadLimits(t *testing.T) {
 						if err := os.WriteFile( pdfRoot + "/limit.bin", []byte("original"), 0600); err != nil {
 							t.Fatal(err)
 						}
-						shaExisting = recordFile( pdfRoot + "/limit.bin", "limit.bin")
+						if shaExisting, err = recordFile( pdfRoot + "/limit.bin", "limit.bin"); err != nil {
+							t.Fatal(err)
+						}
 					}
 					target := "/upload/?name=limit.bin"
 					handler := uploadLimitRouter(s)
