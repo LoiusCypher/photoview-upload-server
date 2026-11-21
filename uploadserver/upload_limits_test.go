@@ -110,10 +110,12 @@ func TestUploadLimits(t *testing.T) {
 			} {
 				t.Run(method+"/"+map[bool]string{true: "unknown", false: "known"}[unknownLength]+"/"+tc.name, func(t *testing.T) {
 					s := &Server{ServerConfig: ServerConfig{MaxUploadSize: tc.limit},}
+					var shaExisting string
 					if tc.existing {
 						if err := os.WriteFile( pdfRoot + "/limit.bin", []byte("original"), 0600); err != nil {
 							t.Fatal(err)
 						}
+						shaExisting = recordFile( pdfRoot + "/limit.bin", "limit.bin")
 					}
 					target := "/upload/?name=limit.bin"
 					handler := uploadLimitRouter(s)
@@ -141,9 +143,9 @@ func TestUploadLimits(t *testing.T) {
 						}
 					}
 					if tc.want == 413 || tc.want == 409 {
-						content, err := os.ReadFile( pdfRoot + "/limit.bin")
+						currentSha, err := getPathSha( "limit.bin")
 						if tc.existing {
-							if err != nil || string(content) != "original" {
+							if err != nil || currentSha != existingSha {
 								t.Fatalf("existing file changed: %q, %v", content, err)
 							}
 						} else if !os.IsNotExist(err) {

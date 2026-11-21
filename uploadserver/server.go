@@ -244,7 +244,7 @@ func (s *Server) processUpload(w http.ResponseWriter, r *http.Request) (string, 
 		log.Printf("failed to write the uploaded content: %v", err)
 		return "", "", fmt.Errorf("failed to write the content")
 	}
-	log.Printf("uploaded by PUT to %s (%d bytes)", pdfFile.Name(), written)
+	log.Printf("uploaded by %s to %s (%d bytes)", r.Method, pdfFile.Name(), written)
 	err = convertPdfToJpg( pdfFile.Name(), s.PictureRoot, dstPath)
 	if err != nil {
 		return "", "", err
