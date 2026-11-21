@@ -254,7 +254,7 @@ func TestUploadMultipartTemporaryCleanup(t *testing.T) {
 					if err != nil {
 						t.Fatal(err)
 					}
-					if currentSha != "" {
+					if currentSha == "" || ( tc.existing && currentSha == shaExisting) {
 						t.Fatalf("upload was not registered in database")
 					}
 				}
