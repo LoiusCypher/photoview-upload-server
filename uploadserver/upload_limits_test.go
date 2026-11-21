@@ -82,9 +82,9 @@ func TestUploadLimits(t *testing.T) {
 	CreateEmptyDatabase_TestHelper( t, path.Join( sqlRoot, "shafiles.db"))
 
 	// ghostscript output has to be on real file system
-	jpgRoot, err1 := os.MkdirTemp( "", "")
+	pictureRoot, err1 := os.MkdirTemp( "", "")
 	require.Nil(t, err1)
-	defer os.RemoveAll( jpgRoot)
+	defer os.RemoveAll( pictureRoot)
 
 	srcRoot, err2 := os.MkdirTemp("", "")
 	require.Nil(t, err2)
@@ -115,7 +115,7 @@ func TestUploadLimits(t *testing.T) {
 				{name: "maximum integer limit", limit: math.MaxInt64, size: 16, want: 201},
 			} {
 				t.Run(method+"/"+map[bool]string{true: "unknown", false: "known"}[unknownLength]+"/"+tc.name, func(t *testing.T) {
-					s := &Server{ServerConfig: ServerConfig{MaxUploadSize: tc.limit},}
+					s := &Server{ServerConfig: ServerConfig{MaxUploadSize: tc.limit, PictureRoot: pictureRoot, },}
 					var shaExisting string
 					if tc.existing {
 						if err := os.WriteFile( path.Join( srcRoot, "/limit.bin"), []byte("original"), 0600); err != nil {
@@ -180,8 +180,8 @@ func TestUploadMultipartTemporaryCleanup(t *testing.T) {
 	defer os.RemoveAll( sqlRoot)
 	CreateEmptyDatabase_TestHelper( t, path.Join( sqlRoot, "shafiles.db"))
 
-	pictureRoot, err2 := os.MkdirTemp("", "")
-	require.Nil(t, err2)
+		pictureRoot, err2 := os.MkdirTemp("", "")
+		require.Nil(t, err2)
 	defer os.RemoveAll( pictureRoot)
 
 	originRoot, err2 := os.MkdirTemp("", "")
@@ -207,7 +207,7 @@ func TestUploadMultipartTemporaryCleanup(t *testing.T) {
 		} {
 			t.Run(method+"/"+tc.name, func(t *testing.T) {
 				root := t.TempDir()
-				s := NewServer(ServerConfig{PictureRoot: pictureRoot, MaxUploadSize: tc.limit})
+				s := NewServer(ServerConfig{PictureRoot: pictureRoot, UploadRoot: root, MaxUploadSize: tc.limit})
 				var shaExisting string
 				if tc.existing {
 					if err := os.WriteFile( path.Join( root, "limit.bin"), []byte("original"), 0600); err != nil {
@@ -238,6 +238,14 @@ func TestUploadMultipartTemporaryCleanup(t *testing.T) {
 				if len(entries) != 0 {
 					t.Fatalf("temporary files remain: %v", entries)
 				}
+				// We should never leave files in upload
+				entries, err := filepath.Glob( filepath.Join( root, "*"))
+				if err != nil {
+					log.Fatal(err)
+				}
+				if len(entries) > 0 {
+					t.Fatal("rejected upload left files in upload:", entries)
+				}
 				if tc.want == 201 {
 					currentSha, err := getPathSha( "limit.bin")
 					if err != nil {
@@ -245,10 +253,6 @@ func TestUploadMultipartTemporaryCleanup(t *testing.T) {
 					}
 					if currentSha != "" {
 						t.Fatalf("upload was not registered in database")
-					}
-				} else if !tc.existing {
-					if _, err := os.Stat( path.Join( originRoot, "limit.bin")); !os.IsNotExist(err) {
-						t.Fatalf("rejected upload left destination: %v", err)
 					}
 				}
 			})
