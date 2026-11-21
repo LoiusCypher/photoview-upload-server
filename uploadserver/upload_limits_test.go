@@ -219,7 +219,7 @@ func TestUploadMultipartTemporaryCleanup(t *testing.T) {
 					if  err != nil {
 						t.Fatal(err)
 					}
-					shaExisting, err = recordFileSha( shaExisting, "limit.bin")
+					_, err = recordFileSha( shaExisting, "limit.bin")
 					if  err != nil {
 						t.Fatal(err)
 					}

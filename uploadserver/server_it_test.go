@@ -85,7 +85,7 @@ func TestServer(t *testing.T) {
 	defer os.RemoveAll( sqlRoot)
 	CreateEmptyDatabase_TestHelper( t, path.Join( sqlRoot, "shafiles.db"))
 
-	helloFile_db_path := "arbitrary / file path / hello,pdf"
+	helloFile_db_path := "arbitrary / file path / hello.pdf"
 	helloSha := RecordFile_TestHelper( t, pdfPath_hello, helloFile_db_path)
 	fmt.Println("SHA 1", helloSha)
 
