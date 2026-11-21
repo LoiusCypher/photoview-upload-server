@@ -115,8 +115,8 @@ func TestUploadLimits(t *testing.T) {
 						if err := os.WriteFile( pdfRoot + "/limit.bin", []byte("original"), 0600); err != nil {
 							t.Fatal(err)
 						}
-						var err
-						shaExisting, err = recordFile( pdfRoot + "/limit.bin", "limit.bin"); err != nil {
+						var err error
+						shaExisting, err = recordFile( pdfRoot + "/limit.bin", "limit.bin")
 						if  err != nil {
 							t.Fatal(err)
 						}
