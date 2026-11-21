@@ -40,6 +40,8 @@ type ServerConfig struct {
 	Addr string `json:"addr"`
 	// Path to the picture root.
 	PictureRoot string `json:"picture_root"`
+	// Path to the picture root.
+	UploadRoot string `json:"upload_root"`
 	// Ghostscript conversiob flags.
 	ConvFlags string `json:"conv_flags"`
 	// Determines whether to enable CORS header.
@@ -228,7 +230,7 @@ func (s *Server) processUpload(w http.ResponseWriter, r *http.Request) (string, 
 	// MaxBytesReader closes the underlying io.Reader on its Close() is called
 	defer fileContent.Close()
 
-	pdfFile, err := os.CreateTemp( "", "*.pdf")
+	pdfFile, err := os.CreateTemp( s.UploadRoot, "*.pdf")
 	if err != nil {
 		log.Printf("failed to create temp file (dstPath=%s): %v", dstPath, err)
 		return "", "", fmt.Errorf("cannot open file %v", err)

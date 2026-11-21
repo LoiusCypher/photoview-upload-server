@@ -20,6 +20,7 @@ func Test_parseConfig(t *testing.T) {
 		if _, err := f.WriteString(`{
 			"addr": ":8123",
 			"picture_root": "/opt/app",
+			"upload_root": "/tmp",
 			"conv_flags": "-r150",
 			"enable_cors": true,
 			"max_upload_size": 1234567,
@@ -49,6 +50,7 @@ func Test_parseConfig(t *testing.T) {
 		want := &uploadserver.ServerConfig{
 			Addr:               ":8123",
 			PictureRoot:        "/opt/app",
+			UploadRoot:         "/tmp",
 			ConvFlags:          "-r150",
 			EnableCORS:         true,
 			MaxUploadSize:      1234567,
@@ -70,6 +72,7 @@ func Test_parseConfig(t *testing.T) {
 		args := []string{
 			"-addr", ":8987",
 			"-picture_root", "/tmp/sus",
+			"-upload_root", "/tmp/upl",
 			"-conv_flags", "-r200",
 			"-enable_cors=false",
 			"-max_upload_size", "987654",
@@ -89,6 +92,7 @@ func Test_parseConfig(t *testing.T) {
 		want := &uploadserver.ServerConfig{
 			Addr:               ":8987",
 			PictureRoot:        "/tmp/sus",
+			UploadRoot:         "/tmp/upl",
 			ConvFlags:          "-r200",
 			EnableCORS:         false,
 			MaxUploadSize:      987654,
@@ -110,6 +114,7 @@ func Test_parseConfig(t *testing.T) {
 		args := []string{
 			"-addr", ":8987",
 			"-picture_root", "/tmp/sus",
+			"-upload_root", "/tmp/upl",
 			"-conv_flags", "-r200",
 			"-enable_cors=true",
 			"-max_upload_size", "987654",
@@ -127,6 +132,7 @@ func Test_parseConfig(t *testing.T) {
 		if _, err := f.WriteString(`{
 			"addr": ":8123",
 			"picture_root": "/opt/app",
+			"upload_root": "/opt/app/upl",
 			"conv_flags": "-r150",
 			"enable_cors": true,
 			"max_upload_size": 1234567,
@@ -156,6 +162,7 @@ func Test_parseConfig(t *testing.T) {
 		want := &uploadserver.ServerConfig{
 			Addr:               ":8987",
 			PictureRoot:        "/tmp/sus",
+			UploadRoot:         "/tmp/upl",
 			ConvFlags:          "-r200",
 			EnableCORS:         true,
 			MaxUploadSize:      987654,

@@ -20,6 +20,7 @@ import (
 
 var DefaultConfig = ServerConfig{
 	PictureRoot:        ".",
+	UploadRoot:         "", // which means to use default os temp folder
 	ConvFlags:          "-r300",
 	Addr:               uploadserver.DefaultAddr,
 	EnableCORS:         nil,
@@ -114,6 +115,8 @@ type ServerConfig struct {
 	Addr string `json:"addr"`
 	// Path to the picture root.
 	PictureRoot string `json:"picture_root"`
+	// Path to the upload root.
+	UploadRoot string `json:"upload_root"`
 	// Ghostscript conversion flags.
 	ConvFlags string `json:"conv_flags"`
 	// Determines whether to enable CORS header.
@@ -147,6 +150,7 @@ func (c *ServerConfig) AsConfig() uploadserver.ServerConfig {
 	return uploadserver.ServerConfig{
 		Addr:               c.Addr,
 		PictureRoot:        c.PictureRoot,
+		UploadRoot:         c.UploadRoot,
 		ConvFlags:          c.ConvFlags,
 		EnableCORS:         *c.EnableCORS,
 		MaxUploadSize:      c.MaxUploadSize,
@@ -168,6 +172,7 @@ type app struct {
 	flagSet            *flag.FlagSet
 	configFilePath     string
 	pictureRoot        string
+	uploadRoot         string
 	convFlags          string
 	addr               string
 	enableCORS         boolOptFlag
@@ -186,6 +191,7 @@ func NewApp(name string) *app {
 	fs := flag.NewFlagSet(name, flag.ExitOnError)
 	fs.StringVar(&a.configFilePath, "config", "", "path to config file")
 	fs.StringVar(&a.pictureRoot, "picture_root", "", "path to picture root directory")
+	fs.StringVar(&a.uploadRoot, "upload_root", "", "path to upload root directory")
 	fs.StringVar(&a.convFlags, "conv_flags", "", "ghostscript conversion flags")
 	fs.StringVar(&a.addr, "addr", "", "address to listen")
 	fs.Var(&a.enableCORS, "enable_cors", "enable CORS header")
@@ -269,6 +275,7 @@ func (a *app) ParseConfig(args []string) (*uploadserver.ServerConfig, error) {
 
 	configFromFlags := ServerConfig{
 		PictureRoot:        a.pictureRoot,
+		UploadRoot:         a.uploadRoot,
 		ConvFlags:          a.convFlags,
 		Addr:               a.addr,
 		MaxUploadSize:      a.maxUploadSize,
