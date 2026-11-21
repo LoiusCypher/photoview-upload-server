@@ -241,7 +241,7 @@ func TestUploadMultipartTemporaryCleanup(t *testing.T) {
 				// We should never leave files in upload
 				entries, err1 := filepath.Glob( filepath.Join( root, "*"))
 				if err1 != nil {
-					log.Fatal(err1)
+					t.Fatal(err1)
 				}
 				if len(entries) > 0 {
 					t.Fatal("rejected upload left files in upload:", entries)
