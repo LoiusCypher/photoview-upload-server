@@ -145,7 +145,7 @@ func TestUploadLimits(t *testing.T) {
 					if tc.want == 413 || tc.want == 409 {
 						currentSha, err := getPathSha( "limit.bin")
 						if tc.existing {
-							if err != nil || currentSha != existingSha {
+							if err != nil || currentSha != shaExisting {
 								t.Fatalf("existing file changed: %q, %v", content, err)
 							}
 						} else if !os.IsNotExist(err) {
