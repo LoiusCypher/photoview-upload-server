@@ -7,12 +7,12 @@ Simple HTTP server to save artifacts
 - [Timeouts](#timeouts)
 - [Testing](#testing)
 - [API](#api)
-  - [`GET /list?name=path`](#get-list)
-  - [`OPTIONS /list`](#options-list)
-  - [`PUT /file?name=path`](#put-file)
-  - [`GET /file?name=path`](#get-file)
-  - [`DELETE /file?name=path`](#delete-file)
-  - [`OPTIONS /file`](#options-file)
+  - [`GET /list/?name=path`](#get-list)
+  - [`OPTIONS /list/`](#options-list)
+  - [`POST /upload/`](#post-file)
+  - [`GET /file/?name=path`](#get-file)
+  - [`DELETE /file/?name=path`](#delete-file)
+  - [`OPTIONS /file/`](#options-file)
 
 
 ## Usage
@@ -89,8 +89,6 @@ Please consider using a reverse proxy like nginx.
 
 ## Timeouts
 
-(Since v2.1.0)
-
 There are 2 timeout configurations: read and write.
 The terms "read" and "write" are from the server's perspective. From clients, they are "upload" (`PUT`) and "get info" (`GET`) respectively.
 
@@ -120,8 +118,11 @@ $ go test ./...
 This includes end-to-end tests. By default, the server with on-memory FileSystem is created and it starts listening on
 the port chosen randomly. You can control this behavior by setting the environment variables.
 
-`TEST_WITH_REAL_FS=${PATH_TO_PICTURE_ROOT}` has to be set, because the test server needs a real filesystem. Make sure the picture
-root directory contains no files; otherwise, some tests might be failed. The directory will not be cleaned after testing.
+The workflow starts with a local file that is uploaded and then converted from PDF to JPG by ghostscript. The uploaded
+file is then removed and its SHA is recorded in an SqLite database.
+Sqlite and ghostscript are not prepared for virtual filesystem, therefore the tests use temp files for the database location,
+the uploaded file and the final JPEG files.
+f the test completes all files are cleaned up.
 
 If `TEST_TARGET_ADDR-${HOST}:${PORT}` is set, the test program doesn't start a local test server and sends requests to
 `http://${HOST}:${PORT}`. Note that the target server's picture root should be cleared prior to testing.

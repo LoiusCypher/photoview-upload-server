@@ -10,7 +10,7 @@ services:
       - jpgroot:/jpgroot
     command: -picture_root=/jpgroot -addr=:8080
   test:
-    image: golang:1.26
+    image: golang:1.27
     environment:
       - TEST_WITH_REAL_FS=/jpgroot
       - TEST_TARGET_ADDR=app:8080
@@ -19,7 +19,7 @@ services:
       - jpgroot:/jpgroot
       - sqlroot:/sqlroot
     working_dir: /app
-    command: go test -v -run TestServer ./...
+    command: bash -c "apt update ; apt install --no-install-recommends -y ghostscript sqlite3 && go test -v -run TestServer ./..."
     depends_on:
       - app
 volumes:
