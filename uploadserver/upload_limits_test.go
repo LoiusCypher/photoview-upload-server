@@ -86,6 +86,10 @@ func TestUploadLimits(t *testing.T) {
 	require.Nil(t, err1)
 	defer os.RemoveAll( pictureRoot)
 
+	root, err1 := os.MkdirTemp( "", "")
+	require.Nil(t, err1)
+	defer os.RemoveAll( root)
+
 	srcRoot, err2 := os.MkdirTemp("", "")
 	require.Nil(t, err2)
 	defer os.RemoveAll( srcRoot)
@@ -115,7 +119,7 @@ func TestUploadLimits(t *testing.T) {
 				{name: "maximum integer limit", limit: math.MaxInt64, size: 16, want: 201},
 			} {
 				t.Run(method+"/"+map[bool]string{true: "unknown", false: "known"}[unknownLength]+"/"+tc.name, func(t *testing.T) {
-					s := &Server{ServerConfig: ServerConfig{MaxUploadSize: tc.limit, PictureRoot: pictureRoot, },}
+					s := &Server{ServerConfig: ServerConfig{MaxUploadSize: tc.limit, PictureRoot: pictureRoot, UploadRoot: root,},}
 					var shaExisting string
 					if tc.existing {
 						if err := os.WriteFile( path.Join( srcRoot, "/limit.bin"), []byte("original"), 0600); err != nil {
