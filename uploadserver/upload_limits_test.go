@@ -237,7 +237,6 @@ func TestUploadMultipartTemporaryCleanup(t *testing.T) {
 				if rr.Code != tc.want {
 					t.Fatalf("status=%d, want=%d: %s", rr.Code, tc.want, rr.Body.String())
 				}
-				}
 				// We should never leave files in upload
 				entries, err1 := filepath.Glob( filepath.Join( root, "*"))
 				if err1 != nil {
