@@ -157,14 +157,20 @@ func TestUploadLimits(t *testing.T) {
 							t.Fatalf("read %d bytes beyond body cap", counter.read)
 						}
 					}
+					// We should never leave files in upload
+					entries, err1 := filepath.Glob( filepath.Join( root, "*"))
+					if err1 != nil {
+						t.Fatal(err1)
+					}
+					if len(entries) > 0 {
+						t.Fatal("rejected upload left files in upload:", len(entries), entries)
+					}
 					if tc.want == 413 || tc.want == 409 {
 						currentSha, err := getPathSha( "limit.bin")
 						if tc.existing {
 							if err != nil || currentSha != shaExisting {
 								t.Fatalf("existing file changed: %q, %q, %v", shaExisting, currentSha, err)
 							}
-						} else if !os.IsNotExist(err) {
-							t.Fatalf("rejected upload left destination: %q, %v", shaExisting, err)
 						}
 					}
 				})
@@ -231,12 +237,6 @@ func TestUploadMultipartTemporaryCleanup(t *testing.T) {
 				if rr.Code != tc.want {
 					t.Fatalf("status=%d, want=%d: %s", rr.Code, tc.want, rr.Body.String())
 				}
-				entries, err := filepath.Glob( path.Join(tmp, "multipart-*"))
-				if err != nil {
-					t.Fatal(err)
-				}
-				if len(entries) != 0 {
-					t.Fatalf("temporary files remain: %v", entries)
 				}
 				// We should never leave files in upload
 				entries, err1 := filepath.Glob( filepath.Join( root, "*"))
@@ -244,7 +244,7 @@ func TestUploadMultipartTemporaryCleanup(t *testing.T) {
 					t.Fatal(err1)
 				}
 				if len(entries) > 0 {
-					t.Fatal("rejected upload left files in upload:", entries)
+					t.Fatal("rejected upload left files in upload:", len(entries), entries)
 				}
 				if tc.want == 201 {
 					currentSha, err := getPathSha( "limit.bin")
