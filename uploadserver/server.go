@@ -28,6 +28,7 @@ var (
 
 var (
 	ErrFileSizeLimitExceeded = fmt.Errorf("file size limit exceeded")
+	ErrNoFileNameSopecified = fmt.Errorf("no name specified")
 )
 
 var (
@@ -249,7 +250,7 @@ func (s *Server) processUpload(w http.ResponseWriter, r *http.Request) (string, 
 	log.Printf("uploaded by %s to %s (%d bytes)", r.Method, pdfFile.Name(), written)
 	err = convertPdfToJpg( pdfFile.Name(), s.PictureRoot, dstPath)
 	if err != nil {
-		return "", "", err
+		return "", "", ErrNoFileNameSopecified
 	}
 	var sha string
 	sha, err = recordFile( pdfFile.Name(), dstPath)
@@ -261,19 +262,18 @@ func (s *Server) processUpload(w http.ResponseWriter, r *http.Request) (string, 
 
 func (s *Server) handlePostUpload(w http.ResponseWriter, r *http.Request) (int, any) {
 	log.Printf("handlePostUpload %s %s", r.Method, r.URL)
-	//if r.URL.Path != "/upload" && r.URL.Path != "/upload/" {
-		//return http.StatusNotFound, fmt.Errorf("page not found: %s", r.URL.Path)
-	//}
 	requestPath, sha, err := s.processUpload(w, r)
-	if err != nil {
-		if err == ErrFileSizeLimitExceeded {
+	switch err {
+		case nil:
+			if requestPath == "" || sha == "" {
+				return http.StatusBadRequest, fmt.Errorf( "missing name parameter")
+			}
+		case ErrFileSizeLimitExceeded:
 			return http.StatusRequestEntityTooLarge, err
-		} else {
+		case ErrNoFileNameSopecified:
+			return http.StatusBadRequest, err
+		default:
 			return http.StatusRequestEntityTooLarge, err
-		}
-	}
-	if requestPath == "" || sha == "" {
-		return http.StatusBadRequest, fmt.Errorf( "missing name parameter")
 	}
 	if s.EnableCORS {
 		w.Header().Set("Access-Control-Allow-Origin", "*")

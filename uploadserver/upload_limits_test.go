@@ -103,20 +103,20 @@ func TestUploadLimits(t *testing.T) {
 				existing            bool
 				want                int
 			}{
-				{name: "empty", limit: 16, want: 201},
-				{name: "exact file limit", limit: 16, size: 16, want: 201},
-				{name: "one byte over", limit: 16, size: 17, want: 413},
-				{name: "oversized overwrite preserves original", limit: 16, size: 17, existing: true, want: 413},
-				{name: "oversized conflict", limit: 16, size: 17, existing: true, want: 413},
-				{name: "aggregate multipart limit", limit: 16, size: 1, extra: 2 << 20, want: 413},
-				{name: "large selected part", limit: 16, size: 2 << 20, want: 413},
-				{name: "conflict", limit: 16, size: 16, existing: true, want: 409},
-				{name: "overwrite", limit: 16, size: 16, existing: true, want: 201},
-				{name: "zero limit empty", want: 201},
-				{name: "zero limit nonempty", size: 1, want: 413},
-				{name: "negative limit empty", limit: -1, want: 201},
-				{name: "negative limit nonempty", limit: -1, size: 1, want: 413},
-				{name: "maximum integer limit", limit: math.MaxInt64, size: 16, want: 201},
+				{name: "empty", limit: 16, want: http.StatusCreated},
+				{name: "exact file limit", limit: 16, size: 16, want: http.StatusCreated},
+				{name: "one byte over", limit: 16, size: 17, want: http.StatusRequestEntityTooLarge},
+				{name: "oversized overwrite preserves original", limit: 16, size: 17, existing: true, want: http.StatusRequestEntityTooLarge},
+				{name: "oversized conflict", limit: 16, size: 17, existing: true, want: http.StatusRequestEntityTooLarge},
+				{name: "aggregate multipart limit", limit: 16, size: 1, extra: 2 << 20, want: http.StatusRequestEntityTooLarge},
+				{name: "large selected part", limit: 16, size: 2 << 20, want: http.StatusRequestEntityTooLarge},
+				{name: "conflict", limit: 16, size: 16, existing: true, want: http.StatusCreated},
+				{name: "overwrite", limit: 16, size: 16, existing: true, want: http.StatusCreated},
+				{name: "zero limit empty", want: http.StatusCreated},
+				{name: "zero limit nonempty", size: 1, want: http.StatusRequestEntityTooLarge},
+				{name: "negative limit empty", limit: -1, want: http.StatusCreated},
+				{name: "negative limit nonempty", limit: -1, size: 1, want: http.StatusRequestEntityTooLarge},
+				{name: "maximum integer limit", limit: math.MaxInt64, size: 16, want: http.StatusCreated},
 			} {
 				t.Run(method+"/"+map[bool]string{true: "unknown", false: "known"}[unknownLength]+"/"+tc.name, func(t *testing.T) {
 					s := &Server{ServerConfig: ServerConfig{MaxUploadSize: tc.limit, PictureRoot: pictureRoot, UploadRoot: root,},}
@@ -139,7 +139,7 @@ func TestUploadLimits(t *testing.T) {
 					urlPath := "/upload/?name=limit.bin"
 					handler := uploadLimitRouter(s)
 					attempts := 1
-					if tc.want == 413 {
+					if tc.want == http.StatusRequestEntityTooLarge {
 						attempts = 2
 					}
 					for attempt := 0; attempt < attempts; attempt++ {
@@ -154,7 +154,7 @@ func TestUploadLimits(t *testing.T) {
 						if rr.Code != tc.want {
 							t.Fatalf("status=%d, want=%d: %s", rr.Code, tc.want, rr.Body.String())
 						}
-						if tc.want == 413 && rr.Body.String() != `{"ok":false,"error":"file size limit exceeded"}` {
+						if tc.want == http.StatusRequestEntityTooLarge && rr.Body.String() != `{"ok":false,"error":"file size limit exceeded"}` {
 							t.Fatalf("unexpected body: %s", rr.Body.String())
 						}
 						if tc.limit >= 0 && tc.limit < math.MaxInt64-(1<<20)-1 && counter.read > tc.limit+(1<<20)+1 {
@@ -169,7 +169,7 @@ func TestUploadLimits(t *testing.T) {
 					if len(entries) > 0 {
 						t.Fatal("rejected upload left files in upload:", len(entries), entries)
 					}
-					if tc.want == 413 || tc.want == 409 {
+					if tc.want == http.StatusRequestEntityTooLarge || tc.want == http.StatusConflict {
 						currentSha, err := getPathSha( "limit.bin")
 						if tc.existing {
 							if err != nil || currentSha != shaExisting {
@@ -190,18 +190,14 @@ func TestUploadMultipartTemporaryCleanup(t *testing.T) {
 	defer os.RemoveAll( sqlRoot)
 	CreateEmptyDatabase_TestHelper( t, path.Join( sqlRoot, "shafiles.db"))
 
-		pictureRoot, err2 := os.MkdirTemp("", "")
-		require.Nil(t, err2)
+	pictureRoot, err2 := os.MkdirTemp("", "")
+	require.Nil(t, err2)
 	defer os.RemoveAll( pictureRoot)
 
 	originRoot, err2 := os.MkdirTemp("", "")
 	require.Nil(t, err2)
 	defer os.RemoveAll( originRoot)
 
-	tmp := t.TempDir()
-	t.Setenv("TMPDIR", tmp)
-	t.Setenv("TMP", tmp)
-	t.Setenv("TEMP", tmp)
 	for _, method := range []string{http.MethodPost} {
 		for _, tc := range []struct {
 			name, field string
@@ -209,11 +205,11 @@ func TestUploadMultipartTemporaryCleanup(t *testing.T) {
 			existing    bool
 			want        int
 		}{
-			{name: "success", field: "file", limit: 34 << 20, want: 201},
-			{name: "conflict", field: "file", limit: 34 << 20, existing: true, want: 409},
-			{name: "missing selected file", field: "other", limit: 34 << 20, want: 500},
-			{name: "file over limit after spill", field: "file", limit: (33 << 20) - 1, want: 413},
-			{name: "body limit during spill", field: "file", limit: 32 << 20, want: 413},
+			{name: "success", field: "file", limit: 34 << 20, want: http.StatusCreated},
+			{name: "conflict", field: "file", limit: 34 << 20, existing: true, want: http.StatusCreated},
+			{name: "missing selected file", field: "other", limit: 34 << 20, want: http.StatusInternalServerError},
+			{name: "file over limit after spill", field: "file", limit: (33 << 20) - 1, want: http.StatusRequestEntityTooLarge},
+			{name: "body limit during spill", field: "file", limit: 32 << 20, want: http.StatusRequestEntityTooLarge},
 		} {
 			t.Run(method+"/"+tc.name, func(t *testing.T) {
 				root := t.TempDir()
@@ -249,7 +245,7 @@ func TestUploadMultipartTemporaryCleanup(t *testing.T) {
 				if len(entries) > 0 {
 					t.Fatal("rejected upload left files in upload:", len(entries), entries)
 				}
-				if tc.want == 201 {
+				if tc.want == http.StatusCreated {
 					currentSha, err := getPathSha( "limit.bin")
 					if err != nil {
 						t.Fatal(err)
