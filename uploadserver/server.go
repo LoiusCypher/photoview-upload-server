@@ -28,7 +28,7 @@ var (
 
 var (
 	ErrFileSizeLimitExceeded = fmt.Errorf("file size limit exceeded")
-	ErrNoFileNameSopecified = fmt.Errorf("no name specified")
+	ErrNoFileNameSpecified = fmt.Errorf("no name specified")
 )
 
 var (
@@ -209,7 +209,7 @@ func (s *Server) processUpload(w http.ResponseWriter, r *http.Request) (string, 
 
 	dstPath := r.FormValue( FormNameKey)
 	if dstPath == "" {
-		return "", "", nil
+		return "", "", ErrNoFileNameSpecified
 	}
 	uplFile, uplHeader, err := r.FormFile( FormFileKey)
 	if err != nil {
@@ -219,7 +219,7 @@ func (s *Server) processUpload(w http.ResponseWriter, r *http.Request) (string, 
 			return "", "", ErrFileSizeLimitExceeded
 		}
 		log.Printf("failed to obtain form file: %v", err)
-		return "", "", fmt.Errorf("cannot obtain the uploaded content")
+		return "", "", err)
 	}
 	defer uplFile.Close()
 	if uplHeader.Size > fileLimit {
@@ -233,8 +233,8 @@ func (s *Server) processUpload(w http.ResponseWriter, r *http.Request) (string, 
 
 	pdfFile, err := os.CreateTemp( s.UploadRoot, "*.pdf")
 	if err != nil {
-		log.Printf("failed to create temp file (dstPath=%s): %v", dstPath, err)
-		return "", "", fmt.Errorf("cannot open file %v", err)
+		log.Printf("failed to create temp file in %s: %v", s.UploadRoot, err)
+		return "", "", err)
 	}
 	defer os.Remove(pdfFile.Name())
 	log.Printf("processUpload pdfFile: %s", pdfFile.Name())
@@ -245,16 +245,18 @@ func (s *Server) processUpload(w http.ResponseWriter, r *http.Request) (string, 
 			return "", "", ErrFileSizeLimitExceeded
 		}
 		log.Printf("failed to write the uploaded content: %v", err)
-		return "", "", fmt.Errorf("failed to write the content")
+		return "", "", err)
 	}
 	log.Printf("uploaded by %s to %s (%d bytes)", r.Method, pdfFile.Name(), written)
 	err = convertPdfToJpg( pdfFile.Name(), s.PictureRoot, dstPath)
 	if err != nil {
-		return "", "", ErrNoFileNameSopecified
+		log.Printf("failed to convert file to jpeg: %v", err)
+		return "", "", err
 	}
 	var sha string
 	sha, err = recordFile( pdfFile.Name(), dstPath)
 	if err != nil {
+		log.Printf("failed to record file in database: %v", err)
 		return "", "", err
 	}
 	return dstPath, sha, nil
@@ -265,15 +267,12 @@ func (s *Server) handlePostUpload(w http.ResponseWriter, r *http.Request) (int, 
 	requestPath, sha, err := s.processUpload(w, r)
 	switch err {
 		case nil:
-			if requestPath == "" || sha == "" {
-				return http.StatusBadRequest, fmt.Errorf( "missing name parameter")
-			}
 		case ErrFileSizeLimitExceeded:
 			return http.StatusRequestEntityTooLarge, err
-		case ErrNoFileNameSopecified:
-			return http.StatusBadRequest, err
+		case ErrNoFileNameSpecified:
+			return http.StatusBadRequest, fmt.Errorf( "missing name parameter")
 		default:
-			return http.StatusRequestEntityTooLarge, err
+			return http.StatusInternalServerError, err
 	}
 	if s.EnableCORS {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
