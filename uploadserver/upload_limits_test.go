@@ -230,7 +230,7 @@ func TestUploadMultipartTemporaryCleanup(t *testing.T) {
 			if err1 != nil {
 				t.Fatal(err1)
 			}
-			lnif len(entries) > 0 {
+			if len(entries) > 0 {
 				log.Println("rejected upload left files in upload:", root, len(entries), entries)
 			}
 					_, err = recordFileSha( shaExisting, "limit.bin")
