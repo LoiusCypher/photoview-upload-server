@@ -219,7 +219,7 @@ func TestUploadMultipartTemporaryCleanup(t *testing.T) {
 					if err := os.WriteFile( path.Join( root, "limit.bin"), []byte("original"), 0600); err != nil {
 						t.Fatal(err)
 					}
-					// defer os.Remove( path.Join( root, "limit.bin"))
+					defer os.Remove( path.Join( root, "limit.bin"))
 					var err error
 					shaExisting, err = calcSha( path.Join( root, "limit.bin"))
 					if  err != nil {
