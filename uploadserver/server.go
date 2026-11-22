@@ -219,7 +219,7 @@ func (s *Server) processUpload(w http.ResponseWriter, r *http.Request) (string, 
 			return "", "", ErrFileSizeLimitExceeded
 		}
 		log.Printf("failed to obtain form file: %v", err)
-		return "", "", err)
+		return "", "", err
 	}
 	defer uplFile.Close()
 	if uplHeader.Size > fileLimit {
@@ -234,7 +234,7 @@ func (s *Server) processUpload(w http.ResponseWriter, r *http.Request) (string, 
 	pdfFile, err := os.CreateTemp( s.UploadRoot, "*.pdf")
 	if err != nil {
 		log.Printf("failed to create temp file in %s: %v", s.UploadRoot, err)
-		return "", "", err)
+		return "", "", err
 	}
 	defer os.Remove(pdfFile.Name())
 	log.Printf("processUpload pdfFile: %s", pdfFile.Name())
@@ -245,7 +245,7 @@ func (s *Server) processUpload(w http.ResponseWriter, r *http.Request) (string, 
 			return "", "", ErrFileSizeLimitExceeded
 		}
 		log.Printf("failed to write the uploaded content: %v", err)
-		return "", "", err)
+		return "", "", err
 	}
 	log.Printf("uploaded by %s to %s (%d bytes)", r.Method, pdfFile.Name(), written)
 	err = convertPdfToJpg( pdfFile.Name(), s.PictureRoot, dstPath)
