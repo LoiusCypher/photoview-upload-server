@@ -225,6 +225,14 @@ func TestUploadMultipartTemporaryCleanup(t *testing.T) {
 					if  err != nil {
 						t.Fatal(err)
 					}
+			// see what's up
+			entries, err1 := filepath.Glob( filepath.Join( root, "*"))
+			if err1 != nil {
+				t.Fatal(err1)
+			}
+			if len(entries) > 0 {
+				t.Println("rejected upload left files in upload:", root, len(entries), entries)
+			}
 					_, err = recordFileSha( shaExisting, "limit.bin")
 					if  err != nil {
 						t.Fatal(err)
@@ -243,7 +251,7 @@ func TestUploadMultipartTemporaryCleanup(t *testing.T) {
 					t.Fatal(err1)
 				}
 				if len(entries) > 0 {
-					t.Fatal("rejected upload left files in upload:", len(entries), entries)
+					t.Fatal("rejected upload left files in upload:", root, len(entries), entries)
 				}
 				if tc.want == http.StatusCreated {
 					currentSha, err := getPathSha( "limit.bin")
