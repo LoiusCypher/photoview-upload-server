@@ -10,7 +10,6 @@ import (
 	"net/http/httptest"
 	"os"
 	"path"
-	"path/filepath"
 	"strings"
 	"testing"
 
@@ -404,8 +403,7 @@ func TestServer_PostHandler(t *testing.T) {
 					t.Errorf("unexpected response body: %v", err)
 				}
 				resp.Files[0].Sha = sha
-				localPath := strings.TrimSuffix(resp.Files[0].Path, ".pdf") + "-01.jpg"
-				localFullPath := filepath.Join(jpgRoot, localPath)
+				localFullPath := convertPdfToJpgFilename( jpgRoot, resp.Files[0].Path, "-01.jpg")
 				assert.FileExists( t, localFullPath)
 				t.Logf("opening %s to verify", localFullPath)
 			}

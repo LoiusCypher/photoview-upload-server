@@ -161,7 +161,7 @@ func TestServer(t *testing.T) {
 		result := CheckResponseSuccess_TestHelper( t, resp, http.StatusCreated)
 		expected := SuccessFileInfosResult{ true, []FileInfo{ { pdfFilePath, sha},},}
 		assert.True(t, reflect.DeepEqual(result, expected), fmt.Sprintf("result = %+v, want = %+v", result, expected))
-		assert.FileExists(t, filepath.Join( jpgRoot, "hello-01.jpg"))
+		assert.FileExists(t, filepath.Join( jpgRoot, "hello", "hello-01.jpg"))
 		lastPdfSha = sha
 	})
 
@@ -176,7 +176,7 @@ func TestServer(t *testing.T) {
 		result := CheckResponseSuccess_TestHelper( t, resp, http.StatusCreated)
 		expected := SuccessFileInfosResult{ true, []FileInfo{ { pdfFilePath, sha},},}
 		assert.True(t, reflect.DeepEqual(result, expected), fmt.Sprintf("result = %+v, want = %+v", result, expected))
-		assert.FileExists(t, filepath.Join( jpgRoot, "hello-01.jpg"))
+		assert.FileExists(t, filepath.Join( jpgRoot, "hello", "hello-01.jpg"))
 		lastPdfSha = sha
 	})
 
@@ -248,7 +248,7 @@ func TestServer(t *testing.T) {
 		fmt.Println("SHA 2", sha_file)
 
 		helloFile_db_dir := "arbitrary / file "
-		helloFile_db_path := helloFile_db_dir + "/" + "hello,pdf"
+		helloFile_db_path := helloFile_db_dir + "/" + "hello.pdf"
 		sha_hello := RecordPdfSha_TestHelper( t, sha_file, helloFile_db_path)
 		assert.Equal( t, sha_file, sha_hello)
 
@@ -261,7 +261,7 @@ func TestServer(t *testing.T) {
 		result := CheckResponseSuccess_TestHelper( t, resp, http.StatusCreated)
 		expected := SuccessFileInfosResult{ true, []FileInfo{{ helloFile_db_path, shaNew},},}
 		assert.True(t, reflect.DeepEqual(result, expected), fmt.Sprintf("result = %+v, want = %+v", result, expected))
-		assert.FileExists(t, filepath.Join(jpgRoot, "hello-01.jpg"))
+		assert.FileExists(t, filepath.Join(jpgRoot, "hello", "hello-01.jpg"))
 	})
 /*
 	t.Run("POST /upload/hello_put.txt", func(t *testing.T) {

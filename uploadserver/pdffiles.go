@@ -11,7 +11,11 @@ import (
 )
 
 func convertPdfToJpgFilename( jpgRoot string, destPath string, pattern string) string {
-	destFolder, pdfFileName := filepath.Split( destPath)
+	// make sure path is valid
+	if !filepath.IsLocal( destPath) {
+		return ""
+	}
+	destFolder, pdfFileName := filepath.Split( filepath.Clean( destPath))
 	baseFileName := strings.TrimSuffix( pdfFileName, filepath.Ext( pdfFileName))
 	return filepath.Join( jpgRoot, destFolder, baseFileName, baseFileName + pattern)
 }
@@ -28,6 +32,10 @@ func convertPdfToJpg( uploadedPath string, jpgRoot string, destPath string) erro
 	}
 	// log.Printf("'%s' executable in '%s'\n", targExe, pathExe)
 	jpgPattern := convertPdfToJpgFilename( jpgRoot, destPath, "-%03d.jpg")
+	if jpgPattern == "" {
+		log.Printf("destPath is not valid")
+		return fmt.Errorf("destPath is not valid: %v", destPath)
+	}
 	err = os.MkdirAll(filepath.Dir( jpgPattern), os.ModePerm)
 	if err != nil {
 		log.Printf("making jpgpath dir: %v\n", err)

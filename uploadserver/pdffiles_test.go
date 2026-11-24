@@ -38,9 +38,10 @@ func Test_PdfFiles(t *testing.T) {
 	}{
 		{ "Simple file","fooBar.pdf", path.Join( jpgRoot, "fooBar",  "fooBar" + pattern), },
 		{ "File in subdir", "foo/fooBar.pdf", path.Join( jpgRoot, "foo/fooBar",  "fooBar" + pattern), },
-		{ "Absolute path", "/bar/fooBar.pdf", path.Join( jpgRoot, "bar/fooBar",  "fooBar" + pattern), },
-		{ "Relative path leaving scope", "../fooBar.pdf", path.Join( jpgRoot, "fooBar",  "fooBar" + pattern) , },
-		{ "Absolute path leaving scope", "/../fooBar.pdf", path.Join( jpgRoot, "fooBar",  "fooBar" + pattern) , },
+		{ "Absolute path", "/bar/fooBar.pdf", path.Join( jpgRoot, "foo/fooBar",  "fooBar" + pattern), },
+		{ "Relative path with ..", "baz/../fooBar.pdf", path.Join( jpgRoot, "fooBar",  "fooBar" + pattern), },
+		{ "Relative path leaving scope", "../fooBar.pdf", "", },
+		{ "Absolute path leaving scope", "/../fooBar.pdf", "", },
 		{ "File without .pdf extension", "fooBar", path.Join( jpgRoot, "fooBar",  "fooBar" + pattern), },
 	}
 	for _, tt := range tests {
