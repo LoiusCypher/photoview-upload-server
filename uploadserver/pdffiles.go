@@ -12,7 +12,7 @@ import (
 
 func convertPdfToJpgFilename( jpgRoot string, destPath string, pattern string) string {
 	// make sure path is valid
-	if !filepath.IsLocal( destPath) {
+	if !filepath.IsLocal( filepath.Join( ".", destPath)) {
 		return ""
 	}
 	destFolder, pdfFileName := filepath.Split( filepath.Clean( destPath))

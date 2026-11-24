@@ -28,7 +28,7 @@ func CreatePdfFile_TestHelper(t *testing.T, contentPages []string, pdfRoot strin
 	return pdfFilePath
 }
 
-func Test_PdfFiles(t *testing.T) {
+func TestPdfFilenames(t *testing.T) {
 	jpgRoot := "/jpgs"
 	pattern := "_%02.jpg"
 	tests := []struct {
@@ -51,7 +51,9 @@ func Test_PdfFiles(t *testing.T) {
 			}
 		})
 	}
-	// =========================================Add a file
+}
+
+func TestPdfFiles(t *testing.T) {
 	pdfRoot, err1 := os.MkdirTemp("", "")
 	require.Nil(t, err1)
 	defer os.RemoveAll( pdfRoot)
