@@ -11,7 +11,6 @@ import (
 	"path"
 	"path/filepath"
 	"testing"
-	"log"
 
 	"github.com/stretchr/testify/require"
 )
