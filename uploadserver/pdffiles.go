@@ -76,7 +76,7 @@ func convertPdfToJpg( uploadedPath string, jpgRoot string, destPath string) erro
 }
 
 func deleteJpgs(jpgRoot string, uploadPath string) error {
-	jpgPattern := convertPdfToJpgFilename( jpgRoot, destPath, "-*.jpg")
+	jpgPattern := convertPdfToJpgFilename( jpgRoot, uploadPath, "-*.jpg")
 	log.Printf("deleteJpgs: %s %s", uploadPath, jpgPattern)
 	jpgFiles, err := filepath.Glob(jpgPattern)
 	if err != nil {
