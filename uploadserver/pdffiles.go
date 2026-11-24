@@ -42,14 +42,14 @@ func convertPdfToJpg( uploadedPath string, jpgRoot string, destPath string) erro
 		return fmt.Errorf("making jpgpath dir: %v", err)
 	}
 	// log.Printf("convertPdfToJpg: jpg dir created %s", filepath.Dir(jpgPattern))
-	// log.Printf("convertPdfToJpg: %s %s", uploadedPath, jpgPattern)
+	log.Printf("convertPdfToJpg: %s %s", uploadedPath, jpgPattern)
 	cmdArgs := []string{ "-dNOPAUSE", "-sDEVICE=jpeg", "-r100", "-sOutputFile=" + jpgPattern, "-f", uploadedPath, "-c", "quit"}
 	// cmdArgs := []string{ "-al", "/", "/opt",  "/opt/app", "/opt/app/jpgs", "/opt/app/pdfs", filepath.Dir(jpgPattern), filepath.Dir(uploadedPath)}
 	cmd := exec.Command(pathExe, cmdArgs...)
 	cmd.Dir = filepath.Dir(uploadedPath)
 	var out strings.Builder
 	var sterr strings.Builder
-	// log.Println("cmd:", pathExe, cmdArgs)
+	log.Println("cmd:", pathExe, cmdArgs)
 	cmd.Stdout = &out
 	cmd.Stderr = &sterr
 	if err := cmd.Run(); err != nil {

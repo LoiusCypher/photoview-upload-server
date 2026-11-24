@@ -403,7 +403,7 @@ func TestServer_PostHandler(t *testing.T) {
 					t.Errorf("unexpected response body: %v", err)
 				}
 				resp.Files[0].Sha = sha
-				localFullPath := convertPdfToJpgFilename( jpgRoot, resp.Files[0].Path, "-01.jpg")
+				localFullPath := convertPdfToJpgFilename( jpgRoot, resp.Files[0].Path, "-001.jpg")
 				assert.FileExists( t, localFullPath)
 				t.Logf("opening %s to verify", localFullPath)
 			}
