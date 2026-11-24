@@ -10,6 +10,12 @@ import (
 	"strings"
 )
 
+func convertPdfToJpgFilename( jpgRoot string, destPath string, pattern string) string {
+	destFolder, pdfFileName := filepath.Split( destPath)
+	baseFileName := strings.TrimSuffix( pdfFileName, filepath.Ext( pdfFileName))
+	return filepath.Join( jpgRoot, destFolder, baseFileName, baseFileName + pattern)
+}
+
 func convertPdfToJpg( uploadedPath string, jpgRoot string, destPath string) error {
 	var targExe string
 	var pathExe string
@@ -21,21 +27,21 @@ func convertPdfToJpg( uploadedPath string, jpgRoot string, destPath string) erro
 		return fmt.Errorf("didn't find %s: %v", targExe, err)
 	}
 	// log.Printf("'%s' executable in '%s'\n", targExe, pathExe)
-	jpgPattern := strings.TrimSuffix(jpgRoot + "/" + destPath, filepath.Ext(destPath)) + "-%02d.jpg"
-	err = os.MkdirAll(filepath.Dir(jpgPattern), 0777) // os.ModePerm)
-	log.Printf("convertPdfToJpg: jpg dir created %s", filepath.Dir(jpgPattern))
+	jpgPattern := convertPdfToJpgFilename( jpgRoot, destPath, "-%03d.jpg")
+	err = os.MkdirAll(filepath.Dir( jpgPattern), os.ModePerm)
 	if err != nil {
 		log.Printf("making jpgpath dir: %v\n", err)
 		return fmt.Errorf("making jpgpath dir: %v", err)
 	}
-	log.Printf("convertPdfToJpg: %s %s", uploadedPath, jpgPattern)
+	// log.Printf("convertPdfToJpg: jpg dir created %s", filepath.Dir(jpgPattern))
+	// log.Printf("convertPdfToJpg: %s %s", uploadedPath, jpgPattern)
 	cmdArgs := []string{ "-dNOPAUSE", "-sDEVICE=jpeg", "-r100", "-sOutputFile=" + jpgPattern, "-f", uploadedPath, "-c", "quit"}
 	// cmdArgs := []string{ "-al", "/", "/opt",  "/opt/app", "/opt/app/jpgs", "/opt/app/pdfs", filepath.Dir(jpgPattern), filepath.Dir(uploadedPath)}
 	cmd := exec.Command(pathExe, cmdArgs...)
 	cmd.Dir = filepath.Dir(uploadedPath)
 	var out strings.Builder
 	var sterr strings.Builder
-	log.Println("cmd:", pathExe, cmdArgs)
+	// log.Println("cmd:", pathExe, cmdArgs)
 	cmd.Stdout = &out
 	cmd.Stderr = &sterr
 	if err := cmd.Run(); err != nil {
