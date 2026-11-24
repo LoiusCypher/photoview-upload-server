@@ -217,17 +217,10 @@ func TestUploadMultipartTemporaryCleanup(t *testing.T) {
 				s := NewServer(ServerConfig{PictureRoot: pictureRoot, UploadRoot: root, MaxUploadSize: tc.limit})
 				var shaExisting string
 				if tc.existing {
-				    func () {
 					if err := os.WriteFile( path.Join( root, "limit.bin"), []byte("original"), 0600); err != nil {
 						t.Fatal(err)
 					}
-					func () {
-						err01 := os.Remove( path.Join( root, "limit.bin"))
-						if  err01 != nil {
-							log.Println(err01)
-						}
-						log.Println("DEFER REMOVE files in upload:", path.Join( root, "limit.bin"))
-					} ()
+					defer os.Remove( path.Join( root, "limit.bin"))
 					var err error
 					shaExisting, err = calcSha( path.Join( root, "limit.bin"))
 					if  err != nil {
@@ -237,7 +230,10 @@ func TestUploadMultipartTemporaryCleanup(t *testing.T) {
 					if  err != nil {
 						t.Fatal(err)
 					}
-				    } ()
+					err = os.Remove( path.Join( root, "limit.bin"))
+					if  err != nil {
+						t.Fatal(err)
+					}
 				}
 	// see what's up
 	entries, err2 := filepath.Glob( filepath.Join( root, "*"))
