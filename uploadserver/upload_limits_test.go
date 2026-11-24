@@ -225,7 +225,7 @@ func TestUploadMultipartTemporaryCleanup(t *testing.T) {
 						if  err01 != nil {
 							log.Println(err01)
 						}
-						log.Println("DEFER REMOVE files in upload:", root, len(entries), entries)
+						log.Println("DEFER REMOVE files in upload:", path.Join( root, "limit.bin"))
 					} ()
 					var err error
 					shaExisting, err = calcSha( path.Join( root, "limit.bin"))
