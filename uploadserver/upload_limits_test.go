@@ -226,19 +226,19 @@ func TestUploadMultipartTemporaryCleanup(t *testing.T) {
 					if  err != nil {
 						t.Fatal(err)
 					}
-			// see what's up
-			entries, err1 := filepath.Glob( filepath.Join( root, "*"))
-			if err1 != nil {
-				t.Fatal(err1)
-			}
-			if len(entries) > 0 {
-				log.Println("rejected upload left files in upload:", root, len(entries), entries)
-			}
 					_, err = recordFileSha( shaExisting, "limit.bin")
 					if  err != nil {
 						t.Fatal(err)
 					}
 				}
+	// see what's up
+	entries, err1 := filepath.Glob( filepath.Join( root, "*"))
+	if err1 != nil {
+		t.Fatal(err1)
+	}
+	if len(entries) > 0 {
+		log.Println("rejected upload left files in upload:", root, len(entries), entries)
+	}
 				urlPath := "/upload/"
 				req := uploadLimitRequest(t, method, urlPath, "limit.bin", path.Join( originRoot, "limit.bin"), tc.field, 33<<20, 0)
 				rr := httptest.NewRecorder()
