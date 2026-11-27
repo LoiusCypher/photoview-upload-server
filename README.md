@@ -1,16 +1,21 @@
 photoview-upload-server
 =======================
 
-Simple HTTP server to save artifacts
+This work is based on https://github.com/mayth/go-simple-upload-server a Simple HTTP server to save artifacts
+
+It was modified and serves now as an (PDF) upload and administration API that converts the documents to
+JPEGs that can be viewed through photoview. For this purpose the uploaded PDFs are needed only to generate
+the JPEGs and are removed afterwards. Only an SHA sum of every PDF file is recoreded to enable the client SW
+if any PDF was modified since last upload.
 
 - [Usage](#usage)
 - [Timeouts](#timeouts)
 - [Testing](#testing)
 - [API](#api)
-  - [`GET /list/?name=path`](#get-list)
+  - [`GET /list/?name=path`](#get-listnamepath)
   - [`OPTIONS /list/`](#options-list)
   - [`POST /upload/`](#post-file)
-  - [`GET /file/?name=path`](#get-file)
+  - [`GET /file/?name=path`](#get-filenamepath`)
   - [`DELETE /file/?name=path`](#delete-file)
   - [`OPTIONS /file/`](#options-file)
 
@@ -23,7 +28,9 @@ Simple HTTP server to save artifacts
   -config string
         path to config file
   -picture_root string
-        path to picture root directory
+        path to root of directory tree where JPEGs will be stored
+  -upload_root string
+        path to directory where uploaded PDFs are temporarily stored until they are converted to JPEGs
   -enable_auth
         enable authentication
   -enable_cors
@@ -63,10 +70,10 @@ The server implements a simple authentication mechanism using tokens.
    If authentication is enabled but no tokens provided, the server generates a read-only token and a read-write token on its starting up.
 4. Request with the token. Add Authorization header with value `Bearer <TOKEN>` or `token=<TOKEN>` to the query parameter. Authorization header takes precedence.
 
-| Token Type |             Allowed Operations             |
-| ---------- | ------------------------------------------ |
-| read-only  | `GET`, `HEAD`                              |
-| read-write | `POST`, `PUT` in addition to read-only ops |
+| Token Type |          Allowed Operations         |
+| ---------- | ----------------------------------- |
+| read-only  | `GET`, `HEAD`                       |
+| read-write | `POST` in addition to read-only ops |
 
 Note that `OPTIONS` is always allowed without authentication.
 
@@ -235,57 +242,6 @@ $ cat $DOCROOT/foobar.txt
 Hello, world!
 ```
 
-### `GET /files/:path`
-
-Downloads a file.
-Request a list of uploaded files in the specified directory tree.
-
-#### Request
-
-Parameters:
-
-|  Name  | Required? |   Type   |     Description     | Default |
-| ------ | :-------: | -------- | ------------------- | ------- |
-| `path` |     x     | `string` | A path name filter. |         |
-
-#### Response
-
-##### On Successful
-
-Status Code
-: `200 OK`
-
-Content-Type
-: `application/json`
-
-Body
-
-Array of:
-
-|  Name  |   Type    |               Description               |
-| ------ | --------- | --------------------------------------- |
-| `path` | `string`  | A path to access this file in this API. |
-| `sha`  | `string`  | Sha256 of the uploaded file contents.   |
-
-##### On Failure
-
-Content-Type
-: `application/json`
-
-|   StatusCode    |          When          |
-| --------------- | ---------------------- |
-| `404 Not Found` | There is no such file. |
-
-#### Example
-
-```
-$ curl "http://localhost:25478/list"
-[{"path":"my files/foobar.txt","sha":"dbc08b031f67a6a5bf77a911a02542d91accb466750276452637ab050994547c"}
- {"path":"my files/my samples/sample.txt","sha":"f982b83f83557bbb1d7d7e330a2c038137a1df0ff9462ff4eb7c8bacc020d971"}]
-
-$ curl --url-query "path=my files" "http://localhost:25478/list"
-[{"path":"my files/foobar.txt","sha":"dbc08b031f67a6a5bf77a911a02542d91accb466750276452637ab050994547c"}]
-
 ### `PUT /file?name=path`
 
 Uploads a file. The original file name is ignored and the name is taken from the path in the request URL.
@@ -408,8 +364,8 @@ Body:
 $ curl -X DELETE --url-query "path=my files/foobar.txt" "http://localhost:25478/file"
 {"path":"my files/foobar.txt"}
 
-### `OPTIONS /file`
-### `OPTIONS /list`
+### `OPTIONS /file/`
+### `OPTIONS /list/`
 
 CORS preflight request.
 

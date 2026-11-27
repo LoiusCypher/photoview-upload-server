@@ -282,10 +282,7 @@ func (s *Server) handlePostUpload(w http.ResponseWriter, r *http.Request) (int, 
 
 func (s *Server) handleListGet(w http.ResponseWriter, r *http.Request) (int, any) {
 	log.Printf("handleListGet %s %s", r.Method, r.URL)
-	//if r.URL.Path != "/list" {
-		//return http.StatusNotFound, fmt.Errorf("page not found: %s", r.URL.Path)
-	//}
-	requestPath := r.URL.Query().Get("name")
+	requestPath := strings.TrimPrefix( r.URL.Query().Get("name"), "/")
 	log.Printf("GET %s -> %s", r.URL.Path, requestPath)
 	fileInfos, err := listShas( requestPath)
 	if err != nil {
@@ -302,10 +299,8 @@ func (s *Server) handleListGet(w http.ResponseWriter, r *http.Request) (int, any
 
 func (s *Server) handleFileGet(w http.ResponseWriter, r *http.Request) (int, any) {
 	log.Printf("handleFileGet %s %s", r.Method, r.URL)
-	//if r.URL.Path != "/file" && r.URL.Path != "/file/" {
-		//return http.StatusNotFound, fmt.Errorf("page not found: %s", r.URL.Path)
-	//}
 	requestPath := strings.TrimPrefix( r.URL.Query().Get("name"), "/")
+	log.Printf("GET %s -> %s", r.URL.Path, requestPath)
 	if requestPath == "" {
 		return http.StatusBadRequest, fmt.Errorf( "missing name of file: /file?name=")
 	}
@@ -324,10 +319,8 @@ func (s *Server) handleFileGet(w http.ResponseWriter, r *http.Request) (int, any
 
 func (s *Server) handleFileDelete( w http.ResponseWriter, r *http.Request) (int, any) {
 	log.Printf("handleFileDelete %s %s", r.Method, r.URL)
-	//if r.URL.Path != "/file" && r.URL.Path != "/file/" {
-		//return http.StatusNotFound, fmt.Errorf( "page not found: %s", r.URL.Path)
-	//}
 	requestPath := strings.TrimPrefix( r.URL.Query().Get("name"), "/")
+	log.Printf("GET %s -> %s", r.URL.Path, requestPath)
 	if requestPath == "" {
 		return http.StatusBadRequest, fmt.Errorf( "missing name of file: /file?name=")
 	}
@@ -430,11 +423,11 @@ func (s *Server) handleOptions(w http.ResponseWriter, r *http.Request) (int, any
 	log.Printf("handleOptions %s %s", r.Method, r.URL)
 	var allowedMethods []string
 	switch r.URL.Path {
-		case "/list":
+		case "/list/":
 			allowedMethods = allowedMethodsList
-		case "/file":
+		case "/file/":
 			allowedMethods = allowedMethodsFile
-		case "/upload":
+		case "/upload/":
 			allowedMethods = allowedMethodsUpload
 		default:
 			return http.StatusNotFound, nil
