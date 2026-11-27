@@ -510,8 +510,8 @@ func TestServer(t *testing.T) {
 		assert.True(t, reflect.DeepEqual(result, expected), fmt.Sprintf("result = %+v, want = %+v", result, expected))
 	})
 
-	t.Run("OPTIONS /list", func(t *testing.T) {
-		u := base.JoinPath("/list")
+	t.Run("OPTIONS /list/", func(t *testing.T) {
+		u := base.JoinPath("/list/")
 		req, err1 := http.NewRequest(http.MethodOptions, u.String(), nil)
 		assert.Nil(t, err1)
 		resp, err2 := http.DefaultClient.Do(req)
@@ -529,8 +529,8 @@ func TestServer(t *testing.T) {
 		assert.Equal( t, resp.Header.Get("Access-Control-Allow-Origin"), "*")
 	})
 
-	t.Run("OPTIONS /file", func(t *testing.T) {
-		u := base.JoinPath("/file")
+	t.Run("OPTIONS /file/", func(t *testing.T) {
+		u := base.JoinPath("/file/")
 		req, err1 := http.NewRequest(http.MethodOptions, u.String(), nil)
 		assert.Nil(t, err1)
 		resp, err2 := http.DefaultClient.Do(req)
@@ -548,8 +548,8 @@ func TestServer(t *testing.T) {
 		assert.Equal( t, resp.Header.Get("Access-Control-Allow-Origin"), "*")
 	})
 
-	t.Run("OPTIONS /upload", func(t *testing.T) {
-		u := base.JoinPath("/upload")
+	t.Run("OPTIONS /upload/", func(t *testing.T) {
+		u := base.JoinPath("/upload/")
 		req, err1 := http.NewRequest(http.MethodOptions, u.String(), nil)
 		assert.Nil(t, err1)
 		resp, err2 := http.DefaultClient.Do(req)
