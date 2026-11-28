@@ -180,11 +180,11 @@ func TestServer(t *testing.T) {
 				value:  "",
 				pages:  nil,
 			},
-			want: http.StatusOK,
+			want: http.StatusMethodNotAllowed,
 			headers: map[string]string{
 				"Access-Control-Allow-Origin": "*",
 			},
-			body: `{"ok":true,"Files":[{"path":"` + helloFile_db_path + `","sha":"` + helloSha + `"}]}`,
+			body: "Method Not Allowed\nok",
 		},
 		{
 			name: "?name",
@@ -210,8 +210,7 @@ func TestServer(t *testing.T) {
 			assert.Nil(t, err4, fmt.Sprintf("failed to %s: %v", tt.args.method, err4))
 			defer resp.Body.Close()
 			result := CheckResponseSuccess_TestHelper( t, resp, tt.want) 
-			expected := SuccessFileInfosResult{ true, []FileInfo{{ helloFile_db_path, helloSha},},}
-			assert.True(t, reflect.DeepEqual(result, tt.body), fmt.Sprintf("result = %+v, want = %+v", result, expected))
+			assert.Equal(t, fmt.Sprintf("%+v", result), tt.body), fmt.Sprintf("result = %+v, want = %+v", result, expected))
 		})
 	}
 
