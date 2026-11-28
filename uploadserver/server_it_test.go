@@ -154,7 +154,8 @@ func TestServer(t *testing.T) {
 			headers: map[string]string{
 				"Access-Control-Allow-Origin": "*",
 			},
-			body: `{"ok":true,"Files":[{"path":"` + helloFile_db_path + `","sha":"` + helloSha + `"}]}`,
+			//body: `{"ok":true,"Files":[{"path":"` + helloFile_db_path + `","sha":"` + helloSha + `"}]}`,
+			body: `{OK:true Files:[{Path:` + helloFile_db_path + `,Sha:` + helloSha + `}]}`,
 		},
 		{
 			name: "?name",
@@ -169,7 +170,8 @@ func TestServer(t *testing.T) {
 			headers: map[string]string{
 				"Access-Control-Allow-Origin": "*",
 			},
-			body: `{"ok":true,"Files":[{"path":"` + helloFile_db_path + `","sha":"` + helloSha + `"}]}`,
+			//body: `{"ok":true,"Files":[{"path":"` + helloFile_db_path + `","sha":"` + helloSha + `"}]}`,
+			body: `{OK:true Files:[{Path:` + helloFile_db_path + `,Sha:` + helloSha + `}]}`,
 		},
 		{
 			name: "?name",
