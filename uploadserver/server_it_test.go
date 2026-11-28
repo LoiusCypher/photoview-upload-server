@@ -210,7 +210,7 @@ func TestServer(t *testing.T) {
 			assert.Nil(t, err4, fmt.Sprintf("failed to %s: %v", tt.args.method, err4))
 			defer resp.Body.Close()
 			result := CheckResponseSuccess_TestHelper( t, resp, tt.want) 
-			assert.Equal(t, fmt.Sprintf("%+v", result), tt.body, fmt.Sprintf("result = %+v, want = %+v", result, expected))
+			assert.Equal(t, fmt.Sprintf("%+v", result), tt.body, fmt.Sprintf("result = %+v, want = %+v", result, tt.body))
 		})
 	}
 
