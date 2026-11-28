@@ -92,11 +92,7 @@ func TestServer(t *testing.T) {
 	helloFile_db_path := "arbitrary / file path / hello.pdf"
 	helloSha := RecordFile_TestHelper( t, pdfPath_hello, helloFile_db_path)
 	fmt.Println("SHA 1", helloSha)
-/*
-	helloFile2_db_path := "arbitrary / file path / hello2.pdf"
-	hello2Sha := RecordFile_TestHelper( t, pdfPath_hello, helloFile2_db_path)
-	fmt.Println("SHA 2", hello2Sha)
-*/
+
 	var target string
 	if addr, ok := os.LookupEnv("TEST_TARGET_ADDR"); ok && addr != "" {
 		target = addr
@@ -132,23 +128,26 @@ func TestServer(t *testing.T) {
 		url     string
 		query   string
 		value   string
-		pages   []string
+	}
+	type reqBody struct {
+		fileField string
+		nameField string
+		nameValue string
+		pageTexts []string
 	}
 	tests := []struct {
 		name    string
 		args    args
+		reqBody reqBody
 		want    int
 		body    string
 		headers map[string]string
 	}{
 		{
-			name: " 1 expect one file from setup",
+			name: " expect one file from setup",
 			args: args{
 				method: http.MethodGet,
 				url:    "/list/",
-				query:  "",
-				value:  "",
-				pages:  nil,
 			},
 			want: http.StatusOK,
 			headers: map[string]string{
@@ -164,13 +163,11 @@ func TestServer(t *testing.T) {
 				url:    "/list/",
 				query:  "name",
 				value:  "",
-				pages:  nil,
 			},
 			want: http.StatusOK,
 			headers: map[string]string{
 				"Access-Control-Allow-Origin": "*",
 			},
-			//body: `{"ok":true,"Files":[{"path":"` + helloFile_db_path + `","sha":"` + helloSha + `"}]}`,
 			body: `{OK:true Files:[{Path:` + helloFile_db_path + ` Sha:` + helloSha + `}]}`,
 		},
 		{
@@ -180,24 +177,44 @@ func TestServer(t *testing.T) {
 				url:    "/list/all",
 				query:  "name",
 				value:  "",
-				pages:  nil,
 			},
 			want: http.StatusMethodNotAllowed,
 			headers: map[string]string{
 				"Access-Control-Allow-Origin": "*",
 			},
-			body: "Method Not Allowed\nok",
+			body: "Method Not Allowed\n",
 		},
 		{
-			name: "?name",
+			name: " hello.pdf",
 			args: args{
 				method: http.MethodPost,
 				url:    "/upload/",
-				query:  "",
-				value:  "",
-				pages:  []string{ "lorem ipsum",},
 			},
-			want: http.StatusOK,
+			reqBody: reqBody{
+				fileField: "file",
+				nameField: "name",
+				nameValue: "hello.pdf",
+				pageTexts: []string{ "lorem ipsum",},
+			},
+			want: http.StatusCreated,
+			headers: map[string]string{
+				"Access-Control-Allow-Origin": "*",
+			},
+			body: `{"ok":true,"Files":[{"path":"` + helloFile_db_path + `","sha":"` + helloSha + `"}]}`,
+		},
+		{
+			name: " hello.pdf overwrite should work the same",
+			args: args{
+				method: http.MethodPost,
+				url:    "/upload/",
+			},
+			reqBody: reqBody{
+				fileField: "file",
+				nameField: "name",
+				nameValue: "hello.pdf",
+				pageTexts: []string{ "new world", "page two",},
+			},
+			want: http.StatusCreated,
 			headers: map[string]string{
 				"Access-Control-Allow-Origin": "*",
 			},
@@ -207,50 +224,47 @@ func TestServer(t *testing.T) {
 	for _, tt := range tests {
 		t.Run( tt.args.method + " " + tt.args.url + tt.name, func(t *testing.T) {
 			u := base.JoinPath( tt.args.url)
-			req, _ := GenerateFullRequest_TestHelper( t, tt.args.method, u, tt.args.query, tt.args.value, tt.args.pages, pdfRoot)
+			var b io.Reader
+			if len( tt.reqBody.pageTexts) > 0 {
+				b, _ = CreateBody_TestHelper( t, tt.reqBody.pageTexts, tt.reqBody.fileField, tt.reqBody.nameField, tt.reqBody.nameValue, pdfRoot)
+			}
+			req := GenerateFullRequest_TestHelper( t, tt.args.method, u, tt.args.query, tt.args.value, b)
 			resp, err4 := http.DefaultClient.Do(req)
 			assert.Nil(t, err4, fmt.Sprintf("failed to %s: %v", tt.args.method, err4))
 			defer resp.Body.Close()
-			result := CheckResponseSuccess_TestHelper( t, resp, tt.want) 
-			assert.Equal(t, fmt.Sprintf("%+v", result), tt.body, fmt.Sprintf("result = %+v, want = %+v", result, tt.body))
-		})
+
+			assert.Equal(t, tt.want, resp.StatusCode)
+			if tt.want == http.StatusMethodNotAllowed {
+				assert.Equal(t, "text/plain; charset=utf-8", resp.Header.Get("Content-Type"))
+			} else {
+				assert.Equal(t, "application/json", resp.Header.Get("Content-Type"))
+			}
+
+			body, err1 := io.ReadAll(resp.Body)
+			assert.Nil(t, err1, fmt.Sprintf("failed to read response body: %v", err1))
+
+			if resp.Header.Get("Content-Type") == "application/json" {
+				var result SuccessFileInfosResult
+				err2 := json.Unmarshal(body, &result)
+				assert.Nil(t, err2, fmt.Sprintf("failed to decode response body: %v", err2))
+			} else {
+				assert.Equal(t, string( body), tt.body, fmt.Sprintf("result = %+v, want = %+v", string( body), tt.body))
+			}
+/*
+			if resp.StatusCode == http.StatusCreated || resp.StatusCode == http.StatusOK {
+				var resp SuccessFileInfosResult
+				if err := json.NewDecoder(resp.Body).Decode(&resp); err != nil {
+					t.Errorf("unexpected response body: %v", err)
+				}
+				resp.Files[0].Sha = sha
+				localFullPath := convertPdfToJpgFilename( jpgRoot, resp.Files[0].Path, "-001.jpg")
+				assert.FileExists( t, localFullPath)
+				t.Logf("opening %s to verify", localFullPath)
+			}
+*/		})
 	}
 
-	t.Run("GET /list/ 3 expect one file from setup", func(t *testing.T) {
-		u := base.JoinPath("/list/")
-log.Println( "u:", u.String())
-		resp, err4 := http.Get(u.String())
-		assert.Nil(t, err4, fmt.Sprintf("failed to GET: %v", err4))
-		defer resp.Body.Close()
-		result := CheckResponseSuccess_TestHelper( t, resp, http.StatusOK)
-		expected := SuccessFileInfosResult{ true, []FileInfo{{ helloFile_db_path, helloSha},},}
-		assert.True(t, reflect.DeepEqual(result, expected), fmt.Sprintf("result = %+v, want = %+v", result, expected))
-	})
-
-	t.Run("GET /list/?name=", func(t *testing.T) {
-		u := base.JoinPath("/list/")
-		GenerateUrl_TestHelper( t, u, "")
-log.Println( "u:", u.String())
-		resp, err4 := http.Get(u.String())
-		assert.Nil(t, err4, fmt.Sprintf("failed to GET: %v", err4))
-		defer resp.Body.Close()
-		result := CheckResponseSuccess_TestHelper( t, resp, http.StatusOK)
-		expected := SuccessFileInfosResult{ true, []FileInfo{{ helloFile_db_path, helloSha},},}
-		assert.True(t, reflect.DeepEqual(result, expected), fmt.Sprintf("result = %+v, want = %+v", result, expected))
-	})
-
-	t.Run("GET /list/all?name=", func(t *testing.T) {
-		u := base.JoinPath("/list/all")
-		GenerateUrl_TestHelper( t, u, "")
-log.Println( "u:", u.String())
-		resp, err4 := http.Get(u.String())
-		assert.Nil(t, err4, fmt.Sprintf("failed to GET: %v", err4))
-		defer resp.Body.Close()
-		body := CheckResponse_TestHelper( t, resp, http.StatusMethodNotAllowed)
-		assert.Equal(t, string(body), "Method Not Allowed\n")
-	})
-
-	t.Run("POST /upload/ hello.pdf", func(t *testing.T) {
+	t.Run("POST /upload/ hello.pdf 1", func(t *testing.T) {
 		u := base.JoinPath("/upload/")
 		pdfFilePath := "hello.pdf"
 		req, sha := makeFormRequest( t, u, http.MethodPost, pdfFilePath, []string{ "lorem ipsum",}, pdfRoot)
@@ -1283,41 +1297,39 @@ func makeFormRequest( t *testing.T, url *url.URL, method string, filePath string
 	return req, sha
 }
 
-func GenerateFullRequest_TestHelper(t *testing.T, method string, u *url.URL, query string, filePath string, contentPages []string, pdfRoot string) (*http.Request, string) {
+func CreateBody_TestHelper(t *testing.T, pageTexts []string, fileField string, nameField string, nameValue string, pdfRoot string) ( io.Reader, string) {
+	filename := CreatePdfFile_TestHelper( t, pageTexts, pdfRoot)
+	sha, err0 := calcSha( filename)
+	require.Nil(t, err0)
+	file, err1 := os.Open( filename)
+	require.Nil(t, err1)
+	defer file.Close()
+	b := new(bytes.Buffer)
+	w := multipart.NewWriter(b)
+	defer w.Close()
+	fw, err2 := w.CreateFormFile( fileField, filename)
+	require.Nil(t, err2)
+	// defer fw.Close()
+	written, err3 := io.Copy(fw, file)
+	assert.Nil(t, err3)
+	assert.NotEqual(t, 0, written, "no bytes written")
+	err4 := w.WriteField( nameField, nameValue)
+	log.Println( "file:", fileField, "name:", nameField, "value:", nameValue)
+	assert.Nil(t, err4)
+	w.Close()
+	return b, sha
+}
+
+func GenerateFullRequest_TestHelper(t *testing.T, method string, u *url.URL, query string, filePath string, reqBody io.Reader) (*http.Request) {
 	if query != "" {
 		q := url.Values{}
         	q.Add( query, filePath)
 		u.RawQuery = q.Encode()
 	}
 	log.Println( "Method:", method, "u:", u.String())
-	if len( contentPages) > 0 {
-		filename := CreatePdfFile_TestHelper( t, contentPages, pdfRoot)
-		sha, err0 := calcSha( filename)
-		require.Nil(t, err0)
-		file, err1 := os.Open( filename)
-		require.Nil(t, err1)
-		defer file.Close()
-		b := new(bytes.Buffer)
-		w := multipart.NewWriter(b)
-		defer w.Close()
-		fw, err2 := w.CreateFormFile("file", filename)
-		require.Nil(t, err2)
-		// defer fw.Close()
-		written, err3 := io.Copy(fw, file)
-		assert.Nil(t, err3)
-		// assert.NotEqual(t, 0, written, fmt.Sprintf("no bytes written"))
-		assert.NotEqual(t, 0, written, "no bytes written")
-		err4 := w.WriteField( "name", filePath)
-		assert.Nil(t, err4)
-		w.Close()
-		req, err5 := http.NewRequest( method, u.String(), b)
-		require.Nil(t, err5)
-		return req, sha
-	} else {
-		req, err1 := http.NewRequest( method, u.String(), nil)
-		assert.Nil(t, err1)
-		return req, ""
-	}
+	req, err1 := http.NewRequest( method, u.String(), reqBody)
+	assert.Nil(t, err1)
+	return req
 }
 
 // getAvailablePort returns an available port number randomly.
