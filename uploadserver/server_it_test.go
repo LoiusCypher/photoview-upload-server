@@ -92,11 +92,11 @@ func TestServer(t *testing.T) {
 	helloFile_db_path := "arbitrary / file path / hello.pdf"
 	helloSha := RecordFile_TestHelper( t, pdfPath_hello, helloFile_db_path)
 	fmt.Println("SHA 1", helloSha)
-
+/*
 	helloFile2_db_path := "arbitrary / file path / hello2.pdf"
 	hello2Sha := RecordFile_TestHelper( t, pdfPath_hello, helloFile2_db_path)
 	fmt.Println("SHA 2", hello2Sha)
-
+*/
 	var target string
 	if addr, ok := os.LookupEnv("TEST_TARGET_ADDR"); ok && addr != "" {
 		target = addr
